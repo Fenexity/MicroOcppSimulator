@@ -1,0 +1,19 @@
+{
+  "variables": [
+    {
+      "component": "SecurityCtrlr",
+      "name": "CsmsUrl",
+      "valActual": "ws://172.18.0.5:8092/charger-1.6"
+    },
+    {
+      "component": "SecurityCtrlr",
+      "name": "Identity",
+      "valActual": "charger-1.6"
+    },
+    {
+      "component": "SecurityCtrlr",
+      "name": "BasicAuthPassword",
+      "valActual": ""
+    }
+  ]
+}

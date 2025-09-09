@@ -1,0 +1,19 @@
+{
+  "variables": [
+    {
+      "component": "SecurityCtrlr",
+      "name": "CsmsUrl",
+      "valActual": "ws://172.18.0.5:8082/charger-201"
+    },
+    {
+      "component": "SecurityCtrlr",
+      "name": "Identity",
+      "valActual": "charger-201"
+    },
+    {
+      "component": "SecurityCtrlr",
+      "name": "BasicAuthPassword",
+      "valActual": "fenexity_test_2025"
+    }
+  ]
+}

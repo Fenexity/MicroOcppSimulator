@@ -1,9 +1,14 @@
 // matth-x/MicroOcppSimulator
 // Copyright Matthias Akstaller 2022 - 2024
 // GPL-3.0 License
+//
+// ============================================================================
+// Fenexity CSMS Platform - Environment Variable Configuration Support
+// ============================================================================
 
 #include <iostream>
 #include <signal.h>
+#include <cstdlib>
 
 #include <mbedtls/platform.h>
 
@@ -14,6 +19,14 @@
 #include "api.h"
 
 #include <MicroOcpp/Core/Memory.h>
+
+// ============================================================================
+// Fenexity Environment Variable Helper Functions
+// ============================================================================
+const char* getEnvOrDefault(const char* name, const char* defaultValue) {
+    const char* value = getenv(name);
+    return value ? value : defaultValue;
+}
 
 #if MO_NUMCONNECTORS == 3
 std::array<Evse, MO_NUMCONNECTORS - 1> connectors {{1,2}};
@@ -165,9 +178,19 @@ int main() {
 
     mg_http_listen(&mgr, api_url, http_serve, (void*)api_url);     // Create listening connection
 
+    // ========================================================================
+    // Fenexity: Environment Variable Configuration
+    // ========================================================================
+    const char* websocketUrl = getEnvOrDefault("CENTRAL_SYSTEM_URL", "ws://echo.websocket.events");
+    const char* chargerId = getEnvOrDefault("CHARGER_ID", "charger-01");
+    
+    printf("[FENEXITY_CONFIG] WebSocket URL: %s\n", websocketUrl);
+    printf("[FENEXITY_CONFIG] Charger ID: %s\n", chargerId);
+    printf("[FENEXITY_CONFIG] OCPP Version: %s\n", g_isOcpp201 ? "2.0.1" : "1.6");
+
     osock = new MicroOcpp::MOcppMongooseClient(&mgr,
-        "ws://echo.websocket.events",
-        "charger-01",
+        websocketUrl,    // Use environment variable
+        chargerId,       // Use environment variable
         "",
         "",
         filesystem,

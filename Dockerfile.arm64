@@ -1,0 +1,122 @@
+# =============================================================================
+# Fenexity MicroOCPP Simulator - ARM64 Unified Build
+# =============================================================================
+FROM --platform=linux/arm64 alpine:latest
+
+# Build arguments
+ARG OCPP_VERSION=1.6
+ARG SIMULATOR_PORT=8000
+ARG CHARGER_ID=charger-01
+ARG API_PORT=8001
+
+# Update package lists and install dependencies
+RUN apk update && \
+    apk add --no-cache \
+    git \
+    cmake \
+    openssl-dev \
+    build-base \
+    nodejs \
+    npm \
+    bash \
+    curl \
+    wget
+
+# Set the working directory
+WORKDIR /MicroOcppSimulator
+
+# Copy the entire source code
+COPY . .
+
+# Initialize submodules if not already done
+RUN git submodule update --init --recursive || echo "Submodules already initialized"
+
+# Configure CMake build based on OCPP version
+RUN if [ "$OCPP_VERSION" = "2.0.1" ]; then \
+        echo "Building for OCPP 2.0.1"; \
+        cmake -S . -B ./build -DMO_ENABLE_V201=1; \
+    else \
+        echo "Building for OCPP 1.6"; \
+        cmake -S . -B ./build -DMO_ENABLE_V201=0; \
+    fi
+
+# Build the simulator with optimized parallel compilation
+RUN cmake --build ./build --target mo_simulator -j $(nproc)
+
+# Grant execute permissions
+RUN chmod +x /MicroOcppSimulator/build/mo_simulator
+
+# Build the WebApp Frontend
+WORKDIR /MicroOcppSimulator/webapp-src
+
+# Create .env.production with dynamic API_ROOT based on build args
+RUN echo "API_ROOT=http://localhost:${API_PORT}/api" > .env.production && \
+    echo "NODE_ENV=production" >> .env.production && \
+    echo "Created .env.production:" && \
+    cat .env.production
+
+RUN npm install
+RUN npm run build
+
+# Copy built webapp to public directory
+RUN mkdir -p /MicroOcppSimulator/public
+RUN cp -r /MicroOcppSimulator/webapp-src/dist/* /MicroOcppSimulator/public/
+
+# Return to main directory
+WORKDIR /MicroOcppSimulator
+
+# Create directory for OCPP configuration
+RUN mkdir -p /MicroOcppSimulator/mo_store
+
+# Expose the simulator port
+EXPOSE ${SIMULATOR_PORT}
+
+# Create startup script with WebApp configuration
+RUN echo '#!/bin/bash' > /start.sh && \
+    echo 'set -e' >> /start.sh && \
+    echo '' >> /start.sh && \
+    echo '# Environment Variables' >> /start.sh && \
+    echo 'export API_PORT=${API_PORT:-8000}' >> /start.sh && \
+    echo 'export CHARGER_ID=${CHARGER_ID:-charger-01}' >> /start.sh && \
+    echo 'export OCPP_VERSION=${OCPP_VERSION:-1.6}' >> /start.sh && \
+    echo '' >> /start.sh && \
+    echo 'echo "[FENEXITY_STARTUP] Starting MicroOCPP Simulator..."' >> /start.sh && \
+    echo 'echo "[FENEXITY_STARTUP] API Port: $API_PORT"' >> /start.sh && \
+    echo 'echo "[FENEXITY_STARTUP] Charger ID: $CHARGER_ID"' >> /start.sh && \
+    echo 'echo "[FENEXITY_STARTUP] OCPP Version: $OCPP_VERSION"' >> /start.sh && \
+    echo '' >> /start.sh && \
+    echo '# Wait for mo_store configuration (created by init container)' >> /start.sh && \
+    echo 'echo "[FENEXITY_STARTUP] Waiting for WebSocket configuration..."' >> /start.sh && \
+    echo 'RETRY_COUNT=0' >> /start.sh && \
+    echo 'while [ $RETRY_COUNT -lt 60 ]; do' >> /start.sh && \
+    echo '  if [ -f /MicroOcppSimulator/mo_store/ws-conn.jsn ]; then' >> /start.sh && \
+    echo '    echo "[FENEXITY_STARTUP] ✅ WebSocket configuration found"' >> /start.sh && \
+    echo '    break' >> /start.sh && \
+    echo '  fi' >> /start.sh && \
+    echo '  RETRY_COUNT=$((RETRY_COUNT + 1))' >> /start.sh && \
+    echo '  echo "[FENEXITY_STARTUP] Waiting for configuration... ($RETRY_COUNT/60)"' >> /start.sh && \
+    echo '  sleep 2' >> /start.sh && \
+    echo 'done' >> /start.sh && \
+    echo '' >> /start.sh && \
+    echo '# Update WebApp configuration if needed' >> /start.sh && \
+    echo 'echo "[FENEXITY_STARTUP] Updating WebApp configuration..."' >> /start.sh && \
+    echo '# Update bundle.html.gz' >> /start.sh && \
+    echo 'if [ -f /MicroOcppSimulator/public/bundle.html.gz ]; then' >> /start.sh && \
+    echo '  gunzip /MicroOcppSimulator/public/bundle.html.gz' >> /start.sh && \
+    echo '  sed -i "s|localhost:8000|localhost:$API_PORT|g" /MicroOcppSimulator/public/bundle.html' >> /start.sh && \
+    echo '  gzip /MicroOcppSimulator/public/bundle.html' >> /start.sh && \
+    echo '  echo "[FENEXITY_STARTUP] bundle.html.gz updated"' >> /start.sh && \
+    echo 'fi' >> /start.sh && \
+    echo '# Update main.js' >> /start.sh && \
+    echo 'if [ -f /MicroOcppSimulator/public/main.js ]; then' >> /start.sh && \
+    echo '  sed -i "s|localhost:8000|localhost:$API_PORT|g" /MicroOcppSimulator/public/main.js' >> /start.sh && \
+    echo '  echo "[FENEXITY_STARTUP] main.js updated"' >> /start.sh && \
+    echo 'fi' >> /start.sh && \
+    echo '' >> /start.sh && \
+    echo '# Start the simulator' >> /start.sh && \
+    echo 'echo "[FENEXITY_STARTUP] Launching MicroOCPP Simulator..."' >> /start.sh && \
+    echo 'exec /MicroOcppSimulator/build/mo_simulator' >> /start.sh && \
+    chmod +x /start.sh
+
+# Start with the script
+CMD ["/start.sh"]

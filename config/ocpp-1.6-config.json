@@ -1,0 +1,93 @@
+{
+  "head": {
+    "content-type": "ocpp_config_file",
+    "version": "2.0"
+  },
+  "configurations": [
+    {
+      "type": "string",
+      "key": "OcppVersion",
+      "value": "1.6"
+    },
+    {
+      "type": "string",
+      "key": "Cst_BackendUrl",
+      "value": "ws://fenexity-citrineos:8092/charger-1.6"
+    },
+    {
+      "type": "string",
+      "key": "Cst_ChargeBoxId",
+      "value": "charger-1.6"
+    },
+    {
+      "type": "string",
+      "key": "AuthorizationKey",
+      "value": ""
+    },
+    {
+      "type": "string",
+      "key": "SupportedFeatureProfiles",
+      "value": "Core,Provisioning,FirmwareManagement,RemoteTrigger,LocalAuthListManagement,Reservation,SmartCharging"
+    },
+    {
+      "type": "string",
+      "key": "BootNotificationReason",
+      "value": "PowerUp"
+    },
+    {
+      "type": "int",
+      "key": "WebSocketPingInterval",
+      "value": 5
+    },
+    {
+      "type": "int",
+      "key": "Cst_ReconnectInterval",
+      "value": 10
+    },
+    {
+      "type": "int",
+      "key": "Cst_StaleTimeout",
+      "value": 300
+    },
+    {
+      "type": "bool",
+      "key": "evPlugged_cId_1",
+      "value": false
+    },
+    {
+      "type": "bool",
+      "key": "evsePlugged_cId_1",
+      "value": false
+    },
+    {
+      "type": "bool",
+      "key": "evReady_cId_1",
+      "value": false
+    },
+    {
+      "type": "bool",
+      "key": "evseReady_cId_1",
+      "value": false
+    },
+    {
+      "type": "bool",
+      "key": "evPlugged_cId_2",
+      "value": false
+    },
+    {
+      "type": "bool",
+      "key": "evsePlugged_cId_2",
+      "value": false
+    },
+    {
+      "type": "bool",
+      "key": "evReady_cId_2",
+      "value": false
+    },
+    {
+      "type": "bool",
+      "key": "evseReady_cId_2",
+      "value": false
+    }
+  ]
+}

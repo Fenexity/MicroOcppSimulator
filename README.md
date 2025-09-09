@@ -1,123 +1,244 @@
-# <img src="https://github.com/matth-x/MicroOcpp/assets/63792403/1c49d1ad-7afc-48d3-a54e-9aef2d4886db" alt="Icon" height="24"> &nbsp; MicroOcppSimulator
+# Fenexity MicroOCPP Simulator
 
-[![Build (Ubuntu)](https://github.com/matth-x/MicroOcppSimulator/workflows/Ubuntu/badge.svg)]((https://github.com/matth-x/MicroOcppSimulator/actions))
-[![Build (Docker)](https://github.com/matth-x/MicroOcppSimulator/workflows/Docker/badge.svg)]((https://github.com/matth-x/MicroOcppSimulator/actions))
-[![Build (WebAssembly)](https://github.com/matth-x/MicroOcppSimulator/workflows/WebAssembly/badge.svg)]((https://github.com/matth-x/MicroOcppSimulator/actions))
+This repository is a fork of [matth-x/MicroOcppSimulator](https://github.com/matth-x/MicroOcppSimulator) with integrated modifications for the Fenexity CSMS Platform.
 
-Tester / Demo App for the [MicroOCPP](https://github.com/matth-x/MicroOcpp) Client, running on native Ubuntu, WSL, WebAssembly or MSYS2. Online demo: [Try it](https://demo.micro-ocpp.com/)
+## Features
 
-[![Screenshot](https://github.com/agruenb/arduino-ocpp-dashboard/blob/master/docs/img/status_page.png)](https://demo.micro-ocpp.com/)
+- **Dual OCPP Protocol Support**: OCPP 1.6 and OCPP 2.0.1 simultaneously
+- **OCPP 1.6 Compliance Fix**: Integrated directly into the code
+- **Environment Variable Configuration**: Dynamic configuration support
+- **Automatic CitrineOS Integration**: Seamless connection with fenexity-csms network
+- **ARM64 Optimized**: Specifically developed for Apple Silicon
 
-The Simulator has two purposes:
-- As a development tool, it allows to run MicroOCPP directly on the host computer and simplifies the development (no flashing of the microcontroller required)
-- As a demonstration tool, it allows backend operators to test and use MicroOCPP without the need to set up an actual microcontroller or to buy an actual charger with MicroOCPP.
+## Quick Start
 
-That means that the Simulator runs on your computer and connects to an OCPP server using the same software like a
-microcontroller. It provides a Graphical User Interface to show the connection status and to trigger simulated charging
-sessions (and further simulated actions).
+Clone this repository with its submodules:
 
-## Running on Docker
-
-The Simulator can be run on Docker. This is the easiest way to get it up and running. The Docker image is based on
-Ubuntu 20.04 and contains all necessary dependencies.
-
-Firstly, build the image:
-
-```shell
-docker build -t matthx/microocppsimulator:latest .
+```bash
+git clone --recurse-submodules git@github.com:Fenexity/MicroOcppSimulator.git
 ```
 
-Then run the image:
+### Simple Setup (Recommended)
 
-```shell
-docker run -p 8000:8000 matthx/microocppsimulator:latest
+```bash
+# Start both simulators - One command, everything automatic!
+docker-compose up -d
+
+# Check status
+docker-compose ps
+
+# View live logs
+docker-compose logs -f
+
+# Stop
+docker-compose down
 ```
 
-The Simulator should be up and running now on [localhost:8000](http://localhost:8000).
+### Automatic CitrineOS Integration
 
-## Installation (Ubuntu or WSL)
+The simulators configure themselves **automatically** for CitrineOS:
 
-On Windows, get the Windows Subsystem for Linux (WSL): [https://ubuntu.com/wsl](https://ubuntu.com/wsl) or [MSYS2](https://www.msys2.org/).
+1. **Init-Container** dynamically determines CitrineOS IP address
+2. **WebSocket Configuration** is created at runtime
+3. **BasicAuth Passwords** are registered in CitrineOS database
+4. **Simulators start** with correct configuration
 
-Then follow the same steps like for Ubuntu.
+**A single `docker-compose up -d` is sufficient!** ✅
 
-On Ubuntu (other distros probably work as well, tested on Ubuntu 20.04 and 22.04), install cmake, OpenSSL and the C++
-compiler:
+## Service URLs
 
-```shell
-sudo apt install cmake libssl-dev build-essential
+| Service | URL | Charge Point ID | OCPP Version |
+|---------|-----|-----------------|--------------|
+| OCPP 1.6 Simulator | http://localhost:8001 | charger-1.6 | 1.6 |
+| OCPP 2.0.1 Simulator | http://localhost:8002 | charger-201 | 2.0.1 |
+
+## Architecture
+
+### Integrated Fenexity Modifications
+
+1. **OCPP 1.6 Compliance Fix** (directly in `lib/MicroOcpp/src/MicroOcpp/Operations/StartTransaction.cpp`):
+   - ✅ Correct StartTransaction.req without transactionId
+   - ✅ Accept Transaction ID from CSMS (OCPP 1.6 standard)
+   - ✅ No own Transaction ID generation
+
+2. **Environment Variable Support** (directly in `src/main.cpp`):
+   - ✅ `CENTRAL_SYSTEM_URL` for WebSocket endpoint
+   - ✅ `CHARGER_ID` for charger identification
+   - ✅ Automatic fallback values
+
+3. **Unified ARM64 Docker Build**:
+   - ✅ One Dockerfile for both OCPP versions
+   - ✅ Dynamic CMake configuration
+   - ✅ Environment-based configuration
+
+## Configuration
+
+### Environment Variables
+
+| Variable | OCPP 1.6 | OCPP 2.0.1 | Description |
+|----------|----------|------------|-------------|
+| `CENTRAL_SYSTEM_URL` | `ws://citrineos:8092/ocpp16` | `ws://citrineos:8082/ocpp201` | WebSocket endpoint |
+| `CHARGER_ID` | `charger-1.6` | `charger-201` | Charger identification |
+| `MO_ENABLE_V201` | `0` | `1` | Enable OCPP version |
+| `BASIC_AUTH_PASSWORD` | - | `fenexity_test_2025` | Auth for OCPP 2.0.1 |
+
+### Directory Structure
+
+```
+MicroOcppSimulator/
+├── lib/MicroOcpp/                  # ✅ Modified MicroOCPP library
+│   └── src/MicroOcpp/Operations/
+│       └── StartTransaction.cpp    # 🔧 OCPP 1.6 Compliance Fix integrated
+├── src/main.cpp                    # 🔧 Environment Variable Support integrated
+├── config/                         # 📁 OCPP configuration files
+├── mo_store_v16/                   # 📁 OCPP 1.6 state files
+├── mo_store_v201/                  # 📁 OCPP 2.0.1 state files
+├── docker-compose.yml              # 🐳 Unified container orchestration
+└── Dockerfile.arm64                # 🐳 ARM64-optimized build
 ```
 
-Navigate to the preferred installation directory or just to the home folder. Clone the Simulator and all submodules:
+## Testing
 
-```shell
-git clone --recurse-submodules https://github.com/matth-x/MicroOcppSimulator
+### Basic Functionality Test
+
+1. Start the simulators:
+   ```bash
+   docker-compose up -d
+   ```
+
+2. Check API connectivity:
+   ```bash
+   # Test OCPP 1.6
+   curl http://localhost:8001/api/connectors
+   
+   # Test OCPP 2.0.1
+   curl http://localhost:8002/api/connectors
+   ```
+
+3. Open web interfaces:
+   - OCPP 1.6: http://localhost:8001
+   - OCPP 2.0.1: http://localhost:8002
+
+### OCPP Protocol Tests
+
+1. **OCPP 1.6**: ChargePoint `charger-1.6` on port 8001
+2. **OCPP 2.0.1**: ChargePoint `charger-201` on port 8002
+3. **Operations**: Test StartTransaction, StopTransaction, Heartbeat
+4. **Status monitoring**: Use CitrineOS Operator UI for live monitoring
+
+## CitrineOS Integration
+
+### Automatic Network Configuration
+
+- **Network**: `fenexity-csms` (external)
+- **OCPP 1.6 Endpoint**: `ws://citrineos:8092/ocpp16`
+- **OCPP 2.0.1 Endpoint**: `ws://citrineos:8082/ocpp201`
+
+### Charger Registration
+
+The simulators automatically register with CitrineOS:
+- **OCPP 1.6**: `charger-1.6`
+- **OCPP 2.0.1**: `charger-201`
+
+## Debugging
+
+### Container Logs
+
+```bash
+# All logs
+docker-compose logs -f
+
+# OCPP 1.6 only
+docker-compose logs -f microocpp-sim-v16
+
+# OCPP 2.0.1 only
+docker-compose logs -f microocpp-sim-v201
 ```
 
-Navigate to the copy of the Simulator and build:
+### OCPP 1.6 Compliance Debugging
 
-```shell
+```bash
+# Filter StartTransaction logs
+docker-compose logs microocpp-sim-v16 | grep -E "FENEXITY_OCPP16_FIX|Transaction|StartTransaction"
+```
+
+### Configuration Debugging
+
+```bash
+# Show current WebSocket configuration
+cat mo_store_v16/ws-conn.jsn | grep -E '"value"|"valActual"'
+cat mo_store_v201/ws-conn-v201.jsn | grep -E '"valActual"'
+```
+
+## Important Notes
+
+### ARM64 Performance
+
+- ⚡ **Native Performance**: Optimized for Apple Silicon
+- 🔧 **Build Time**: Longer compilation time due to architecture optimization
+- 📦 **Image Size**: Compact Alpine-based images
+
+### Network Configuration
+
+- 🌐 **External Network**: `fenexity-csms` must exist
+- 🔌 **Port Mapping**: 8001 (OCPP 1.6), 8002 (OCPP 2.0.1)
+- 🔐 **Security**: OCPP 2.0.1 with Basic Auth
+
+### Port Conflict Avoidance
+
+- Port 8001: Exclusive for OCPP 1.6 Simulator
+- Port 8002: Exclusive for OCPP 2.0.1 Simulator
+- Check with `docker-compose ps` for status
+
+## Production Deployment
+
+### Prerequisites
+
+```bash
+# Create Fenexity CSMS network
+docker network create fenexity-csms
+
+# Start CitrineOS (separate repository)
+# ...
+```
+
+### Deployment
+
+```bash
+# Clone repository
+git clone --recurse-submodules https://github.com/Fenexity/MicroOcppSimulator.git
 cd MicroOcppSimulator
-cmake -S . -B ./build
-cmake --build ./build -j 16 --target mo_simulator
+
+# Start simulators
+docker-compose up -d
+
+# Test functionality
+curl http://localhost:8001/api/connectors
+curl http://localhost:8002/api/connectors
 ```
 
-The installation is complete! To run the Simulator, type:
+## Development
 
-```shell
-./build/mo_simulator
+### Code Modifications
+
+The main Fenexity modifications are directly integrated into the code:
+
+1. **StartTransaction.cpp**: OCPP 1.6 Compliance Fix
+2. **main.cpp**: Environment Variable Support
+3. **Dockerfile.arm64**: Unified ARM64 Build
+4. **docker-compose.yml**: Dual-Simulator Setup
+
+### Upstream Updates
+
+```bash
+# Add upstream remote
+git remote add upstream https://github.com/matth-x/MicroOcppSimulator.git
+
+# Fetch updates (careful due to modifications)
+git fetch upstream
+git merge upstream/main  # Manual conflict resolution required
 ```
 
-This will open [localhost:8000](http://localhost:8000). You can access the Graphical User Interface by entering that
-address into a browser running on the same computer. Make sure that the firewall settings allow the Simulator to connect
-and to be reached.
+---
 
-The Simulator should be up and running now!
-
-## Building the Webapp (Developers)
-
-The webapp is registered as a git submodule in *webapp-src*.
-
-Before you can build the webapp, you have to create a *.env.production* file in the *webapp-src* folder. If you just
-want to try out the build process, you can simply duplicate the *.env.development* file and rename it.
-
-After that, to build it for deployment, all you have to do is run `./build-webapp/build_webapp.ps1` (Windows) from the
-root directory.
-For this to work NodeJS, npm and git have to be installed on your machine. The called script automatically performs the
-following tasks:
-
-- pull the newest version of the the [arduino-ocpp-dashboard](https://github.com/agruenb/arduino-ocpp-dashboard)
-- check if you have added a *.env.production* file
-- install webapp dependencies
-- build the webapp
-- compress the webapp
-- move the g-zipped bundle file into the public folder
-
-During the process there might be some warnings displayed. Als long as the script exits without an error everything worked fine. An up-to-date version of the webapp should be placed in the *public* folder.
-
-## Porting to WebAssembly (Developers)
-
-If you want to run the Simulator in the browser instead of a Linux host, you can port the code for WebAssembly.
-
-Make sure that emscripten is installed and on the path (see [https://emscripten.org/docs/getting_started/downloads.html#installation-instructions-using-the-emsdk-recommended](https://emscripten.org/docs/getting_started/downloads.html#installation-instructions-using-the-emsdk-recommended)).
-
-Then, create the CMake build files with the corresponding emscripten tool and change the target:
-
-```shell
-emcmake cmake -S . -B ./build
-cmake --build ./build -j 16 --target mo_simulator_wasm
-```
-
-The compiler toolchain should emit the WebAssembly binary and a JavaScript wrapper into the build folder. They need to be built into the preact webapp. Instead of making XHR requests to the server, the webapp will call the API of the WebAssembly JS wrapper then. The `install_webassembly.sh` script patches the webapp sources with the WASM binary and JS wrapper:
-
-```shell
-./build-webapp/install_webassembly.sh
-```
-
-Now, the GUI can be developed or built as described in the [webapp repository](https://github.com/agruenb/arduino-ocpp-dashboard).
-
-After building the GUI, the emited files contain the full Simulator functionality. To run the Simualtor, start an HTTP file server in the dist folder and access it with your browser.
-
-## License
-
-This project is licensed under the GPL as it uses the [Mongoose Embedded Networking Library](https://github.com/cesanta/mongoose). If you have a proprietary license of Mongoose, then the [MIT License](https://github.com/matth-x/MicroOcpp/blob/master/LICENSE) applies.
+**Fenexity CSMS Platform** - Developed for ARM64 with OCPP 1.6/2.0.1 Dual-Support 🚀
