@@ -1,0 +1,122 @@
+# =============================================================================
+# Fenexity MicroOCPP Simulator - Unified ARM64 Dual OCPP Protocol Support
+# =============================================================================
+# Starte beide OCPP Simulatoren (1.6 + 2.0.1) mit einem Command
+# Verwendung: docker-compose up -d
+# Ports: 8001 (OCPP 1.6), 8002 (OCPP 2.0.1)
+
+# version: '3.8'  # Removed as it's obsolete in newer Docker Compose
+
+networks:
+  default:
+    driver: bridge
+    name: fenexity-csms
+    external: true
+
+services:
+  # =============================================================================
+  # MicroOCPP Konfiguration (läuft vor Simulator-Start)
+  # =============================================================================
+  microocpp-config:
+    image: alpine:latest
+    container_name: microocpp-config
+    platform: linux/arm64
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./configure-citrineos.sh:/configure-citrineos.sh:ro
+      - ./mo_store_v16:/output/mo_store_v16
+      - ./mo_store_v201:/output/mo_store_v201
+    command: >
+      sh -c "
+      echo '🔧 Starte MicroOCPP-Konfiguration...';
+      apk add --no-cache bash grep curl docker-cli;
+      cd /output && bash /configure-citrineos.sh;
+      echo '✅ Konfiguration abgeschlossen!';
+      "
+    restart: "no"  # Läuft nur einmal
+
+  # =============================================================================
+  # OCPP 1.6 Simulator (ARM64)
+  # =============================================================================
+  microocpp-sim-v16:
+    build:
+      context: .
+      dockerfile: Dockerfile.arm64
+      args:
+        OCPP_VERSION: "1.6"
+        SIMULATOR_PORT: "8000"
+        CHARGER_ID: "charger-1.6"
+        API_PORT: "8001"
+    container_name: microocpp-sim-v16
+    platform: linux/arm64
+    ports:
+      - "8001:8000"  # HTTP Frontend
+    volumes:
+      - ./mo_store_v16:/MicroOcppSimulator/mo_store:rw
+      - ./config:/MicroOcppSimulator/config:ro
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=charger-1.6
+      - SIMULATOR_PORT=8000
+      - API_PORT=8001
+      - CENTRAL_SYSTEM_URL=ws://citrineos:8092/ocpp16
+      - MO_ENABLE_V201=0
+    networks:
+      - default
+    restart: unless-stopped
+    depends_on:
+      - microocpp-config
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # =============================================================================
+  # OCPP 2.0.1 Simulator (ARM64)
+  # =============================================================================
+  microocpp-sim-v201:
+    build:
+      context: .
+      dockerfile: Dockerfile.arm64
+      args:
+        OCPP_VERSION: "2.0.1"
+        SIMULATOR_PORT: "8000"
+        CHARGER_ID: "charger-201"
+        API_PORT: "8002"
+    container_name: microocpp-sim-v201
+    platform: linux/arm64
+    ports:
+      - "8002:8000"  # HTTP Frontend
+    volumes:
+      - ./mo_store_v201:/MicroOcppSimulator/mo_store:rw
+      - ./config:/MicroOcppSimulator/config:ro
+    environment:
+      - OCPP_VERSION=2.0.1
+      - CHARGER_ID=charger-201
+      - SIMULATOR_PORT=8000
+      - API_PORT=8002
+      - CENTRAL_SYSTEM_URL=ws://citrineos:8082/ocpp201
+      - MO_ENABLE_V201=1
+      - BASIC_AUTH_PASSWORD=fenexity_test_2025
+    networks:
+      - default
+    restart: unless-stopped
+    depends_on:
+      - microocpp-config
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+# =============================================================================
+# Volumes für persistente Daten
+# =============================================================================
+volumes:
+  microocpp_v16_data:
+    name: microocpp-v16-data
+  microocpp_v201_data:
+    name: microocpp-v201-data

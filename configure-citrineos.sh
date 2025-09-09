@@ -17,11 +17,28 @@
 echo "🔧 Konfiguriere MicroOCPP-Simulatoren für CitrineOS (Hybrid-Ansatz)..."
 
 # Service-Name (wartungsfreundlich in Source Control)
-CITRINEOS_SERVICE="fenexity-citrineos"
+CITRINEOS_SERVICE="${CITRINEOS_SERVICE:-fenexity-citrineos}"
 
 # Dynamische IP-Ermittlung zur Runtime (Mongoose-kompatibel)
 echo "🔍 Ermittle aktuelle IP von Container: $CITRINEOS_SERVICE..."
-CITRINEOS_IP=$(docker inspect $CITRINEOS_SERVICE | grep '"IPAddress"' | grep -v '""' | head -1 | sed 's/.*"IPAddress": "\([^"]*\)".*/\1/')
+
+# Versuche verschiedene Methoden, um die IP zu finden
+CITRINEOS_IP=""
+
+# Methode 1: Robuste Docker-Format-Methode
+CITRINEOS_IP=$(docker inspect "$CITRINEOS_SERVICE" --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' 2>/dev/null)
+
+# Methode 2: Fallback mit "citrineos" Alias
+if [ -z "$CITRINEOS_IP" ] || [ "$CITRINEOS_IP" = "null" ]; then
+    echo "🔍 Fallback: Versuche mit 'citrineos' Alias..."
+    CITRINEOS_IP=$(docker inspect "citrineos" --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' 2>/dev/null)
+fi
+
+# Methode 3: Legacy grep-Methode als letzter Fallback
+if [ -z "$CITRINEOS_IP" ] || [ "$CITRINEOS_IP" = "null" ]; then
+    echo "🔍 Fallback: Versuche legacy IP-Ermittlung..."
+    CITRINEOS_IP=$(docker inspect "$CITRINEOS_SERVICE" 2>/dev/null | grep '"IPAddress"' | grep -v '""' | head -1 | sed 's/.*"IPAddress": "\([^"]*\)".*/\1/')
+fi
 
 # Validation: IP-Adresse prüfen
 if [ -z "$CITRINEOS_IP" ] || [ "$CITRINEOS_IP" = "null" ]; then
