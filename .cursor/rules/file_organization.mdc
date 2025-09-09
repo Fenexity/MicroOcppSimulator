@@ -1,0 +1,49 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# File Organization Rules
+
+## Repository Scope
+- **All project files MUST be created within the repository directory structure**
+- **Never create project files outside the workspace repository** (e.g., in parent directories like `/home/benjamin/fenexity/CursorProjects/`)
+- **Always verify file paths are within the repository before creation**
+
+## Documentation Management
+- **Update existing documentation files** (README.md, .cursormemory.md) rather than creating separate tracking files
+- **Consolidate progress tracking** in established files instead of proliferating new ones
+- **Follow existing documentation patterns** and structures
+
+## Path Verification
+- **Use relative paths from repository root** for all file operations
+- **Verify working directory** is within the repository before file creation
+- **Check file paths** to ensure they resolve within the project structure
+
+## Examples
+
+### Correct File Locations
+```
+project-repo/
+├── demo_script.py                   # Demo scripts in repo root
+├── docs/completion_guide.md         # Documentation in docs/
+├── .cursormemory.md                 # Progress tracking (existing file)
+└── README.md                        # Project overview (existing file)
+```
+
+### Incorrect File Locations
+```
+/parent/directory/outside/repo/
+├── PROJECT_COMPLETE.md              # Outside repository!
+├── demo_script.py                   # Outside repository!
+└── project-repo/                    # Repository is here
+```
+
+## Rationale
+- **Project Integrity**: Keeps all related files together
+- **Version Control**: Ensures all files are tracked by Git
+- **Data Manipulation**: Keep data and code strictly separated (only code belongs in the repository)
+- **Large files**: Always store large data files in a separate folder
+- **Collaboration**: Makes files accessible to all team members
+- **Organization**: Prevents scattered files across filesystem
+- **Maintenance**: Easier to find, update, and manage project files

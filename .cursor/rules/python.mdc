@@ -1,0 +1,85 @@
+---
+description: This rule applies for Python files.
+globs: *.py
+alwaysApply: false
+---
+# Python Development Guidelines
+
+## Package Management and Environment Setup
+- **Always use the uv package manager** for dependency management
+- **Always activate the correct virtual environment** before running any Python-related terminal command
+  - Activate it using `source .venv/bin/activate`
+- **Always use the standard name .venv** for virtual environments
+- **Never install global Python packages** — all packages must be installed inside the virtual environment
+
+## Code Style
+- **Follow PEP8 guidelines:**
+  - 4-space indentations
+  - Maximum 88 characters per line
+  - A maximum of 72 characters per line is allowed for docstrings
+  - Clear naming conventions
+- **Always use double quotes for strings**
+- **Comments should not exceed 72 characters**
+- **Start private class variables with an underscore**
+- **Use UPPER_SNAKE_CASE for constants**
+- **Keep functions small and focused**
+- **Use descriptive names** for variables, functions, and classes
+- **Favor functional programming patterns, prefer functions over classes**
+- **Never write a function or class inside another function**
+- **Never use emojis in code**
+
+## Imports
+- **Always use absolute imports** instead of relative imports
+  - Good Example: `from package_name.module import function`
+  - Avoid this: `from .module import function`
+- **Organize imports in the following order:**
+  1. Standard library imports
+  2. Third-party package imports
+  3. Local application imports
+- **Separate each import group** with a blank line
+- **Avoid using `import *`**
+- **When running scripts directly**, ensure PYTHONPATH is set correctly
+
+## Type Safety
+- **Always include type hints** in function signatures
+- **Favor explicit code** over implicit assumptions
+
+## Error Handling
+- **Follow EAFP** (Easier to Ask for Forgiveness than Permission) principle
+- **Only catch specific exceptions** in try-except blocks
+
+## Dependencies and Configuration
+- **Keep configuration** in config.py
+- **Include path variables** in .env file
+- **Initialize all dependencies** in requirements.txt
+- **Pass dependencies to classes** during initialization
+
+## File Structure
+- **Keep __init__.py files minimal**, but include package docstrings
+- **Separate source code (src/) from tests (tests/)**
+
+## Documentation
+- **Write docstrings** for all public functions and classes
+- **Follow this docstring convention:** "google"
+- **Include:**
+  - Function/class intention and behavior
+  - Arguments
+  - Return values
+  - Assumptions
+  - Known edge cases or fixes (after resolving issues)
+- **Use inline comments sparingly**—only where code intent isn't obvious
+- **Avoid personal pronouns** ("I", "we") in comments/documentation
+
+## Testing
+- **Follow Test-Driven Development (TDD):**
+  - Write tests first
+  - Always place test files in the directory (tests/)
+  - Run tests in virtual environment
+  - Keep tests clean and up to date
+
+## Debugging and Logging
+- **Use a logger instead of print statements**
+- **Include basic logging** for critical operations
+- **Use debug logging prints during development** if needed
+- **Remove debug prints** after fixing issues
+- **Only keep debug logging that is relevant for production**

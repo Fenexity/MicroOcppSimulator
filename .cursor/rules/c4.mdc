@@ -1,0 +1,116 @@
+---
+description: This rule applies for Python files.
+globs: *.dsl
+alwaysApply: false
+---
+# Development Guidelines for domain specific language (dsl) of the C4 model
+The C4 model is a framework for visualizing software architecture through four 
+hierarchical diagrams: Context, Container, Component, and Code. 
+It helps teams understand and communicate the structure of software systems at 
+varying levels of detail, from high-level interactions to low-level implementation.
+This approach is independent of specific notations or tools, making it adaptable
+to various development environments.
+Structurizr DSL (Domain-Specific Language) offers a text-based way to define C4 models.
+It allows you to describe software architecture models in plain text,
+enabling version control, collaboration, and automation.
+
+## Code Style
+- Use the Structurizr DSL for concise and readable workspace definitions.
+- Break down large models into smaller, manageable files using the !include directive.
+- Enable hierarchical identifiers with !identifiers hierarchical to maintain clear and consistent references across your model.
+- Clearly specify relationships using the -> syntax to illustrate interactions between elements.
+- Enable implied relationships to reduce redundancy, allowing the DSL to infer connections based on existing relationships.
+- Use tags to categorize elements, facilitating consistent styling and filtering across diagrams.
+- Assign styles to tags within the styles block to maintain visual consistency and convey meaning effectively.
+
+## File Structure and Definition Order
+The following order should be maintained in the DSL file:
+
+1. Workspace Configuration
+   - Workspace properties
+   - Documentation references
+   - Model properties (e.g., groupSeparator)
+
+2. Model Definitions (in order)
+   - People (users, actors)
+   - Groups (organizational boundaries)
+   - Software Systems
+   - Containers within Systems
+   - Components within Containers
+   - Container Instances
+   - Infrastructure Nodes
+   - Deployment Nodes
+
+3. Relationships
+   - System-to-System relationships
+   - Container-to-Container relationships
+   - Component-to-Component relationships
+   - Deployment relationships
+
+4. Views
+   - System Landscape views
+   - System Context views
+   - Container views
+   - Component views
+   - Deployment views
+   - Filtered views
+   - Dynamic views
+
+5. Styles and Themes
+   - Element styles
+   - Relationship styles
+   - Theme definitions
+
+## Documentation
+- Use inline comments sparingly—only where code intent isn't obvious
+- Avoid personal pronouns ("I", "we") in comments/documentation
+- Document network and deployment configurations clearly
+- Include security properties for network elements
+- Document relationships between deployment groups
+
+## Views
+- Do not use autolayout unless specified
+- Use filtered views for complex deployments
+- Create specific views for network infrastructure
+- Use deployment groups to manage container instance relationships
+
+## Network and Deployment Best Practices
+- Define network boundaries using deployment nodes
+- Use infrastructure nodes for network elements (VPN, Firewall)
+- Group related container instances using deployment groups
+- Document network properties (protocols, security)
+- Use tags to categorize network elements
+- Create specific views for network infrastructure
+
+## Groups in C4
+- Groups are organizational elements that help with visualization and organization
+- Groups cannot participate in relationships directly
+- All relationships must be defined between actual elements (people, software systems, containers, components)
+- When referencing elements within groups, use the full path to the element, not the group
+- Groups are purely for visual organization and do not affect the actual architecture model
+
+## Container Properties Formatting (Critical Syntax Rule)
+- **CRITICAL**: Properties blocks within containers must use proper multi-line formatting
+- **Incorrect Format** (causes parser errors):
+  ```dsl
+  container "Name" "Description" "Technology" {
+      properties { "Interface Type" "Internal" }  // ❌ WRONG
+  }
+  ```
+- **Correct Format** (required for parser to work):
+  ```dsl
+  container "Name" "Description" "Technology" {
+      properties {
+          "Interface Type" "Internal" 
+      }
+  }
+  ```
+- **Error Symptom**: "Unexpected tokens" error at line X when defining multiple containers
+- **Root Cause**: Single-line properties blocks confuse the Structurizr parser state
+- **Solution**: Always use multi-line, properly indented properties blocks
+
+## Security Considerations
+- Document security properties for network elements
+- Use appropriate tags for security-critical components
+- Include security protocols in relationship properties
+- Document access restrictions and authentication methods
