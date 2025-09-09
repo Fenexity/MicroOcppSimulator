@@ -1,0 +1,6 @@
+{
+  "websocket_url": "ws://echo.websocket.events",
+  "charger_id": "charger-01",
+  "protocol_version": "1.6",
+  "description": "MicroOCPP Connection Configuration - This file will be replaced at runtime with correct values"
+} 

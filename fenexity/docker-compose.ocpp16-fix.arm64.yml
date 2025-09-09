@@ -1,0 +1,100 @@
+# ============================================================================
+# Fenexity CSMS Platform - MicroOCPP Simulator OCPP 1.6 Compliance Fix
+# ============================================================================
+# ZWECK: Docker-Compose für MicroOCPP mit Transaction ID Compliance Fix
+# PROBLEM: Standard MicroOCPP erstellt eigene Transaction IDs (OCPP 1.6 Verletzung)
+# LÖSUNG: Gepatchter Simulator, der nur CSMS-Transaction IDs verwendet
+
+services:
+  # ============================================================================
+  # OCPP 1.6 Simulator MIT Compliance Fix
+  # ============================================================================
+  microocpp-sim-v16-fixed:
+    build:
+      context: ../../  # Root Kontext für Zugriff auf sowohl submodules/ als auch overrides/
+      dockerfile: overrides/microocpp-simulator/Dockerfile.v16.ocpp16-fix.arm64
+      platforms:
+        - linux/arm64
+        - linux/amd64
+    container_name: microocpp-sim-v16-fixed
+    restart: unless-stopped
+    ports:
+      - "8001:8000"  # Web Interface
+    environment:
+      # OCPP 1.6 Compliance Modus
+      - OCPP_VERSION=1.6
+      - OCPP16_COMPLIANCE_MODE=1
+      - CHARGE_POINT_ID=charger-simulator-01-v16-fixed
+      
+      # CitrineOS Connection (ARM64 optimiert)
+      - CENTRAL_SYSTEM_URL=ws://host.docker.internal:8080/ocpp16
+      - CITRINEOS_OCPP16_ENDPOINT=ws://host.docker.internal:8080/ocpp16
+      
+      # OCPP 1.6 Configuration für Transaction ID Compliance
+      - AUTHORIZE_REMOTE_TX_REQUESTS=false  # Keine separate Autorisierung für Remote Start
+      - STOP_TRANSACTION_ON_INVALID_ID=true # Stop bei ungültiger ID
+      - TRANSACTION_MESSAGE_ATTEMPTS=3      # Max. 3 Versuche für Transaction Messages
+      - TRANSACTION_MESSAGE_RETRY_INTERVAL=10 # 10s Retry-Intervall
+      
+      # Debugging für Compliance-Verifikation
+      - MO_DBG_LEVEL=INFO
+      - OCPP16_TRANSACTION_DEBUG=1
+      
+    volumes:
+      # Persistente Transaction Storage
+      - microocpp_v16_fixed_store:/MicroOcppSimulator/mo_store
+      
+      # Log-Verzeichnis für OCPP Compliance Debugging
+      - ./logs/microocpp-v16-fixed:/var/log/microocpp
+      
+    networks:
+      - fenexity-csms
+      
+    # Health-Check für OCPP 1.6 Compliance
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+      
+    # Resource Limits für ARM64
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+          cpus: '0.5'
+          
+    # Dependency Management (External Services)
+    # Note: CitrineOS läuft in separatem Docker-Compose Projekt
+    external_links:
+      - "citrineos:citrineos-server"
+        
+    # Labels für Management
+    labels:
+      - "com.fenexity.service=microocpp-simulator"
+      - "com.fenexity.version=v1.6"
+      - "com.fenexity.compliance=ocpp16-transaction-fix"
+      - "com.fenexity.architecture=arm64"
+
+  # OCPP 2.0.1 läuft bereits im Haupt-System (docker-compose.microocpp.yml)
+
+# ============================================================================
+# Volumes für persistente Transaction Data
+# ============================================================================
+volumes:
+  microocpp_v16_fixed_store:
+    driver: local
+    labels:
+      - "com.fenexity.service=microocpp-v16-fixed"
+      - "com.fenexity.data=transaction-store"
+
+# ============================================================================
+# Externe Networks (definiert in Haupt-Docker-Compose)
+# ============================================================================
+networks:
+  fenexity-csms:
+    external: true 

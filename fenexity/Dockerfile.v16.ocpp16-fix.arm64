@@ -1,0 +1,166 @@
+# ============================================================================
+# Fenexity CSMS Platform - MicroOCPP v1.6 Simulator mit OCPP 1.6 Compliance Fix
+# ============================================================================
+# ZWECK: ARM64-optimierter MicroOCPP-Simulator mit Transaction ID Compliance Fix
+# PROBLEM: Simulator erstellt eigene Transaction IDs anstatt CSMS-IDs zu verwenden
+# LÖSUNG: Patched StartTransaction.cpp für OCPP 1.6 Standard-Konformität
+
+FROM --platform=linux/arm64 alpine:latest
+
+# Dependencies für ARM64-Build (inkl. curl für Health-Check)
+RUN apk update && \
+    apk add --no-cache \
+    git \
+    cmake \
+    openssl-dev \
+    build-base \
+    curl
+
+# Working Directory setzen
+WORKDIR /MicroOcppSimulator
+
+# MicroOCPP Source Code kopieren (vom Root aus)
+COPY submodules/microocpp-simulator/ .
+
+# ============================================================================
+# KRITISCHER FIX: OCPP 1.6 Compliance Patch anwenden
+# ============================================================================
+# Ersetzt die problematische StartTransaction.cpp mit OCPP 1.6-konformer Version
+COPY overrides/microocpp-simulator/patches/StartTransaction_OCPP16_Fix.cpp \
+     ./lib/MicroOcpp/src/MicroOcpp/Operations/StartTransaction.cpp
+
+# Backup der Original-Datei erstellen (für Debugging)
+RUN cp ./lib/MicroOcpp/src/MicroOcpp/Operations/StartTransaction.cpp \
+       ./lib/MicroOcpp/src/MicroOcpp/Operations/StartTransaction.cpp.original || true
+
+# Verifikation des Patches
+RUN echo "🔧 [OCPP16_FIX] Verifying patch application..." && \
+    grep -q "OCPP16_FIX" ./lib/MicroOcpp/src/MicroOcpp/Operations/StartTransaction.cpp && \
+    echo "✅ [OCPP16_FIX] StartTransaction OCPP 1.6 compliance patch applied successfully!" || \
+    (echo "❌ [OCPP16_FIX] Patch application failed!" && exit 1)
+
+# ============================================================================
+# CMake Build-Konfiguration für OCPP 1.6
+# ============================================================================
+# WICHTIG: -DMO_ENABLE_V201=0 deaktiviert OCPP 2.0.1 für reine v1.6-Kompatibilität
+RUN cmake -S . -B ./build \
+    -DMO_ENABLE_V201=0 \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_CXX_FLAGS="-DOCPP16_COMPLIANCE_MODE=1"
+
+# Parallel Build mit allen verfügbaren Cores
+RUN cmake --build ./build --target mo_simulator -j $(nproc)
+
+# Ausführungsrechte setzen
+RUN chmod +x /MicroOcppSimulator/build/mo_simulator
+
+# ============================================================================
+# OCPP 1.6 Konfiguration
+# ============================================================================
+# MO Store Directory erstellen
+RUN mkdir -p /MicroOcppSimulator/mo_store
+
+# OCPP 1.6 Standard-Konfiguration erstellen
+RUN echo '{ \
+  "head": { \
+    "content-type": "ocpp_config_file", \
+    "version": "2.0" \
+  }, \
+  "configurations": [ \
+    { \
+      "type": "string", \
+      "key": "OcppVersion", \
+      "value": "1.6" \
+    }, \
+    { \
+      "type": "string", \
+      "key": "ChargePointId", \
+      "value": "charger-1.6" \
+    }, \
+    { \
+      "type": "string", \
+      "key": "CentralSystemUrl", \
+      "value": "ws://172.18.0.6:8081/" \
+    }, \
+    { \
+      "type": "bool", \
+      "key": "AuthorizeRemoteTxRequests", \
+      "value": false \
+    }, \
+    { \
+      "type": "bool", \
+      "key": "StopTransactionOnInvalidId", \
+      "value": true \
+    } \
+  ] \
+}' > /MicroOcppSimulator/mo_store/simulator-v16.jsn
+
+# ============================================================================
+# Runtime-Konfiguration
+# ============================================================================
+# Port 8000 für Web Interface
+EXPOSE 8000
+
+# Environment Variables für OCPP 1.6 Compliance Mode
+ENV OCPP_VERSION=1.6
+ENV OCPP16_COMPLIANCE_MODE=1
+ENV CHARGE_POINT_ID=charger-1.6
+ENV CENTRAL_SYSTEM_URL=ws://172.18.0.6:8081/
+
+# Startup-Script erstellen mit Web-App-Konfiguration
+RUN echo '#!/bin/sh' > /start-simulator.sh && \
+    echo 'echo "🚀 [OCPP16_FIX] Starting MicroOCPP Simulator v1.6 with Transaction ID Compliance Fix"' >> /start-simulator.sh && \
+    echo 'echo "🔧 [OCPP16_FIX] OCPP Version: $OCPP_VERSION"' >> /start-simulator.sh && \
+    echo 'echo "🔧 [OCPP16_FIX] Charge Point ID: $CHARGE_POINT_ID"' >> /start-simulator.sh && \
+    echo 'echo "🔧 [OCPP16_FIX] Central System URL: $CENTRAL_SYSTEM_URL"' >> /start-simulator.sh && \
+    echo 'echo "🔧 [OCPP16_FIX] Compliance Mode: Transaction IDs provided by CSMS only"' >> /start-simulator.sh && \
+    echo 'echo "⚠️  [OCPP16_FIX] This simulator will NOT generate its own Transaction IDs!"' >> /start-simulator.sh && \
+    echo 'echo "⚠️  [OCPP16_FIX] It will use Transaction IDs provided by CitrineOS CSMS."' >> /start-simulator.sh && \
+    echo '' >> /start-simulator.sh && \
+    echo '# ============================================================================' >> /start-simulator.sh && \
+    echo '# WEB-APP KONFIGURATION (wie OCPP 2.0.1)' >> /start-simulator.sh && \
+    echo '# ============================================================================' >> /start-simulator.sh && \
+    echo 'API_PORT=${API_PORT:-8000}' >> /start-simulator.sh && \
+    echo 'CHARGER_ID=${CHARGER_ID:-$CHARGE_POINT_ID}' >> /start-simulator.sh && \
+    echo 'echo "🌐 [OCPP16_FIX] Setting API port to: $API_PORT"' >> /start-simulator.sh && \
+    echo 'echo "🌐 [OCPP16_FIX] Setting Charger ID to: $CHARGER_ID"' >> /start-simulator.sh && \
+    echo '' >> /start-simulator.sh && \
+    echo '# Update WebApp API configuration' >> /start-simulator.sh && \
+    echo 'echo "🔧 [OCPP16_FIX] Updating WebApp API configuration..."' >> /start-simulator.sh && \
+    echo 'if [ -f /MicroOcppSimulator/mo_store_v16/ws-conn.jsn ]; then' >> /start-simulator.sh && \
+    echo '  sed -i "s|\"value\":\"charger-01\"|\"value\":\"$CHARGER_ID\"|g" /MicroOcppSimulator/mo_store_v16/ws-conn.jsn' >> /start-simulator.sh && \
+    echo '  echo "✅ [OCPP16_FIX] WebApp API configuration updated"' >> /start-simulator.sh && \
+    echo 'else' >> /start-simulator.sh && \
+    echo '  echo "⚠️  [OCPP16_FIX] Warning: ws-conn.jsn not found"' >> /start-simulator.sh && \
+    echo 'fi' >> /start-simulator.sh && \
+    echo '' >> /start-simulator.sh && \
+    echo '# Handle compressed bundle.html.gz file' >> /start-simulator.sh && \
+    echo 'if [ -f /MicroOcppSimulator/public/bundle.html.gz ]; then' >> /start-simulator.sh && \
+    echo '  echo "🗜️  [OCPP16_FIX] Decompressing bundle.html.gz..."' >> /start-simulator.sh && \
+    echo '  gunzip /MicroOcppSimulator/public/bundle.html.gz' >> /start-simulator.sh && \
+    echo '  echo "🔧 [OCPP16_FIX] Replacing API URLs in bundle.html..."' >> /start-simulator.sh && \
+    echo '  sed -i "s|localhost:8000|localhost:$API_PORT|g" /MicroOcppSimulator/public/bundle.html' >> /start-simulator.sh && \
+    echo '  echo "🗜️  [OCPP16_FIX] Recompressing bundle.html..."' >> /start-simulator.sh && \
+    echo '  gzip /MicroOcppSimulator/public/bundle.html' >> /start-simulator.sh && \
+    echo '  echo "✅ [OCPP16_FIX] Frontend URL replacement complete"' >> /start-simulator.sh && \
+    echo 'fi' >> /start-simulator.sh && \
+    echo '' >> /start-simulator.sh && \
+    echo '# Fix main.js with hardcoded localhost:8000' >> /start-simulator.sh && \
+    echo 'if [ -f /MicroOcppSimulator/public/main.js ]; then' >> /start-simulator.sh && \
+    echo '  echo "🔧 [OCPP16_FIX] Replacing API URLs in main.js..."' >> /start-simulator.sh && \
+    echo '  sed -i "s|localhost:8000|localhost:$API_PORT|g" /MicroOcppSimulator/public/main.js' >> /start-simulator.sh && \
+    echo '  echo "✅ [OCPP16_FIX] main.js URL replacement complete"' >> /start-simulator.sh && \
+    echo 'fi' >> /start-simulator.sh && \
+    echo '' >> /start-simulator.sh && \
+    echo 'echo "🚀 [OCPP16_FIX] Starting MicroOCPP Simulator with Web-Interface..."' >> /start-simulator.sh && \
+    echo 'exec /MicroOcppSimulator/build/mo_simulator' >> /start-simulator.sh && \
+    chmod +x /start-simulator.sh
+
+# ============================================================================
+# Health-Check für OCPP 1.6 Compliance
+# ============================================================================
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/ || exit 1
+
+# Container starten mit Compliance Fix
+CMD ["/start-simulator.sh"] 

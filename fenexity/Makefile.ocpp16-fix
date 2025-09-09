@@ -1,0 +1,245 @@
+# ============================================================================
+# Fenexity CSMS Platform - MicroOCPP OCPP 1.6 Compliance Fix Makefile
+# ============================================================================
+# ZWECK: Make-Befehle für MicroOCPP mit Transaction ID Compliance Fix
+# VERWENDUNG: Include in Haupt-Makefile mit: include overrides/microocpp-simulator/Makefile.ocpp16-fix
+
+# ============================================================================
+# OCPP 1.6 Compliance Fix - Build Commands
+# ============================================================================
+
+.PHONY: microocpp-fix-build microocpp-fix-build-arm64 microocpp-fix-rebuild
+
+# Build OCPP 1.6 Fixed Simulator (Auto-Detect Architecture)
+microocpp-fix-build:
+	@echo "🔧 [OCPP16_FIX] Building MicroOCPP Simulator with Transaction ID Compliance Fix..."
+	@if [ "$$(uname -m)" = "arm64" ] || [ "$$(uname -m)" = "aarch64" ]; then \
+		$(MAKE) microocpp-fix-build-arm64; \
+	else \
+		$(MAKE) microocpp-fix-build-x86; \
+	fi
+
+# Build für ARM64 (Apple Silicon)
+microocpp-fix-build-arm64:
+	@echo "🔧 [OCPP16_FIX] Building for ARM64 architecture..."
+	docker-compose -f overrides/microocpp-simulator/docker-compose.ocpp16-fix.arm64.yml build microocpp-sim-v16-fixed
+	@echo "✅ [OCPP16_FIX] ARM64 build completed!"
+
+# Build für x86_64 (Intel/AMD)
+microocpp-fix-build-x86:
+	@echo "🔧 [OCPP16_FIX] Building for x86_64 architecture..."
+	@echo "⚠️  [OCPP16_FIX] x86_64 support coming soon. Use ARM64 version for now."
+	@exit 1
+
+# Rebuild (Clean + Build)
+microocpp-fix-rebuild:
+	@echo "🔄 [OCPP16_FIX] Rebuilding MicroOCPP with Compliance Fix..."
+	$(MAKE) microocpp-fix-clean
+	$(MAKE) microocpp-fix-build
+
+# ============================================================================
+# OCPP 1.6 Compliance Fix - Start/Stop Commands
+# ============================================================================
+
+.PHONY: microocpp-fix-start microocpp-fix-start-arm64 microocpp-fix-stop microocpp-fix-restart
+
+# Start OCPP 1.6 Fixed Simulator
+microocpp-fix-start:
+	@echo "🚀 [OCPP16_FIX] Starting MicroOCPP Simulator with Transaction ID Compliance Fix..."
+	@if [ "$$(uname -m)" = "arm64" ] || [ "$$(uname -m)" = "aarch64" ]; then \
+		$(MAKE) microocpp-fix-start-arm64; \
+	else \
+		$(MAKE) microocpp-fix-start-x86; \
+	fi
+
+# Start für ARM64
+microocpp-fix-start-arm64:
+	@echo "🚀 [OCPP16_FIX] Starting ARM64 OCPP 1.6 Compliance Fixed Simulator..."
+	docker-compose -f overrides/microocpp-simulator/docker-compose.ocpp16-fix.arm64.yml up -d microocpp-sim-v16-fixed
+	@echo "✅ [OCPP16_FIX] Simulator started!"
+	@echo "🌐 [OCPP16_FIX] Web Interface: http://localhost:8001"
+	@echo "🔧 [OCPP16_FIX] Charge Point ID: charger-simulator-01-v16-fixed"
+	@echo "⚠️  [OCPP16_FIX] This simulator will NOT generate its own Transaction IDs!"
+
+# Start für x86_64  
+microocpp-fix-start-x86:
+	@echo "⚠️  [OCPP16_FIX] x86_64 support coming soon. Use ARM64 version for now."
+	@exit 1
+
+# Stop Simulator
+microocpp-fix-stop:
+	@echo "🛑 [OCPP16_FIX] Stopping MicroOCPP OCPP 1.6 Fixed Simulator..."
+	docker-compose -f overrides/microocpp-simulator/docker-compose.ocpp16-fix.arm64.yml down
+	@echo "✅ [OCPP16_FIX] Simulator stopped!"
+
+# Restart Simulator
+microocpp-fix-restart:
+	@echo "🔄 [OCPP16_FIX] Restarting MicroOCPP OCPP 1.6 Fixed Simulator..."
+	$(MAKE) microocpp-fix-stop
+	sleep 3
+	$(MAKE) microocpp-fix-start
+
+# ============================================================================
+# OCPP 1.6 Compliance Fix - Status & Health Commands
+# ============================================================================
+
+.PHONY: microocpp-fix-status microocpp-fix-logs microocpp-fix-health microocpp-fix-debug
+
+# Status Check
+microocpp-fix-status:
+	@echo "📊 [OCPP16_FIX] MicroOCPP OCPP 1.6 Fixed Simulator Status:"
+	@docker ps --filter "name=microocpp-sim-v16-fixed" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+	@echo ""
+	@echo "🔍 [OCPP16_FIX] Health Check:"
+	@curl -s -f http://localhost:8001/ > /dev/null && \
+		echo "✅ [OCPP16_FIX] Web Interface: HEALTHY (http://localhost:8001)" || \
+		echo "❌ [OCPP16_FIX] Web Interface: UNHEALTHY"
+
+# View Logs
+microocpp-fix-logs:
+	@echo "📜 [OCPP16_FIX] MicroOCPP OCPP 1.6 Fixed Simulator Logs:"
+	docker logs -f microocpp-sim-v16-fixed
+
+# Health Check
+microocpp-fix-health:
+	@echo "🏥 [OCPP16_FIX] Performing comprehensive health check..."
+	@echo "🔍 [OCPP16_FIX] Container Status:"
+	@docker inspect microocpp-sim-v16-fixed --format='{{.State.Status}}' || echo "Container not found"
+	@echo ""
+	@echo "🔍 [OCPP16_FIX] Web Interface Check:"
+	@curl -s -f http://localhost:8001/ > /dev/null && echo "✅ Web Interface: OK" || echo "❌ Web Interface: FAIL"
+	@echo ""
+	@echo "🔍 [OCPP16_FIX] OCPP Compliance Verification:"
+	@docker logs microocpp-sim-v16-fixed 2>&1 | grep -q "OCPP16_FIX" && \
+		echo "✅ OCPP 1.6 Compliance Patch: ACTIVE" || \
+		echo "❌ OCPP 1.6 Compliance Patch: NOT DETECTED"
+
+# Debug Information
+microocpp-fix-debug:
+	@echo "🐛 [OCPP16_FIX] Debug Information:"
+	@echo "📋 System Information:"
+	@echo "   Architecture: $$(uname -m)"
+	@echo "   OS: $$(uname -s)"
+	@echo ""
+	@echo "🐳 Container Information:"
+	@docker inspect microocpp-sim-v16-fixed --format='{{.Config.Image}}' 2>/dev/null || echo "   Container not found"
+	@echo ""
+	@echo "🔍 OCPP 1.6 Compliance Verification:"
+	@docker exec -it microocpp-sim-v16-fixed ls -la /MicroOcppSimulator/lib/MicroOcpp/src/MicroOcpp/Operations/ 2>/dev/null | grep StartTransaction || echo "   Cannot access container files"
+	@echo ""
+	@echo "📜 Recent Logs (last 20 lines):"
+	@docker logs --tail 20 microocpp-sim-v16-fixed 2>/dev/null || echo "   Cannot access logs"
+
+# ============================================================================
+# OCPP 1.6 Compliance Fix - Testing Commands
+# ============================================================================
+
+.PHONY: microocpp-fix-test microocpp-fix-test-transaction microocpp-fix-test-compliance
+
+# Complete Test Suite
+microocpp-fix-test:
+	@echo "🧪 [OCPP16_FIX] Running OCPP 1.6 Compliance Test Suite..."
+	$(MAKE) microocpp-fix-test-compliance
+	$(MAKE) microocpp-fix-test-transaction
+
+# Transaction ID Compliance Test
+microocpp-fix-test-transaction:
+	@echo "🧪 [OCPP16_FIX] Testing Transaction ID Compliance..."
+	@echo "🔄 [OCPP16_FIX] Starting transaction test scenario..."
+	
+	@echo "1️⃣ Checking if simulator is running..."
+	@curl -s -f http://localhost:8001/ > /dev/null || (echo "❌ Simulator not accessible" && exit 1)
+	
+	@echo "2️⃣ Verifying OCPP 1.6 patch is active..."
+	@docker logs microocpp-sim-v16-fixed 2>&1 | grep -q "OCPP16_FIX" || (echo "❌ Compliance patch not detected" && exit 1)
+	
+	@echo "3️⃣ Checking for transaction ID compliance in logs..."
+	@docker logs microocpp-sim-v16-fixed 2>&1 | grep -q "CSMS provided Transaction ID" && \
+		echo "✅ Transaction ID compliance verified" || \
+		echo "⚠️  No transaction activity detected yet"
+	
+	@echo "✅ [OCPP16_FIX] Transaction ID compliance test completed!"
+
+# Compliance Verification
+microocpp-fix-test-compliance:
+	@echo "🧪 [OCPP16_FIX] Testing OCPP 1.6 Standard Compliance..."
+	
+	@echo "1️⃣ Verifying StartTransaction.cpp patch..."
+	@docker exec microocpp-sim-v16-fixed grep -q "OCPP16_FIX" /MicroOcppSimulator/lib/MicroOcpp/src/MicroOcpp/Operations/StartTransaction.cpp && \
+		echo "✅ StartTransaction.cpp patch verified" || \
+		echo "❌ StartTransaction.cpp patch not found"
+	
+	@echo "2️⃣ Checking OCPP 1.6 configuration..."
+	@docker exec microocpp-sim-v16-fixed grep -q '"OcppVersion","value":"1.6"' /MicroOcppSimulator/mo_store/simulator-v16.jsn && \
+		echo "✅ OCPP 1.6 version configured correctly" || \
+		echo "❌ OCPP 1.6 configuration error"
+	
+	@echo "✅ [OCPP16_FIX] OCPP 1.6 compliance verification completed!"
+
+# ============================================================================
+# OCPP 1.6 Compliance Fix - Cleanup Commands  
+# ============================================================================
+
+.PHONY: microocpp-fix-clean microocpp-fix-clean-all microocpp-fix-reset
+
+# Clean Build Cache
+microocpp-fix-clean:
+	@echo "🧹 [OCPP16_FIX] Cleaning build cache..."
+	docker-compose -f overrides/microocpp-simulator/docker-compose.ocpp16-fix.arm64.yml down --rmi all
+	docker system prune -f
+	@echo "✅ [OCPP16_FIX] Cleanup completed!"
+
+# Clean Everything (including volumes)
+microocpp-fix-clean-all:
+	@echo "🧹 [OCPP16_FIX] Cleaning everything (including persistent data)..."
+	docker-compose -f overrides/microocpp-simulator/docker-compose.ocpp16-fix.arm64.yml down --volumes --rmi all
+	docker volume rm microocpp_v16_fixed_store 2>/dev/null || true
+	docker system prune -f
+	@echo "✅ [OCPP16_FIX] Complete cleanup finished!"
+
+# Reset to Clean State
+microocpp-fix-reset:
+	@echo "🔄 [OCPP16_FIX] Resetting to clean state..."
+	$(MAKE) microocpp-fix-clean-all
+	$(MAKE) microocpp-fix-build
+	@echo "✅ [OCPP16_FIX] Reset completed!"
+
+# ============================================================================
+# OCPP 1.6 Compliance Fix - Help
+# ============================================================================
+
+.PHONY: microocpp-fix-help
+
+microocpp-fix-help:
+	@echo "🆘 [OCPP16_FIX] MicroOCPP OCPP 1.6 Compliance Fix - Available Commands:"
+	@echo ""
+	@echo "📦 Build Commands:"
+	@echo "   make microocpp-fix-build         - Build simulator with compliance fix"
+	@echo "   make microocpp-fix-rebuild       - Rebuild from scratch"
+	@echo ""
+	@echo "🚀 Runtime Commands:"
+	@echo "   make microocpp-fix-start         - Start fixed simulator"
+	@echo "   make microocpp-fix-stop          - Stop simulator"
+	@echo "   make microocpp-fix-restart       - Restart simulator"
+	@echo ""
+	@echo "📊 Status Commands:"
+	@echo "   make microocpp-fix-status        - Show status"
+	@echo "   make microocpp-fix-logs          - View logs"
+	@echo "   make microocpp-fix-health        - Health check"
+	@echo "   make microocpp-fix-debug         - Debug information"
+	@echo ""
+	@echo "🧪 Testing Commands:"
+	@echo "   make microocpp-fix-test          - Run compliance test suite"
+	@echo "   make microocpp-fix-test-transaction - Test transaction ID compliance"
+	@echo "   make microocpp-fix-test-compliance  - Test OCPP 1.6 compliance"
+	@echo ""
+	@echo "🧹 Cleanup Commands:"
+	@echo "   make microocpp-fix-clean         - Clean build cache"
+	@echo "   make microocpp-fix-clean-all     - Clean everything"
+	@echo "   make microocpp-fix-reset         - Reset to clean state"
+	@echo ""
+	@echo "🌐 Access:"
+	@echo "   Web Interface: http://localhost:8001"
+	@echo "   Charge Point ID: charger-simulator-01-v16-fixed"
+	@echo ""
+	@echo "⚠️  Important: This simulator uses CSMS-provided Transaction IDs only!" 

@@ -1,0 +1,40 @@
+services:
+  # OCPP 2.0.1 Simulator
+  ocpp-simulator-v201:
+    build:
+      context: ../../submodules/microocpp-simulator
+      dockerfile: ../../overrides/microocpp-simulator/Dockerfile.arm64
+      platforms:
+        - linux/arm64
+        - linux/amd64
+    container_name: ocpp-sim-v201
+    ports:
+      - "8002:8000"
+    environment:
+      - OCPP_VERSION=2.0.1
+      - CHARGE_POINT_ID=charger-simulator-01
+    volumes:
+      - ../../submodules/microocpp-simulator/mo_store:/MicroOcppSimulator/mo_store
+    profiles:
+      - v201
+      - dual
+
+  # OCPP 1.6 Simulator (für Vergleichstests)
+  ocpp-simulator-v16:
+    build:
+      context: ../../submodules/microocpp-simulator
+      dockerfile: ../../overrides/microocpp-simulator/Dockerfile.v16.arm64
+      platforms:
+        - linux/arm64
+        - linux/amd64
+    container_name: ocpp-sim-v16
+    ports:
+      - "8001:8000"
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGE_POINT_ID=charger-simulator-01-v16
+    volumes:
+      - ../../submodules/microocpp-simulator/mo_store:/MicroOcppSimulator/mo_store
+    profiles:
+      - v16
+      - dual 

@@ -1,0 +1,39 @@
+# Use Alpine Linux as the base image for ARM64 compatibility
+FROM --platform=linux/arm64 alpine:latest
+
+# Update package lists and install necessary dependencies
+RUN apk update && \
+    apk add --no-cache \
+    git \
+    cmake \
+    openssl-dev \
+    build-base
+
+# Set the working directory inside the container
+WORKDIR /MicroOcppSimulator
+
+# Copy the entire MicroOCPP source including initialized submodules
+COPY . .
+
+# Submodule sind bereits initialisiert - überspringe git submodule init/update
+
+# Configure CMake build for OCPP 1.6
+RUN cmake -S . -B ./build -DMO_ENABLE_V201=0
+
+# Build the simulator with optimized parallel compilation
+RUN cmake --build ./build --target mo_simulator -j $(nproc)
+
+# Grant execute permissions to the simulator binary
+RUN chmod +x /MicroOcppSimulator/build/mo_simulator
+
+# Create directory for OCPP configuration if it doesn't exist
+RUN mkdir -p /MicroOcppSimulator/mo_store
+
+# Create OCPP 1.6 configuration file
+RUN echo '{"head":{"content-type":"ocpp_config_file","version":"2.0"},"configurations":[{"type":"string","key":"OcppVersion","value":"1.6"},{"type":"string","key":"ChargePointId","value":"charger-simulator-01-v16"},{"type":"string","key":"CentralSystemUrl","value":"ws://host.docker.internal:8080/ocpp16"}]}' > /MicroOcppSimulator/mo_store/simulator-v16.jsn
+
+# Expose port 8000 for the web interface
+EXPOSE 8000
+
+# Run the simulator with OCPP 1.6 configuration
+CMD ["./build/mo_simulator"] 
