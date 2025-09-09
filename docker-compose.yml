@@ -54,6 +54,7 @@ services:
     volumes:
       - ./mo_store_v16:/MicroOcppSimulator/mo_store:rw
       - ./config:/MicroOcppSimulator/config:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro  # Für IP-Check
     environment:
       - OCPP_VERSION=1.6
       - CHARGER_ID=charger-1.6
@@ -92,6 +93,7 @@ services:
     volumes:
       - ./mo_store_v201:/MicroOcppSimulator/mo_store:rw
       - ./config:/MicroOcppSimulator/config:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro  # Für IP-Check
     environment:
       - OCPP_VERSION=2.0.1
       - CHARGER_ID=charger-201

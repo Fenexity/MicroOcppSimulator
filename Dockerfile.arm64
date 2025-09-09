@@ -46,6 +46,13 @@ RUN cmake --build ./build --target mo_simulator -j $(nproc)
 # Grant execute permissions
 RUN chmod +x /MicroOcppSimulator/build/mo_simulator
 
+# Install Docker CLI for IP-check functionality
+RUN apk add --no-cache docker-cli
+
+# Copy IP-check script
+COPY scripts/check-citrineos-ip.sh /check-citrineos-ip.sh
+RUN chmod +x /check-citrineos-ip.sh
+
 # Build the WebApp Frontend
 WORKDIR /MicroOcppSimulator/webapp-src
 
@@ -111,6 +118,11 @@ RUN echo '#!/bin/bash' > /start.sh && \
     echo 'if [ -f /MicroOcppSimulator/public/main.js ]; then' >> /start.sh && \
     echo '  sed -i "s|localhost:8000|localhost:$API_PORT|g" /MicroOcppSimulator/public/main.js' >> /start.sh && \
     echo '  echo "[FENEXITY_STARTUP] main.js updated"' >> /start.sh && \
+    echo 'fi' >> /start.sh && \
+    echo '' >> /start.sh && \
+    echo '# Check and update CitrineOS IP if needed' >> /start.sh && \
+    echo 'if [ -f /check-citrineos-ip.sh ]; then' >> /start.sh && \
+    echo '  bash /check-citrineos-ip.sh' >> /start.sh && \
     echo 'fi' >> /start.sh && \
     echo '' >> /start.sh && \
     echo '# Start the simulator' >> /start.sh && \

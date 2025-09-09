@@ -3,7 +3,7 @@
     {
       "component": "SecurityCtrlr",
       "name": "CsmsUrl",
-      "valActual": "ws://172.18.0.5:8082/charger-201"
+      "valActual": "ws://172.18.0.6:8082/charger-201"
     },
     {
       "component": "SecurityCtrlr",

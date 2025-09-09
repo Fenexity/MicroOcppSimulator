@@ -1,0 +1,192 @@
+---
+description: Core design principles for maintainable, readable code
+globs: "**/*.{py,js,ts,jsx,tsx,java,go,rs,cpp,c,h,hpp}"
+alwaysApply: true
+---
+
+# Design Principles for Clean Code
+
+These principles guide code design decisions to create maintainable, readable, and robust software. Apply these heuristics consistently but pragmatically - they're guidelines, not rigid laws.
+
+## Core Principles
+
+### KISS (Keep It Simple, Straightforward)
+**Principle**: Prefer the simplest solution that correctly solves the problem.
+
+**Why it matters**: Complexity breeds bugs and slows development. Every extra branch, layer, or abstraction increases cognitive load and failure modes.
+
+**How to apply**:
+- Start simple - ship the smallest working thing first
+- If you can explain the design in 30 seconds, you're on track
+- Choose straightforward implementations over clever ones
+- Avoid premature optimization and over-engineering
+
+**Example (Python)**:
+```python
+# KISS: Simple and readable
+def avg(nums):
+    return sum(nums) / len(nums)
+
+# Avoid: Unnecessary complexity
+class StreamingAverageCalculatorWithObserverPattern:
+    # 50+ lines of abstraction for a simple calculation
+```
+
+### DRY (Don't Repeat Yourself)
+**Principle**: Avoid duplicated knowledge; put each fact or rule in exactly one place.
+
+**Why it matters**: Duplication leads to drift - when you fix a bug in one copy, it remains in others.
+
+**How to apply**:
+- Use the Rule of Three: extract common code after ~3 repetitions
+- Prefer local DRY over global DRY - share within modules before creating cross-cutting frameworks
+- Name the concept - if you can give the duplication a clear name, it's ready for abstraction
+- Balance with KISS - a little duplication is better than a leaky abstraction
+
+**Example (Python)**:
+```python
+# Before: Duplicated validation
+def create_user(user_data):
+    if not user_data["email"] or "@" not in user_data["email"]:
+        raise ValueError("invalid email")
+    # ... more code
+
+def update_user(user_data):
+    if not user_data["email"] or "@" not in user_data["email"]:
+        raise ValueError("invalid email")
+    # ... more code
+
+# After: Single source of truth
+def validate_email(email):
+    if not email or "@" not in email:
+        raise ValueError("invalid email")
+
+def create_user(user_data):
+    validate_email(user_data["email"])
+    # ... rest of logic
+
+def update_user(user_data):
+    validate_email(user_data["email"])
+    # ... rest of logic
+```
+
+**When DRY can fight KISS**: Beware the "wrong abstraction"
+```python
+# Over-DRY: Too-clever base class
+class Processor:
+    def process(self, data, *, mode=None, strategy=None, hooks=None):
+        # 40+ lines of branching for different cases
+        pass
+
+# Simpler: Two focused functions
+def process_csv(rows): 
+    # Clear, focused logic
+    pass
+
+def process_json(obj): 
+    # Clear, focused logic
+    pass
+```
+
+## Supporting Principles
+
+### YAGNI (You Aren't Gonna Need It)
+**Principle**: Build only what's required by today's use cases.
+
+**Why**: Avoids "frameworks in search of a problem" and reduces maintenance burden.
+
+**Apply**: Implement features when you need them, not when you think you might need them.
+
+**Trap**: Don't use YAGNI to dodge clearly imminent requirements.
+
+### Rule of Three
+**Principle**: Don't generalize until you've solved the same problem ~3 times.
+
+**Why**: Proves the pattern is real and worth abstracting.
+
+**Apply**: Copy-paste twice, then refactor on the third occurrence.
+
+**Trap**: Don't wait forever - use judgment for obvious patterns.
+
+### Single Responsibility Principle (SRP)
+**Principle**: Each module, class, or function should have one reason to change.
+
+**Why**: Makes testing easier and reduces the blast radius of changes.
+
+**Apply**: 
+- Functions should do one thing well
+- Classes should represent a single concept
+- Modules should have a focused purpose
+
+**Trap**: Avoid "anemic" micro-classes - cohesion still matters.
+
+### Composition over Inheritance
+**Principle**: Prefer "has-a" relationships over "is-a" unless the hierarchy is truly stable.
+
+**Why**: More flexible, easier to test, avoids deep inheritance chains.
+
+**Apply**:
+- Use dependency injection
+- Favor interfaces and protocols
+- Build functionality by combining smaller pieces
+
+**Trap**: Don't create needless object graphs - keep it simple.
+
+### Fail Fast
+**Principle**: Validate early, crash loudly in development, provide actionable error context.
+
+**Why**: Catches bugs closer to their source, making debugging easier.
+
+**Apply**:
+- Validate inputs at function boundaries
+- Use type hints and runtime checks
+- Include context in error messages
+- Fail immediately on invalid state
+
+**Trap**: Don't spam logs without correlation IDs or actionable information.
+
+### Boy Scout Rule
+**Principle**: Leave the code a little cleaner than you found it.
+
+**Why**: Prevents technical debt accumulation and improves code quality over time.
+
+**Apply**:
+- Fix small issues when you encounter them
+- Improve naming and documentation
+- Extract small functions from complex ones
+- Add missing tests
+
+**Trap**: Don't turn small fixes into major refactoring sessions.
+
+## Quick Checklist
+
+Before committing code, ask:
+
+**KISS Check**:
+- [ ] Can a new teammate understand this function/class after one read?
+- [ ] Is this the simplest solution that works?
+- [ ] Can I explain the design in 30 seconds?
+
+**DRY Check**:
+- [ ] Did I copy/paste any logic or constants?
+- [ ] Have I seen this pattern 3+ times before abstracting?
+- [ ] Is my abstraction smaller and clearer than the duplicated code?
+
+**General Quality**:
+- [ ] Does each function/class have a single, clear responsibility?
+- [ ] Am I using composition appropriately?
+- [ ] Do my error messages provide actionable context?
+- [ ] Did I leave the code cleaner than I found it?
+
+## Quantifiable Guidelines
+
+- **Cyclomatic complexity**: Aim ≤ 10 per function; refactor when > 15
+- **Function length**: Keep most ≤ 50-80 lines
+- **Parameter count**: Prefer ≤ 4 parameters (use objects for more)
+- **Naming**: Can a teammate guess the purpose in ≤ 10 seconds?
+
+## Meta-Rules
+
+- **Context over dogma**: These are heuristics, not laws - state trade-offs explicitly
+- **Measure impact**: Use metrics and feedback to validate principle application
+- **Document decisions**: Explain when and why you deviated from these principles

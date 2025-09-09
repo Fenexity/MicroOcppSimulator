@@ -1,0 +1,101 @@
+---
+globs: *.py,*.sql,*.yml,*.yaml
+alwaysApply: false
+---
+## Backend & Microservice Architecture
+
+### Port Management
+- **Microservice Port Allocation:** Use sequential port assignment starting from 8101
+  - User Management: 8101
+  - Electricity Prices: 8102  
+  - Vehicle Module: 8103
+  - **New microservices must use the next available port in sequence**
+- **Always document the assigned port** in the service's README.md
+- **Include port in environment variables** with descriptive names (e.g., `USER_SERVICE_PORT=8101`)
+
+### Database Configuration
+- **Always use PostgreSQL** as the primary database
+- **Standard connection string format:**
+  ```python
+  DATABASE_URL = "postgresql://<service_user>:<password>@ocpp-db:5432/modules"
+  ```
+- **Use service-specific database users** for each microservice
+- **Each microservice must use its own database schema** (e.g., user_service, electricity_service, vehicle_service)
+- **Store database credentials in environment variables:**
+  ```python
+  DB_USER = "<service_name>_user"
+  DB_PASSWORD = "<secure_password>"
+  DB_HOST = "ocpp-db"
+  DB_PORT = "5432"
+  DB_NAME = "modules"
+  ```
+- **Never hardcode database credentials** in source code
+
+### CORS Configuration
+- **Always include the frontend port 5173** in CORS policies
+- **CORS configuration must include:**
+  ```python
+  ALLOWED_ORIGINS = [
+      "http://localhost:5173",  # Frontend development server
+      "http://127.0.0.1:5173",
+      # Add production frontend URLs as needed
+  ]
+  ```
+- **Use environment variables** for CORS origins in production
+- **Include common headers** in CORS configuration:
+  ```python
+  ALLOWED_HEADERS = ["*"]
+  ALLOWED_METHODS = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
+  ```
+
+### API Development Standards
+- **Use FastAPI** as the primary web framework for new microservices
+- **Follow RESTful API principles:**
+  - Use appropriate HTTP methods (GET, POST, PUT, DELETE)
+  - Use meaningful HTTP status codes
+  - Structure URLs logically (/api/v1/resource)
+- **Always include API versioning** in URL structure (e.g., `/api/v1/`)
+- **Include comprehensive error handling** with proper HTTP status codes
+- **Use Pydantic models** for request/response validation
+- **Always include OpenAPI documentation** (automatic with FastAPI)
+
+### Service Communication
+- **Use Docker service names** for inter-service communication
+- **Never hardcode IP addresses** - use service names defined in docker-compose.yml
+- **All microservices must run in the Docker network 'fenexity-csms'**
+- **Implement proper health checks** for service discovery
+- **Use environment variables** for service endpoints
+
+### Development Environment
+- **Each microservice must include:**
+  - `docker-compose.yml` for local development
+  - `.env.example` with all required environment variables
+  - `Dockerfile` optimized for Python applications
+  - Health check endpoint (`/health` or `/api/v1/health`)
+- **Use consistent naming conventions** for Docker services and containers
+- **Include restart policies** in Docker configurations
+
+### Security Standards
+- **Never commit secrets** to version control
+- **Use environment variables** for all sensitive configuration
+- **Implement proper input validation** using Pydantic
+- **Include request rate limiting** for public endpoints
+- **Use HTTPS** in production environments
+- **Implement proper authentication/authorization** where required
+
+### Monitoring & Logging
+- **Use structured logging** with JSON format
+- **Include correlation IDs** for request tracing across services
+- **Log all database operations** at appropriate levels
+- **Include performance metrics** for critical operations
+- **Use consistent log levels:**
+  - DEBUG: Development information
+  - INFO: General operational information
+  - WARNING: Unexpected situations that don't stop operation
+  - ERROR: Serious problems that prevented operation
+  - CRITICAL: Very serious errors that may cause the program to abort
+
+- **Include basic logging** for critical operations
+- **Use debug logging prints during development** if needed
+- **Remove debug prints** after fixing issues
+- **Only keep debug logging that is relevant for production**
