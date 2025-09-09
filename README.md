@@ -12,10 +12,10 @@ This repository is a fork of [matth-x/MicroOcppSimulator](https://github.com/mat
 
 ## Quick Start
 
-Clone this repository with its submodules:
+Clone this repository:
 
 ```bash
-git clone --recurse-submodules git@github.com:Fenexity/MicroOcppSimulator.git
+git clone git@github.com:Fenexity/MicroOcppSimulator.git
 ```
 
 ### Simple Setup (Recommended)
@@ -206,7 +206,7 @@ docker network create fenexity-csms
 
 ```bash
 # Clone repository
-git clone --recurse-submodules https://github.com/Fenexity/MicroOcppSimulator.git
+git clone https://github.com/Fenexity/MicroOcppSimulator.git
 cd MicroOcppSimulator
 
 # Start simulators
