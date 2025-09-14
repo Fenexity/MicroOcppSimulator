@@ -1,0 +1,47 @@
+# =============================================================================
+# Small Test Configuration - Development
+# =============================================================================
+
+global:
+  network_name: "fenexity-csms"
+  citrineos_service: "fenexity-citrineos"
+  mo_store_base_path: "./mo_store_generated"
+
+simulators:
+  v16:
+    count: 2
+    base_port: 7101
+    ocpp_version: "1.6"
+    csms_url_template: "ws://citrineos:8092/{charger_id}"
+    base_charger_id: "charger-v16"
+    container_prefix: "microocpp-sim-v16"
+    environment:
+      MO_ENABLE_V201: "0"
+    
+  v201:
+    count: 1
+    base_port: 7201
+    ocpp_version: "2.0.1"
+    csms_url_template: "ws://citrineos:8081/{charger_id}"
+    base_charger_id: "charger-v201"
+    container_prefix: "microocpp-sim-v201"
+    auth_password: ""
+    environment:
+      MO_ENABLE_V201: "1"
+      BASIC_AUTH_PASSWORD: ""
+
+templates:
+  v16_mo_store: "./mo_store_v16"
+  v201_mo_store: "./mo_store_v201"
+
+docker:
+  dockerfile: "Dockerfile.arm64"
+  platform: "linux/arm64"
+  context: "."
+  restart_policy: "unless-stopped"
+  healthcheck:
+    test: '["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]'
+    interval: "30s"
+    timeout: "10s"
+    retries: 3
+    start_period: "30s"

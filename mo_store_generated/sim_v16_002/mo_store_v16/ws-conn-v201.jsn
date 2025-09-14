@@ -3,17 +3,17 @@
     {
       "component": "SecurityCtrlr",
       "name": "CsmsUrl",
-      "valActual": "{{CSMS_URL}}"
+      "valActual": "ws://172.18.0.6:8092/charger-1.6"
     },
     {
       "component": "SecurityCtrlr",
       "name": "Identity",
-      "valActual": "{{CHARGER_ID}}"
+      "valActual": "charger-1.6"
     },
     {
       "component": "SecurityCtrlr",
       "name": "BasicAuthPassword",
-      "valActual": "{{AUTH_PASSWORD}}"
+      "valActual": ""
     }
   ]
 }
