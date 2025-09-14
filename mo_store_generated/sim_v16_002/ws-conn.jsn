@@ -7,12 +7,12 @@
     {
       "type": "string",
       "key": "Cst_BackendUrl",
-      "value": "ws://172.18.0.3:8092/charger-1.6"
+      "value": "ws://172.18.0.3:8092/charger-v16-002"
     },
     {
       "type": "string",
       "key": "Cst_ChargeBoxId",
-      "value": "charger-1.6"
+      "value": "charger-v16-002"
     },
     {
       "type": "string",

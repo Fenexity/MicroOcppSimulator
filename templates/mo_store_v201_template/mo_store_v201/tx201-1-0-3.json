@@ -1,0 +1,1 @@
+{"tx":{"trackAuthorized":true,"started":true,"stopped":true,"isAuthorizationActive":true,"isAuthorized":true,"idToken":{"idToken":"RFID123","type":"Central"},"beginTimestamp":"2025-07-08T10:37:04.714Z","remoteStartId":123456,"stoppedReason":"EVDisconnected","stopTrigger":"EVCommunicationLost","txId":"6DE760791406FE03257CF02CEB09C2B2E9"}}

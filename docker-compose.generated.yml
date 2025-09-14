@@ -1,0 +1,153 @@
+# =============================================================================
+# Fenexity MicroOCPP Simulator - Generierte Multi-Container Konfiguration
+# =============================================================================
+# ACHTUNG: Diese Datei wurde automatisch generiert!
+# Änderungen hier werden beim nächsten Aufruf von generate-simulators.sh überschrieben.
+# 
+# Für Konfigurationsänderungen bearbeite: simulator-config.yml
+# Dann führe aus: ./generate-simulators.sh
+# =============================================================================
+
+networks:
+  default:
+    driver: bridge
+    name: fenexity-csms
+    external: true
+
+services:
+  # =============================================================================
+  # Konfiguration Service (läuft vor Simulator-Start)
+  # =============================================================================
+  microocpp-multi-config:
+    image: alpine:latest
+    container_name: microocpp-multi-config
+    platform: linux/arm64
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./configure-citrineos.sh:/configure-citrineos.sh:ro
+      - ./mo_store_generated/sim_v16_001:/output/sim_v16_001
+      - ./mo_store_generated/sim_v16_002:/output/sim_v16_002
+      - ./mo_store_generated/sim_v201_001:/output/sim_v201_001
+    command: >
+      sh -c "
+      echo '🔧 Starte Multi-Simulator-Konfiguration...';
+      apk add --no-cache bash grep curl docker-cli;
+      echo '✅ Multi-Simulator-Konfiguration abgeschlossen!';
+      "
+    restart: "no"
+
+  # =============================================================================
+  # OCPP 1.6 Simulatoren (2 Container)
+  # =============================================================================
+  microocpp-sim-v16-001:
+    build:
+      context: .
+      dockerfile: Dockerfile.arm64
+      args:
+        OCPP_VERSION: "1.6"
+        SIMULATOR_PORT: "8000"
+        CHARGER_ID: "charger-v16-001"
+        API_PORT: "7101"
+    container_name: microocpp-sim-v16-001
+    platform: linux/arm64
+    ports:
+      - "7101:8000"
+    volumes:
+      - ./mo_store_generated/sim_v16_001:/MicroOcppSimulator/mo_store:rw
+      - ./config:/MicroOcppSimulator/config:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=charger-v16-001
+      - SIMULATOR_PORT=8000
+      - API_PORT=7101
+      - CENTRAL_SYSTEM_URL=ws://citrineos:8092/charger-v16-001
+      - MO_ENABLE_V201=0
+    networks:
+      - default
+    restart: unless-stopped
+    depends_on:
+      - microocpp-multi-config
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  microocpp-sim-v16-002:
+    build:
+      context: .
+      dockerfile: Dockerfile.arm64
+      args:
+        OCPP_VERSION: "1.6"
+        SIMULATOR_PORT: "8000"
+        CHARGER_ID: "charger-v16-002"
+        API_PORT: "7102"
+    container_name: microocpp-sim-v16-002
+    platform: linux/arm64
+    ports:
+      - "7102:8000"
+    volumes:
+      - ./mo_store_generated/sim_v16_002:/MicroOcppSimulator/mo_store:rw
+      - ./config:/MicroOcppSimulator/config:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=charger-v16-002
+      - SIMULATOR_PORT=8000
+      - API_PORT=7102
+      - CENTRAL_SYSTEM_URL=ws://citrineos:8092/charger-v16-002
+      - MO_ENABLE_V201=0
+    networks:
+      - default
+    restart: unless-stopped
+    depends_on:
+      - microocpp-multi-config
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # =============================================================================
+  # OCPP 2.0.1 Simulatoren (1 Container)
+  # =============================================================================
+  microocpp-sim-v201-001:
+    build:
+      context: .
+      dockerfile: Dockerfile.arm64
+      args:
+        OCPP_VERSION: "2.0.1"
+        SIMULATOR_PORT: "8000"
+        CHARGER_ID: "charger-v201-001"
+        API_PORT: "7201"
+    container_name: microocpp-sim-v201-001
+    platform: linux/arm64
+    ports:
+      - "7201:8000"
+    volumes:
+      - ./mo_store_generated/sim_v201_001:/MicroOcppSimulator/mo_store:rw
+      - ./config:/MicroOcppSimulator/config:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - OCPP_VERSION=2.0.1
+      - CHARGER_ID=charger-v201-001
+      - SIMULATOR_PORT=8000
+      - API_PORT=7201
+      - CENTRAL_SYSTEM_URL=ws://citrineos:8081/charger-v201-001
+      - MO_ENABLE_V201=1
+      - BASIC_AUTH_PASSWORD=
+    networks:
+      - default
+    restart: unless-stopped
+    depends_on:
+      - microocpp-multi-config
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
