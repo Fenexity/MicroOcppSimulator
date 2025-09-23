@@ -17,43 +17,105 @@ Clone this repository:
 
 ```bash
 git clone git@github.com:Fenexity/MicroOcppSimulator.git
+cd MicroOcppSimulator
 ```
 
-### Einfacher Setup (Empfohlen)
+### Multi-Container Setup (Empfohlen)
 
-#### Standard Setup (2 Simulatoren)
+Laden einer csv Datei:
 
 ```bash
-# Start both simulators - One command, everything automatic!
+# 
+./generate-depot.sh depot-data/darmstadt-depot.csv 1.6
+```
+
+Spezifische Konfiguration:
+
+```bash
+# 1. Konfiguriere gewünschte Anzahl Simulatoren in simulator-config.yml
+nano simulator-config.yml
+
+# 2. Starte alle Simulatoren mit einem Befehl
+./start-simulators.sh
+```
+
+**Das war's!** 🎉 Das Script generiert automatisch alle benötigten Konfigurationen und startet die Container.
+
+
+
+
+
+
+
+
+#### Verwaltung
+
+```bash
+# Status prüfen
+docker-compose -f docker-compose.generated.yml ps
+
+# Logs anzeigen
+docker-compose -f docker-compose.generated.yml logs -f
+
+# Stoppen
+docker-compose -f docker-compose.generated.yml down
+
+# Komplett bereinigen
+./cleanup-simulators.sh
+```
+
+### Legacy Setup (Standard Docker Compose)
+
+Für einfache Tests mit 2 festen Simulatoren:
+
+```bash
+# Start both simulators
 docker-compose up -d
-
-# Check status
-docker-compose ps
-
-# View live logs
-docker-compose logs -f
 
 # Stop
 docker-compose down
+
 ```
 
-#### Multi-Container Setup (Skalierbar)
+## Konfiguration
+
+Die Anzahl und Art der Simulatoren wird in der Datei `simulator-config.yml` konfiguriert:
+
+```yaml
+# Beispiel-Konfiguration
+simulators:
+  v16:
+    count: 2                    # Anzahl OCPP 1.6 Simulatoren
+    base_port: 7101            # Startport für Frontend
+    csms_url_template: "ws://citrineos:8092/{charger_id}"
+    base_charger_id: "charger-v16"
+    
+  v201:
+    count: 1                    # Anzahl OCPP 2.0.1 Simulatoren  
+    base_port: 7201            # Startport für Frontend
+    csms_url_template: "ws://citrineos:8081/{charger_id}"
+    base_charger_id: "charger-v201"
+```
+
+**Einfach die Anzahl ändern und `./start-simulators.sh` ausführen!**
+
+### Häufige Anwendungsfälle
 
 ```bash
-# 1. Konfiguriere gewünschte Anzahl Simulatoren
-nano simulator-config.yml
+# Kleine Testumgebung (Standard)
+# v16: 2 Simulatoren, v201: 1 Simulator
+./start-simulators.sh
 
-# 2. Generiere Docker Compose Konfiguration
-./generate-simulators.sh
+# Große Testumgebung
+# Editiere simulator-config.yml: v16: count: 10, v201: count: 5
+./start-simulators.sh
 
-# 3. Starte alle Simulatoren
-docker-compose -f docker-compose.generated.yml up -d
+# Nach CitrineOS Neustart (IP-Änderung)
+./start-simulators.sh  # Erkennt automatisch neue IP
 
-# 4. Status prüfen
-docker-compose -f docker-compose.generated.yml ps
-
-# 5. Bereinigen
+# Komplett neu starten
 ./cleanup-simulators.sh
+./start-simulators.sh
 ```
 
 ### Automatic CitrineOS Integration
@@ -71,8 +133,11 @@ The simulators configure themselves **automatically** for CitrineOS:
 
 | Service | URL | Charge Point ID | OCPP Version |
 |---------|-----|-----------------|--------------|
-| OCPP 1.6 Simulator | http://localhost:8001 | charger-1.6 | 1.6 |
-| OCPP 2.0.1 Simulator | http://localhost:8002 | charger-201 | 2.0.1 |
+| OCPP 1.6 Simulator #1 | http://localhost:7101 | charger-v16-001 | 1.6 |
+| OCPP 1.6 Simulator #2 | http://localhost:7102 | charger-v16-002 | 1.6 |
+| OCPP 2.0.1 Simulator | http://localhost:7201 | charger-v201-001 | 2.0.1 |
+
+**Hinweis**: Die URLs und IDs werden automatisch basierend auf der Konfiguration in `simulator-config.yml` generiert.
 
 ## Architecture
 
@@ -87,13 +152,20 @@ Die neue skalierbare Multi-Container-Architektur ermöglicht es, beliebig viele 
    - Konfiguriert Ports, URLs und IDs
    - Einfach anpassbar für verschiedene Testszenarien
 
-2. **`generate-simulators.sh`** - Automatischer Generator
+2. **`start-simulators.sh`** - One-Command Starter
+   - Führt automatisch generate-simulators.sh aus
+   - Startet alle Container mit docker-compose up -d
+   - Zeigt Status und URLs an
+   - Komplett automatisierter Workflow
+
+3. **`generate-simulators.sh`** - Automatischer Generator (wird intern aufgerufen)
    - Liest simulator-config.yml
    - Erstellt docker-compose.generated.yml
-   - Generiert individuelle mo_store-Verzeichnisse
+   - Generiert individuelle mo_store-Verzeichnisse mit korrekten IPs
+   - Erkennt automatisch CitrineOS IP-Adresse (robust gegen Neustarts)
    - Konfiguriert jeden Simulator mit eindeutiger ID
 
-3. **`cleanup-simulators.sh`** - Bereinigungsscript
+4. **`cleanup-simulators.sh`** - Bereinigungsscript
    - Stoppt alle generierten Container
    - Entfernt generierte Dateien
    - Verschiedene Bereinigungsoptionen

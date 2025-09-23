@@ -1,0 +1,80 @@
+floor_id,floor_name,spot_number,column,row,spot_width_units,spot_height_units,spot_type,charging_station_id,connector_id,max_vehicle_length,blocks_departure,blocks_arrival,max_power,notes
+erdgeschoss,Erdgeschoss,90,1,2,1.0,1.38,standard,,,18.0,91,,0,Standard Parkplatz ohne Ladung
+erdgeschoss,Erdgeschoss,91,1,1,1.0,2.08,standard,,,18.0,,90,0,Blockiert durch Stellplatz 90
+erdgeschoss,Erdgeschoss,1,2,2,1.0,1.38,charging,CS-EG-001,1,18.0,2,,150,Standard Ladeplatz
+erdgeschoss,Erdgeschoss,2,2,1,1.0,2.08,charging,CS-EG-001,2,18.0,,1,150,Geteilte Ladesäule mit Spot 1
+erdgeschoss,Erdgeschoss,3,3,3,1.0,0.84,charging,CS-EG-002,1,12.0,4;5,,150,Kurzer Stellplatz mit Ladung
+erdgeschoss,Erdgeschoss,4,3,2,1.0,0.84,charging,CS-EG-002,2,12.0,5,3,150,Mittlerer Stellplatz mit Ladung
+erdgeschoss,Erdgeschoss,5,3,1,1.0,1.78,charging,CS-EG-003,1,18.0,,3;4,150,Langer Stellplatz mit Ladung
+erdgeschoss,Erdgeschoss,6,4,3,1.0,0.84,charging,CS-EG-004,1,12.0,7;8,,150,Kurzer Stellplatz mit Ladung
+erdgeschoss,Erdgeschoss,7,4,2,1.0,0.84,charging,CS-EG-004,2,12.0,8,6,150,Mittlerer Stellplatz mit Ladung
+erdgeschoss,Erdgeschoss,8,4,1,1.0,1.78,charging,CS-EG-005,1,18.0,,6;7,150,Langer Stellplatz mit Ladung
+erdgeschoss,Erdgeschoss,9,5,2,1.0,1.38,charging,CS-EG-006,1,12.0,10,,150,Standard Ladeplatz
+erdgeschoss,Erdgeschoss,10,5,1,1.0,2.08,charging,CS-EG-006,2,18.0,,9,150,Geteilte Ladesäule mit Spot 9
+erdgeschoss,Erdgeschoss,11,6,2,1.0,1.38,charging,CS-EG-007,1,12.0,12,,150,Standard Ladeplatz
+erdgeschoss,Erdgeschoss,12,6,1,1.0,2.08,charging,CS-EG-007,2,18.0,,11,150,Geteilte Ladesäule mit Spot 11
+erdgeschoss,Erdgeschoss,13,7,2,1.0,1.38,charging,CS-EG-008,1,12.0,14,,150,Standard Ladeplatz
+erdgeschoss,Erdgeschoss,14,7,1,1.0,2.08,charging,CS-EG-008,2,18.0,,13,150,Geteilte Ladesäule mit Spot 13
+erdgeschoss,Erdgeschoss,15,8,2,1.0,1.38,charging,CS-EG-009,1,12.0,16,,150,Standard Ladeplatz
+erdgeschoss,Erdgeschoss,16,8,1,1.0,2.08,charging,CS-EG-009,2,18.0,,15,150,Geteilte Ladesäule mit Spot 15
+erdgeschoss,Erdgeschoss,17,9,2,1.0,1.38,charging,CS-EG-010,1,12.0,18,,150,Standard Ladeplatz
+erdgeschoss,Erdgeschoss,18,9,1,1.0,2.08,charging,CS-EG-010,2,18.0,,17,150,Geteilte Ladesäule mit Spot 17
+erdgeschoss,Erdgeschoss,95,10,3,1.0,0.84,standard,,,12.0,96;97,,0,Standard Parkplatz - Kurzer Stellplatz
+erdgeschoss,Erdgeschoss,96,10,2,1.0,0.84,standard,,,12.0,97,95,0,Standard Parkplatz - Mittlerer Stellplatz
+erdgeschoss,Erdgeschoss,97,10,1,1.0,1.78,standard,,,18.0,,95;96,0,Standard Parkplatz - Langer Stellplatz
+erdgeschoss,Erdgeschoss,98,11,3,1.0,0.84,standard,,,12.0,99;100,,0,Standard Parkplatz - Kurzer Stellplatz
+erdgeschoss,Erdgeschoss,99,11,2,1.0,0.84,standard,,,12.0,100,98,0,Standard Parkplatz - Mittlerer Stellplatz
+erdgeschoss,Erdgeschoss,100,11,1,1.0,1.78,standard,,,18.0,,98;99,0,Standard Parkplatz - Langer Stellplatz
+erdgeschoss,Erdgeschoss,19,12,2,1.0,1.38,charging,CS-EG-011,1,12.0,20,,150,Standard Ladeplatz
+erdgeschoss,Erdgeschoss,20,12,1,1.0,2.08,charging,CS-EG-011,2,18.0,,19,150,Geteilte Ladesäule mit Spot 19
+erdgeschoss,Erdgeschoss,21,13,2,1.0,1.38,charging,CS-EG-012,1,12.0,22,,150,Standard Ladeplatz
+erdgeschoss,Erdgeschoss,22,13,1,1.0,2.08,charging,CS-EG-012,2,18.0,,21,150,Geteilte Ladesäule mit Spot 21
+erdgeschoss,Erdgeschoss,23,14,2,1.0,1.38,charging,CS-EG-013,1,12.0,24,,150,Standard Ladeplatz
+erdgeschoss,Erdgeschoss,24,14,1,1.0,2.08,charging,CS-EG-013,2,18.0,,23,150,Geteilte Ladesäule mit Spot 23
+erdgeschoss,Erdgeschoss,25,15,2,1.0,1.38,charging,CS-EG-014,1,12.0,26,,150,Standard Ladeplatz
+erdgeschoss,Erdgeschoss,26,15,1,1.0,2.08,charging,CS-EG-014,2,18.0,,25,150,Geteilte Ladesäule mit Spot 25
+erdgeschoss,Erdgeschoss,27,16,2,1.0,1.38,standard,,,12.0,28,,0,Standard Parkplatz
+erdgeschoss,Erdgeschoss,28,16,1,1.0,2.08,standard,,,18.0,,27,0,Blockiert durch Stellplatz 27
+erdgeschoss,Erdgeschoss,29,17,2,1.0,1.38,standard,,,12.0,30,,0,Standard Parkplatz
+erdgeschoss,Erdgeschoss,30,17,1,1.0,2.08,standard,,,18.0,,29,0,Blockiert durch Stellplatz 29
+erdgeschoss,Erdgeschoss,31,18,2,1.0,1.38,standard,,,12.0,32,,0,Standard Parkplatz
+erdgeschoss,Erdgeschoss,32,18,1,1.0,2.08,standard,,,18.0,,31,0,Blockiert durch Stellplatz 31
+erdgeschoss,Erdgeschoss,33,19,1,1.0,1.38,standard,,,12.0,,,0,Einzelner Standard Parkplatz
+1_stock,1. Stock,37,1,2,1.0,1.38,charging,CS-1S-001,1,12.0,38,,150,Standard Ladeplatz - 1. Stock
+1_stock,1. Stock,38,1,1,1.0,2.08,charging,CS-1S-001,2,18.0,,37,150,Geteilte Ladesäule mit Spot 37
+1_stock,1. Stock,39,2,2,1.0,1.38,charging,CS-1S-002,1,12.0,40,,150,Standard Ladeplatz - 1. Stock
+1_stock,1. Stock,40,2,1,1.0,2.08,charging,CS-1S-002,2,18.0,,39,150,Geteilte Ladesäule mit Spot 39
+1_stock,1. Stock,41,3,2,1.0,1.38,charging,CS-1S-003,1,12.0,42,,150,Standard Ladeplatz - 1. Stock
+1_stock,1. Stock,42,3,1,1.0,2.08,charging,CS-1S-003,2,18.0,,41,150,Geteilte Ladesäule mit Spot 41
+1_stock,1. Stock,43,4,2,1.0,1.38,charging,CS-1S-004,1,12.0,44,,150,Standard Ladeplatz - 1. Stock
+1_stock,1. Stock,44,4,1,1.0,2.08,charging,CS-1S-004,2,18.0,,43,150,Geteilte Ladesäule mit Spot 43
+1_stock,1. Stock,45,5,2,1.0,1.38,charging,CS-1S-005,1,12.0,46,,150,Standard Ladeplatz - 1. Stock
+1_stock,1. Stock,46,5,1,1.0,2.08,charging,CS-1S-005,2,18.0,,45,150,Geteilte Ladesäule mit Spot 45
+1_stock,1. Stock,47,6,2,1.0,1.38,charging,CS-1S-006,1,12.0,48,,150,Standard Ladeplatz - 1. Stock
+1_stock,1. Stock,48,6,1,1.0,2.08,charging,CS-1S-006,2,18.0,,47,150,Geteilte Ladesäule mit Spot 47
+1_stock,1. Stock,49,7,2,1.0,1.38,charging,CS-1S-007,1,12.0,50,,150,Standard Ladeplatz - 1. Stock
+1_stock,1. Stock,50,7,1,1.0,2.08,charging,CS-1S-007,2,18.0,,49,150,Geteilte Ladesäule mit Spot 49
+1_stock,1. Stock,51,8,2,1.0,1.38,charging,CS-1S-008,1,12.0,52,,150,Standard Ladeplatz - 1. Stock
+1_stock,1. Stock,52,8,1,1.0,2.08,charging,CS-1S-008,2,18.0,,51,150,Geteilte Ladesäule mit Spot 51
+1_stock,1. Stock,53,9,2,1.0,1.38,charging,CS-1S-009,1,12.0,54,,150,Standard Ladeplatz - 1. Stock
+1_stock,1. Stock,54,9,1,1.0,2.08,charging,CS-1S-009,2,18.0,,53,150,Geteilte Ladesäule mit Spot 53
+1_stock,1. Stock,80,10,2,1.0,1.38,standard,,,12.0,81,,0,Standard Parkplatz - 1. Stock
+1_stock,1. Stock,81,10,1,1.0,2.08,standard,,,18.0,,,0,Standard Parkplatz - 1. Stock
+1_stock,1. Stock,55,13,3,1.0,1.0,charging,CS-1S-010,1,12.0,56;57,,150,3er Gruppe - Kurzer Stellplatz
+1_stock,1. Stock,56,13,2,1.0,1.66,charging,CS-1S-010,2,18.0,57,55,150,3er Gruppe - Mittlerer Stellplatz
+1_stock,1. Stock,57,13,1,1.0,0.8,charging,CS-1S-011,1,12.0,,55;56,150,3er Gruppe - Kurzer Stellplatz
+1_stock,1. Stock,58,14,3,1.0,1.0,charging,CS-1S-012,1,12.0,59;60,,150,3er Gruppe - Kurzer Stellplatz
+1_stock,1. Stock,59,14,2,1.0,1.66,charging,CS-1S-012,2,18.0,60,58,150,3er Gruppe - Mittlerer Stellplatz
+1_stock,1. Stock,60,14,1,1.0,0.8,charging,CS-1S-013,1,12.0,,58;59,150,3er Gruppe - Kurzer Stellplatz
+1_stock,1. Stock,61,15,3,1.0,1.0,charging,CS-1S-014,1,12.0,62;63,,150,3er Gruppe - Kurzer Stellplatz
+1_stock,1. Stock,62,15,2,1.0,1.66,charging,CS-1S-014,2,18.0,63,61,150,3er Gruppe - Mittlerer Stellplatz
+1_stock,1. Stock,63,15,1,1.0,0.8,charging,CS-1S-015,1,12.0,,61;62,150,3er Gruppe - Kurzer Stellplatz
+1_stock,1. Stock,64,16,3,1.0,1.0,charging,CS-1S-016,1,12.0,65;66,,150,3er Gruppe - Kurzer Stellplatz
+1_stock,1. Stock,65,16,2,1.0,1.66,charging,CS-1S-016,2,18.0,66,64,150,3er Gruppe - Mittlerer Stellplatz
+1_stock,1. Stock,66,16,1,1.0,0.8,charging,CS-1S-017,1,12.0,,64;65,150,3er Gruppe - Kurzer Stellplatz
+1_stock,1. Stock,67,17,2,1.0,1.38,standard,,,12.0,69,,0,Standard Parkplatz - 1. Stock
+1_stock,1. Stock,69,17,1,1.0,2.08,standard,,,18.0,,67,0,Blockiert durch Stellplatz 67
+1_stock,1. Stock,70,18,2,1.0,1.38,standard,,,12.0,72,,0,Standard Parkplatz - 1. Stock
+1_stock,1. Stock,72,18,1,1.0,2.08,standard,,,18.0,,70,0,Blockiert durch Stellplatz 70
+1_stock,1. Stock,82,19,2,1.0,1.38,standard,,,12.0,83,,0,Standard Parkplatz - 1. Stock
+1_stock,1. Stock,83,19,1,1.0,2.08,standard,,,18.0,,82,0,Blockiert durch Stellplatz 82
