@@ -694,6 +694,83 @@ start_containers_in_batches() {
 }
 
 # =============================================================================
+# Batch-Neustart-Funktion
+# =============================================================================
+
+restart_containers_in_batches() {
+    local compose_file="$1"
+    local batch_size=${2:-5}  # Standard: 5 Container pro Batch
+    
+    log_info "🔄 Starte Batch-Neustart für bessere CitrineOS-Erkennung..."
+    log_info "Batch-Größe: $batch_size Container gleichzeitig"
+    
+    # Extrahiere alle Service-Namen aus der Docker Compose Datei
+    # Ignoriere den 'depot-config' Service
+    local services
+    if ! services=$(yq eval '.services | keys | .[]' "$compose_file" 2>/dev/null | grep -v 'depot-config'); then
+        log_error "Fehler beim Extrahieren der Service-Namen aus $compose_file"
+        return 1
+    fi
+    
+    local service_count
+    service_count=$(echo "$services" | wc -l | tr -d ' ')
+    
+    if [[ "$service_count" -eq 0 ]]; then
+        log_error "Keine Services in $compose_file gefunden."
+        return 1
+    fi
+    
+    log_success "Gefunden: $service_count Services für Neustart"
+    
+    echo ""
+    log_info "Starte Container-Neustarts in Batches..."
+    
+    local current_batch=0
+    local services_restarted=0
+    local batch_services=()
+    
+    while IFS= read -r service_name; do
+        batch_services+=("$service_name")
+        ((current_batch++))
+        
+        # Wenn Batch voll ist oder letzter Service erreicht
+        if [[ "$current_batch" -eq "$batch_size" ]] || [[ "$services_restarted" -eq $((service_count - current_batch)) ]]; then
+            local batch_number=$(((services_restarted / batch_size) + 1))
+            log_info "🔄 Neustart Batch $batch_number ($current_batch Services): ${batch_services[*]}"
+            
+            # Starte aktuellen Batch neu
+            if ! docker-compose -f "$compose_file" restart "${batch_services[@]}"; then
+                log_error "Fehler beim Neustart von Batch $batch_number"
+                return 1
+            fi
+            
+            log_success "Batch $batch_number erfolgreich neugestartet"
+            services_restarted=$((services_restarted + current_batch))
+            
+            # Reset für nächsten Batch
+            batch_services=()
+            current_batch=0
+            
+            # Warte zwischen Batches (außer beim letzten)
+            if [[ "$services_restarted" -lt "$service_count" ]]; then
+                log_info "⏳ Warte 5 Sekunden vor nächstem Neustart-Batch..."
+                sleep 5
+            fi
+        fi
+    done <<< "$services"
+    
+    echo ""
+    log_success "🎉 Batch-Neustart abgeschlossen!"
+    echo ""
+    echo "📊 Neustart-Zusammenfassung:"
+    echo "   ✅ Erfolgreich neugestartet: $services_restarted Services"
+    echo "   📈 Gesamt: $service_count Services"
+    echo ""
+    
+    return 0
+}
+
+# =============================================================================
 # Hauptfunktion
 # =============================================================================
 
@@ -806,6 +883,17 @@ main() {
         
         if start_containers_in_batches "$OUTPUT_COMPOSE"; then
         log_success "Container erfolgreich gestartet"
+        echo ""
+        
+        # Warte kurz, dann starte alle Container neu für bessere CitrineOS-Erkennung
+        log_info "⏳ Warte 10 Sekunden, dann Neustart für CitrineOS-Optimierung..."
+        sleep 10
+        
+        if restart_containers_in_batches "$OUTPUT_COMPOSE"; then
+            log_success "Batch-Neustart erfolgreich abgeschlossen"
+        else
+            log_error "Fehler beim Batch-Neustart"
+        fi
         echo ""
         
         # Zeige Container-Status

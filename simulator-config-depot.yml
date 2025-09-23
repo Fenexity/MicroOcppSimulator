@@ -1,10 +1,10 @@
 # =============================================================================
 # Fenexity MicroOCPP Simulator - Depot Configuration
 # =============================================================================
-# Automatisch generiert aus: darmstadt-depot.csv
+# Automatisch generiert aus: test-restart.csv
 # OCPP Version: 1.6
-# Anzahl Ladesäulen:       31
-# Generiert am: 2025-09-22 18:23:16
+# Anzahl Ladesäulen:        3
+# Generiert am: 2025-09-23 18:45:33
 # =============================================================================
 
 global:
@@ -14,7 +14,7 @@ global:
 
 simulators:
   v16:
-    count:       31
+    count:        3
     base_port: 7101
     ocpp_version: "1.6"
     csms_url_template: "ws://citrineos:8092/{charger_id}"
@@ -24,68 +24,12 @@ simulators:
       MO_ENABLE_V201: "0"
     # Depot-spezifische IDs (werden automatisch zugewiesen)
     depot_ids:
-      - id: "CS-1S-001"
+      - id: "RESTART-001"
         index: 1
-      - id: "CS-1S-002"
+      - id: "RESTART-002"
         index: 2
-      - id: "CS-1S-003"
+      - id: "RESTART-003"
         index: 3
-      - id: "CS-1S-004"
-        index: 4
-      - id: "CS-1S-005"
-        index: 5
-      - id: "CS-1S-006"
-        index: 6
-      - id: "CS-1S-007"
-        index: 7
-      - id: "CS-1S-008"
-        index: 8
-      - id: "CS-1S-009"
-        index: 9
-      - id: "CS-1S-010"
-        index: 10
-      - id: "CS-1S-011"
-        index: 11
-      - id: "CS-1S-012"
-        index: 12
-      - id: "CS-1S-013"
-        index: 13
-      - id: "CS-1S-014"
-        index: 14
-      - id: "CS-1S-015"
-        index: 15
-      - id: "CS-1S-016"
-        index: 16
-      - id: "CS-1S-017"
-        index: 17
-      - id: "CS-EG-001"
-        index: 18
-      - id: "CS-EG-002"
-        index: 19
-      - id: "CS-EG-003"
-        index: 20
-      - id: "CS-EG-004"
-        index: 21
-      - id: "CS-EG-005"
-        index: 22
-      - id: "CS-EG-006"
-        index: 23
-      - id: "CS-EG-007"
-        index: 24
-      - id: "CS-EG-008"
-        index: 25
-      - id: "CS-EG-009"
-        index: 26
-      - id: "CS-EG-010"
-        index: 27
-      - id: "CS-EG-011"
-        index: 28
-      - id: "CS-EG-012"
-        index: 29
-      - id: "CS-EG-013"
-        index: 30
-      - id: "CS-EG-014"
-        index: 31
 
 templates:
   v16_mo_store: "./mo_store_v16"
