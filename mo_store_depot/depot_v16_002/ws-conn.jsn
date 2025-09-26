@@ -7,12 +7,12 @@
     {
       "type": "string",
       "key": "Cst_BackendUrl",
-      "value": "ws://172.18.0.10:8092/RESTART-002"
+      "value": "ws://172.18.0.10:8092/CS-1S-002"
     },
     {
       "type": "string",
       "key": "Cst_ChargeBoxId",
-      "value": "RESTART-002"
+      "value": "CS-1S-002"
     },
     {
       "type": "string",

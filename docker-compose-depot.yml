@@ -3,7 +3,7 @@
 # =============================================================================
 # Automatisch generiert aus Depot CSV
 # OCPP Version: 1.6
-# Generiert am: 2025-09-23 18:45:33
+# Generiert am: 2025-09-24 14:29:13
 # =============================================================================
 
 version: '3.8'
@@ -20,16 +20,16 @@ services:
       sh -c "
         echo '🔧 Starting Depot Multi-Container Configuration...'
         echo '📊 OCPP Version: 1.6'
-        echo '📈 Total Simulators:        3'
+        echo '📈 Total Simulators:       31'
         echo '🎯 Configuration completed successfully!'
         sleep 5
       "
     networks:
       - fenexity-csms
 
-  sim-RESTART-001:
+  sim-CS-1S-001:
     image: microocpp-sim-v16:latest
-    container_name: sim-RESTART-001
+    container_name: sim-CS-1S-001
     platform: linux/arm64
     ports:
       - "7101:8000"
@@ -50,14 +50,14 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=RESTART-001
+      - CHARGER_ID=CS-1S-001
       - SIMULATOR_PORT=8000
       - API_PORT=7101
       - MO_ENABLE_V201=0
 
-  sim-RESTART-002:
+  sim-CS-1S-002:
     image: microocpp-sim-v16:latest
-    container_name: sim-RESTART-002
+    container_name: sim-CS-1S-002
     platform: linux/arm64
     ports:
       - "7102:8000"
@@ -78,14 +78,14 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=RESTART-002
+      - CHARGER_ID=CS-1S-002
       - SIMULATOR_PORT=8000
       - API_PORT=7102
       - MO_ENABLE_V201=0
 
-  sim-RESTART-003:
+  sim-CS-1S-003:
     image: microocpp-sim-v16:latest
-    container_name: sim-RESTART-003
+    container_name: sim-CS-1S-003
     platform: linux/arm64
     ports:
       - "7103:8000"
@@ -106,8 +106,792 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=RESTART-003
+      - CHARGER_ID=CS-1S-003
       - SIMULATOR_PORT=8000
       - API_PORT=7103
+      - MO_ENABLE_V201=0
+
+  sim-CS-1S-004:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-1S-004
+    platform: linux/arm64
+    ports:
+      - "7104:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_004:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-1S-004
+      - SIMULATOR_PORT=8000
+      - API_PORT=7104
+      - MO_ENABLE_V201=0
+
+  sim-CS-1S-005:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-1S-005
+    platform: linux/arm64
+    ports:
+      - "7105:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_005:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-1S-005
+      - SIMULATOR_PORT=8000
+      - API_PORT=7105
+      - MO_ENABLE_V201=0
+
+  sim-CS-1S-006:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-1S-006
+    platform: linux/arm64
+    ports:
+      - "7106:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_006:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-1S-006
+      - SIMULATOR_PORT=8000
+      - API_PORT=7106
+      - MO_ENABLE_V201=0
+
+  sim-CS-1S-007:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-1S-007
+    platform: linux/arm64
+    ports:
+      - "7107:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_007:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-1S-007
+      - SIMULATOR_PORT=8000
+      - API_PORT=7107
+      - MO_ENABLE_V201=0
+
+  sim-CS-1S-008:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-1S-008
+    platform: linux/arm64
+    ports:
+      - "7108:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_008:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-1S-008
+      - SIMULATOR_PORT=8000
+      - API_PORT=7108
+      - MO_ENABLE_V201=0
+
+  sim-CS-1S-009:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-1S-009
+    platform: linux/arm64
+    ports:
+      - "7109:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_009:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-1S-009
+      - SIMULATOR_PORT=8000
+      - API_PORT=7109
+      - MO_ENABLE_V201=0
+
+  sim-CS-1S-010:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-1S-010
+    platform: linux/arm64
+    ports:
+      - "7110:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_010:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-1S-010
+      - SIMULATOR_PORT=8000
+      - API_PORT=7110
+      - MO_ENABLE_V201=0
+
+  sim-CS-1S-011:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-1S-011
+    platform: linux/arm64
+    ports:
+      - "7111:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_011:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-1S-011
+      - SIMULATOR_PORT=8000
+      - API_PORT=7111
+      - MO_ENABLE_V201=0
+
+  sim-CS-1S-012:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-1S-012
+    platform: linux/arm64
+    ports:
+      - "7112:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_012:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-1S-012
+      - SIMULATOR_PORT=8000
+      - API_PORT=7112
+      - MO_ENABLE_V201=0
+
+  sim-CS-1S-013:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-1S-013
+    platform: linux/arm64
+    ports:
+      - "7113:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_013:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-1S-013
+      - SIMULATOR_PORT=8000
+      - API_PORT=7113
+      - MO_ENABLE_V201=0
+
+  sim-CS-1S-014:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-1S-014
+    platform: linux/arm64
+    ports:
+      - "7114:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_014:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-1S-014
+      - SIMULATOR_PORT=8000
+      - API_PORT=7114
+      - MO_ENABLE_V201=0
+
+  sim-CS-1S-015:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-1S-015
+    platform: linux/arm64
+    ports:
+      - "7115:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_015:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-1S-015
+      - SIMULATOR_PORT=8000
+      - API_PORT=7115
+      - MO_ENABLE_V201=0
+
+  sim-CS-1S-016:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-1S-016
+    platform: linux/arm64
+    ports:
+      - "7116:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_016:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-1S-016
+      - SIMULATOR_PORT=8000
+      - API_PORT=7116
+      - MO_ENABLE_V201=0
+
+  sim-CS-1S-017:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-1S-017
+    platform: linux/arm64
+    ports:
+      - "7117:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_017:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-1S-017
+      - SIMULATOR_PORT=8000
+      - API_PORT=7117
+      - MO_ENABLE_V201=0
+
+  sim-CS-EG-001:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-EG-001
+    platform: linux/arm64
+    ports:
+      - "7118:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_018:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-EG-001
+      - SIMULATOR_PORT=8000
+      - API_PORT=7118
+      - MO_ENABLE_V201=0
+
+  sim-CS-EG-002:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-EG-002
+    platform: linux/arm64
+    ports:
+      - "7119:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_019:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-EG-002
+      - SIMULATOR_PORT=8000
+      - API_PORT=7119
+      - MO_ENABLE_V201=0
+
+  sim-CS-EG-003:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-EG-003
+    platform: linux/arm64
+    ports:
+      - "7120:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_020:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-EG-003
+      - SIMULATOR_PORT=8000
+      - API_PORT=7120
+      - MO_ENABLE_V201=0
+
+  sim-CS-EG-004:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-EG-004
+    platform: linux/arm64
+    ports:
+      - "7121:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_021:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-EG-004
+      - SIMULATOR_PORT=8000
+      - API_PORT=7121
+      - MO_ENABLE_V201=0
+
+  sim-CS-EG-005:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-EG-005
+    platform: linux/arm64
+    ports:
+      - "7122:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_022:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-EG-005
+      - SIMULATOR_PORT=8000
+      - API_PORT=7122
+      - MO_ENABLE_V201=0
+
+  sim-CS-EG-006:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-EG-006
+    platform: linux/arm64
+    ports:
+      - "7123:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_023:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-EG-006
+      - SIMULATOR_PORT=8000
+      - API_PORT=7123
+      - MO_ENABLE_V201=0
+
+  sim-CS-EG-007:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-EG-007
+    platform: linux/arm64
+    ports:
+      - "7124:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_024:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-EG-007
+      - SIMULATOR_PORT=8000
+      - API_PORT=7124
+      - MO_ENABLE_V201=0
+
+  sim-CS-EG-008:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-EG-008
+    platform: linux/arm64
+    ports:
+      - "7125:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_025:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-EG-008
+      - SIMULATOR_PORT=8000
+      - API_PORT=7125
+      - MO_ENABLE_V201=0
+
+  sim-CS-EG-009:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-EG-009
+    platform: linux/arm64
+    ports:
+      - "7126:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_026:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-EG-009
+      - SIMULATOR_PORT=8000
+      - API_PORT=7126
+      - MO_ENABLE_V201=0
+
+  sim-CS-EG-010:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-EG-010
+    platform: linux/arm64
+    ports:
+      - "7127:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_027:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-EG-010
+      - SIMULATOR_PORT=8000
+      - API_PORT=7127
+      - MO_ENABLE_V201=0
+
+  sim-CS-EG-011:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-EG-011
+    platform: linux/arm64
+    ports:
+      - "7128:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_028:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-EG-011
+      - SIMULATOR_PORT=8000
+      - API_PORT=7128
+      - MO_ENABLE_V201=0
+
+  sim-CS-EG-012:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-EG-012
+    platform: linux/arm64
+    ports:
+      - "7129:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_029:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-EG-012
+      - SIMULATOR_PORT=8000
+      - API_PORT=7129
+      - MO_ENABLE_V201=0
+
+  sim-CS-EG-013:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-EG-013
+    platform: linux/arm64
+    ports:
+      - "7130:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_030:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-EG-013
+      - SIMULATOR_PORT=8000
+      - API_PORT=7130
+      - MO_ENABLE_V201=0
+
+  sim-CS-EG-014:
+    image: microocpp-sim-v16:latest
+    container_name: sim-CS-EG-014
+    platform: linux/arm64
+    ports:
+      - "7131:8000"
+    volumes:
+      - "./mo_store_depot/depot_v16_031:/MicroOcppSimulator/mo_store:rw"
+      - "./config:/MicroOcppSimulator/config:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fenexity-csms
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - depot-config
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=CS-EG-014
+      - SIMULATOR_PORT=8000
+      - API_PORT=7131
       - MO_ENABLE_V201=0
 
