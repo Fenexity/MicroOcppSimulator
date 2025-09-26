@@ -1,1 +1,0 @@
-{"head":{"content-type":"ocpp_config_file","version":"2.0"},"configurations":[{"type":"bool","key":"Cst_PreBootTransactions","value":false},{"type":"int","key":"HeartbeatInterval","value":60},{"type":"bool","key":"LocalAuthListEnabled","value":true}]}

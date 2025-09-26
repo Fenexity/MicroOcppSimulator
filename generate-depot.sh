@@ -532,7 +532,7 @@ cleanup_old_mo_store() {
 ensure_images_exist() {
     local ocpp_version="$1"
     
-    log_info "Prüfe ob benötigte Docker Images existieren..." >&2
+    log_info "Prüfe ob benötigte Docker Images existieren..."
     
     local image_name
     if [[ "$ocpp_version" == "1.6" ]]; then
@@ -543,13 +543,23 @@ ensure_images_exist() {
     
     # Prüfe ob Image existiert
     if docker image inspect "$image_name" >/dev/null 2>&1; then
-        log_success "Image $image_name bereits vorhanden" >&2
+        log_success "✅ Image $image_name bereits vorhanden"
         return 0
     fi
     
-    log_info "Baue Docker Image: $image_name" >&2
+    log_info "🔨 Image $image_name nicht gefunden - starte Build-Prozess..."
+    log_info "📦 Baue Docker Image für OCPP $ocpp_version..."
+    
+    # Zeige Build-Fortschritt
+    echo "   🔧 Platform: linux/arm64"
+    echo "   📋 Dockerfile: Dockerfile.arm64"
+    echo "   🔌 OCPP Version: $ocpp_version"
+    echo "   🏷️  Image Tag: $image_name"
+    echo ""
     
     # Baue Image mit Standard Build Args (OHNE individuelle API_PORT)
+    log_info "⚙️  Starte Docker Build (das kann einige Minuten dauern)..."
+    
     if docker build \
         --platform linux/arm64 \
         -f Dockerfile.arm64 \
@@ -558,10 +568,24 @@ ensure_images_exist() {
         --build-arg CHARGER_ID="depot-charger" \
         --build-arg API_PORT=8000 \
         -t "$image_name" \
-        . >/dev/null 2>&1; then
-        log_success "Image $image_name erfolgreich erstellt" >&2
+        . 2>&1 | while IFS= read -r line; do
+            # Zeige nur wichtige Build-Schritte
+            if echo "$line" | grep -E "(Step [0-9]+/|Successfully built|Successfully tagged)" >/dev/null; then
+                echo "   $line"
+            fi
+        done; then
+        echo ""
+        log_success "🎉 Image $image_name erfolgreich erstellt!"
+        log_info "💾 Image ist jetzt verfügbar für alle Container"
+        echo ""
     else
-        log_error "Fehler beim Erstellen des Images $image_name" >&2
+        echo ""
+        log_error "❌ Fehler beim Erstellen des Images $image_name"
+        log_error "💡 Mögliche Lösungen:"
+        echo "   - Prüfe ob Docker läuft: docker info"
+        echo "   - Prüfe ob Dockerfile.arm64 existiert: ls -la Dockerfile.arm64"
+        echo "   - Prüfe Docker-Logs: docker system events"
+        echo ""
         return 1
     fi
 }

@@ -1,3 +1,233 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# Development Tools
+# =============================================================================
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# =============================================================================
+# Docker & Container Data
+# =============================================================================
+
+# Docker Volumes (local data)
+data/
+logs/
+backups/
+volumes/
+
+# Docker Compose Override
+docker-compose.override.yml
+docker-compose.local.yml
+
+# =============================================================================
+# Node.js / NPM
+# =============================================================================
+
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+.npm
+.yarn-integrity
+
+# =============================================================================
+# Build Outputs
+# =============================================================================
+
+dist/
+build/
+out/
+*.tgz
+*.tar.gz
+
+# =============================================================================
+# Environment & Config
+# =============================================================================
+
+# Environment Files
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Local Configuration
+config/local.*
+*.local.json
+
+# =============================================================================
+# Logs & Temporary Files
+# =============================================================================
+
+# Log Files
+logs/
+*.log
+*.log.*
+
+# Temporary Files
+tmp/
+temp/
+.cache/
+
+# =============================================================================
+# Database Files
+# =============================================================================
+
+# SQLite
+*.sqlite
+*.sqlite3
+*.db
+
+# Database Dumps
+*.dump
+*.sql.gz
+
+# =============================================================================
+# Security & Credentials
+# =============================================================================
+
+# Certificates
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# SSH Keys
+id_rsa*
+id_ed25519*
+
+# API Keys & Secrets
+secrets/
+.secrets/
+
+# =============================================================================
+# Testing & Coverage
+# =============================================================================
+
+# Test Coverage
+coverage/
+.coverage
+.nyc_output
+*.lcov
+
+# Test Results
+test-results/
+junit.xml
+
+# Python Virtual Environments (alle Unterordner)
+**/venv/
+**/.venv/
+**/env/
+**/.env/
+venv/
+.venv/
+env/
+.env/
+
+
+**/__pycache__/
+# =============================================================================
+# Performance & Monitoring
+# =============================================================================
+
+# Performance Monitoring
+.pm2/
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# =============================================================================
+# Project Specific
+# =============================================================================
+
+# Custom Modules Development
+custom-modules/node_modules/
+custom-modules/dist/
+custom-modules/.env*
+
+# Custom Frontend Development  
+custom-frontend/node_modules/
+custom-frontend/dist/
+custom-frontend/build/
+custom-frontend/.env*
+
+# CSMS Specific
+*.ocpp.log
+*.charge.log
+everest_logs/
+
+# =============================================================================
+# Submodule Specific Ignores
+# =============================================================================
+
+# Note: Submodule-spezifische .gitignore Dateien
+# werden in den jeweiligen Submodulen verwaltet
+
+# =============================================================================
+# Documentation Generated Files
+# =============================================================================
+
+# Generated Documentation
+docs/build/
+docs/_build/
+site/
+
+# Added by Task Master AI
+# Logs
+logs
+dev-debug.log
+# Dependency directories
+# Environment variables
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# OS specific
+# Task files
+tasks.json
+tasks/ 
+
+
 .vs
 *.exe
 *.obj
