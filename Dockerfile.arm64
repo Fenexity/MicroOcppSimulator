@@ -28,8 +28,6 @@ WORKDIR /MicroOcppSimulator
 # Copy the entire source code
 COPY . .
 
-# Initialize submodules if not already done
-RUN git submodule update --init --recursive || echo "Submodules already initialized"
 
 # Configure CMake build based on OCPP version
 RUN if [ "$OCPP_VERSION" = "2.0.1" ]; then \
