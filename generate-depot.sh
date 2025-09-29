@@ -305,7 +305,7 @@ generate_docker_compose() {
 # Generiert am: $(date '+%Y-%m-%d %H:%M:%S')
 # =============================================================================
 
-version: '3.8'
+# Docker Compose (version nicht mehr erforderlich)
 
 networks:
   fenexity-csms:
@@ -643,10 +643,10 @@ start_containers_in_batches() {
     
     log_info "Batch-Größe: $batch_size Container gleichzeitig"
     
-    # Extrahiere alle Service-Namen aus der Docker Compose Datei
+    # Extrahiere alle Service-Namen aus der Docker Compose Datei (ohne yq)
     # Ignoriere den 'depot-config' Service
     local services
-    if ! services=$(yq eval '.services | keys | .[]' "$compose_file" 2>/dev/null | grep -v 'depot-config'); then
+    if ! services=$(awk '/^services:/{flag=1; next} /^[a-zA-Z]/{flag=0} flag && /^  [a-zA-Z0-9_-]+:/ {print $1}' "$compose_file" | sed 's/:$//' | grep -v 'depot-config'); then
         log_error "Fehler beim Extrahieren der Service-Namen aus $compose_file"
         return 1
     fi
@@ -728,10 +728,10 @@ restart_containers_in_batches() {
     log_info "🔄 Starte Batch-Neustart für bessere CitrineOS-Erkennung..."
     log_info "Batch-Größe: $batch_size Container gleichzeitig"
     
-    # Extrahiere alle Service-Namen aus der Docker Compose Datei
+    # Extrahiere alle Service-Namen aus der Docker Compose Datei (ohne yq)
     # Ignoriere den 'depot-config' Service
     local services
-    if ! services=$(yq eval '.services | keys | .[]' "$compose_file" 2>/dev/null | grep -v 'depot-config'); then
+    if ! services=$(awk '/^services:/{flag=1; next} /^[a-zA-Z]/{flag=0} flag && /^  [a-zA-Z0-9_-]+:/ {print $1}' "$compose_file" | sed 's/:$//' | grep -v 'depot-config'); then
         log_error "Fehler beim Extrahieren der Service-Namen aus $compose_file"
         return 1
     fi
