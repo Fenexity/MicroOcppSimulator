@@ -22,12 +22,12 @@
     {
       "type": "bool",
       "key": "evReady_cId_1",
-      "value": false
+      "value": true
     },
     {
       "type": "bool",
       "key": "evseReady_cId_1",
-      "value": false
+      "value": true
     },
     {
       "type": "bool",
@@ -42,12 +42,12 @@
     {
       "type": "bool",
       "key": "evReady_cId_2",
-      "value": false
+      "value": true
     },
     {
       "type": "bool",
       "key": "evseReady_cId_2",
-      "value": false
+      "value": true
     }
   ]
 }

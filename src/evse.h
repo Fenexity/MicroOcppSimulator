@@ -25,9 +25,9 @@ private:
     std::shared_ptr<MicroOcpp::Configuration> trackEvseReadyBool;
     std::string trackEvseReadyKey;
 
-    const float SIMULATE_POWER_CONST = 11000.f;
+    float SIMULATE_POWER_CONST;
     float simulate_power = 0;
-    float limit_power = 11000.f;
+    float limit_power;
     const float SIMULATE_ENERGY_DELTA_MS = SIMULATE_POWER_CONST / (3600.f * 1000.f);
     unsigned long simulate_energy_track_time = 0;
     float simulate_energy = 0;

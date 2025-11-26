@@ -15,9 +15,15 @@
 #include <MicroOcpp/Debug.h>
 #include <cstring>
 #include <cstdlib>
+#include <cstdio>
 
 Evse::Evse(unsigned int connectorId) : connectorId{connectorId} {
-
+    // Lade maximale Leistung aus Umweltvariable oder verwende Standard
+    const char* maxPowerStr = getenv("MAX_POWER_W");
+    SIMULATE_POWER_CONST = maxPowerStr ? atof(maxPowerStr) : 11000.f;
+    limit_power = SIMULATE_POWER_CONST;
+    
+    printf("[EVSE-%u] Max Power: %.0fW (%.1fkW)\n", connectorId, SIMULATE_POWER_CONST, SIMULATE_POWER_CONST / 1000.0f);
 }
 
 void Evse::setup() {
