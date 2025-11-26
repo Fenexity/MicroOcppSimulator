@@ -199,6 +199,7 @@ int mocpp_api2_call(const char *uri_raw, size_t uri_raw_len, MicroOcpp::Method m
         } else {
             snprintf(resp_body, resp_body_size, "%s", connectors[evse_id-1].getEvPlugged() ? "EV already plugged" : "plugged in EV");
             connectors[evse_id-1].setEvPlugged(true);
+            connectors[evse_id-1].setEvsePlugged(true);
             connectors[evse_id-1].setEvReady(true);
             connectors[evse_id-1].setEvseReady(true);
             return 200;
@@ -213,6 +214,7 @@ int mocpp_api2_call(const char *uri_raw, size_t uri_raw_len, MicroOcpp::Method m
         } else {
             snprintf(resp_body, resp_body_size, "%s", connectors[evse_id-1].getEvPlugged() ? "EV already unplugged" : "unplug EV");
             connectors[evse_id-1].setEvPlugged(false);
+            connectors[evse_id-1].setEvsePlugged(false);
             connectors[evse_id-1].setEvReady(false);
             connectors[evse_id-1].setEvseReady(false);
             return 200;

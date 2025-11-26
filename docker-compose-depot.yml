@@ -3,7 +3,7 @@
 # =============================================================================
 # Automatisch generiert aus Depot CSV
 # OCPP Version: 1.6
-# Generiert am: 2025-09-29 10:43:53
+# Generiert am: 2025-11-26 15:16:44
 # =============================================================================
 
 # Docker Compose (version nicht mehr erforderlich)
@@ -53,6 +53,7 @@ services:
       - CHARGER_ID=CS-1S-001
       - SIMULATOR_PORT=8000
       - API_PORT=7101
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-1S-002:
@@ -81,6 +82,7 @@ services:
       - CHARGER_ID=CS-1S-002
       - SIMULATOR_PORT=8000
       - API_PORT=7102
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-1S-003:
@@ -109,6 +111,7 @@ services:
       - CHARGER_ID=CS-1S-003
       - SIMULATOR_PORT=8000
       - API_PORT=7103
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-1S-004:
@@ -137,6 +140,7 @@ services:
       - CHARGER_ID=CS-1S-004
       - SIMULATOR_PORT=8000
       - API_PORT=7104
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-1S-005:
@@ -165,6 +169,7 @@ services:
       - CHARGER_ID=CS-1S-005
       - SIMULATOR_PORT=8000
       - API_PORT=7105
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-1S-006:
@@ -193,6 +198,7 @@ services:
       - CHARGER_ID=CS-1S-006
       - SIMULATOR_PORT=8000
       - API_PORT=7106
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-1S-007:
@@ -221,6 +227,7 @@ services:
       - CHARGER_ID=CS-1S-007
       - SIMULATOR_PORT=8000
       - API_PORT=7107
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-1S-008:
@@ -249,6 +256,7 @@ services:
       - CHARGER_ID=CS-1S-008
       - SIMULATOR_PORT=8000
       - API_PORT=7108
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-1S-009:
@@ -277,6 +285,7 @@ services:
       - CHARGER_ID=CS-1S-009
       - SIMULATOR_PORT=8000
       - API_PORT=7109
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-1S-010:
@@ -305,6 +314,7 @@ services:
       - CHARGER_ID=CS-1S-010
       - SIMULATOR_PORT=8000
       - API_PORT=7110
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-1S-011:
@@ -333,6 +343,7 @@ services:
       - CHARGER_ID=CS-1S-011
       - SIMULATOR_PORT=8000
       - API_PORT=7111
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-1S-012:
@@ -361,6 +372,7 @@ services:
       - CHARGER_ID=CS-1S-012
       - SIMULATOR_PORT=8000
       - API_PORT=7112
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-1S-013:
@@ -389,6 +401,7 @@ services:
       - CHARGER_ID=CS-1S-013
       - SIMULATOR_PORT=8000
       - API_PORT=7113
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-1S-014:
@@ -417,6 +430,7 @@ services:
       - CHARGER_ID=CS-1S-014
       - SIMULATOR_PORT=8000
       - API_PORT=7114
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-1S-015:
@@ -445,6 +459,7 @@ services:
       - CHARGER_ID=CS-1S-015
       - SIMULATOR_PORT=8000
       - API_PORT=7115
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-1S-016:
@@ -473,6 +488,7 @@ services:
       - CHARGER_ID=CS-1S-016
       - SIMULATOR_PORT=8000
       - API_PORT=7116
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-1S-017:
@@ -501,6 +517,7 @@ services:
       - CHARGER_ID=CS-1S-017
       - SIMULATOR_PORT=8000
       - API_PORT=7117
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-EG-001:
@@ -529,6 +546,7 @@ services:
       - CHARGER_ID=CS-EG-001
       - SIMULATOR_PORT=8000
       - API_PORT=7118
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-EG-002:
@@ -557,6 +575,7 @@ services:
       - CHARGER_ID=CS-EG-002
       - SIMULATOR_PORT=8000
       - API_PORT=7119
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-EG-003:
@@ -585,6 +604,7 @@ services:
       - CHARGER_ID=CS-EG-003
       - SIMULATOR_PORT=8000
       - API_PORT=7120
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-EG-004:
@@ -613,6 +633,7 @@ services:
       - CHARGER_ID=CS-EG-004
       - SIMULATOR_PORT=8000
       - API_PORT=7121
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-EG-005:
@@ -641,6 +662,7 @@ services:
       - CHARGER_ID=CS-EG-005
       - SIMULATOR_PORT=8000
       - API_PORT=7122
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-EG-006:
@@ -669,6 +691,7 @@ services:
       - CHARGER_ID=CS-EG-006
       - SIMULATOR_PORT=8000
       - API_PORT=7123
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-EG-007:
@@ -697,6 +720,7 @@ services:
       - CHARGER_ID=CS-EG-007
       - SIMULATOR_PORT=8000
       - API_PORT=7124
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-EG-008:
@@ -725,6 +749,7 @@ services:
       - CHARGER_ID=CS-EG-008
       - SIMULATOR_PORT=8000
       - API_PORT=7125
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-EG-009:
@@ -753,6 +778,7 @@ services:
       - CHARGER_ID=CS-EG-009
       - SIMULATOR_PORT=8000
       - API_PORT=7126
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-EG-010:
@@ -781,6 +807,7 @@ services:
       - CHARGER_ID=CS-EG-010
       - SIMULATOR_PORT=8000
       - API_PORT=7127
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-EG-011:
@@ -809,6 +836,7 @@ services:
       - CHARGER_ID=CS-EG-011
       - SIMULATOR_PORT=8000
       - API_PORT=7128
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-EG-012:
@@ -837,6 +865,7 @@ services:
       - CHARGER_ID=CS-EG-012
       - SIMULATOR_PORT=8000
       - API_PORT=7129
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-EG-013:
@@ -865,6 +894,7 @@ services:
       - CHARGER_ID=CS-EG-013
       - SIMULATOR_PORT=8000
       - API_PORT=7130
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 
   sim-CS-EG-014:
@@ -893,5 +923,6 @@ services:
       - CHARGER_ID=CS-EG-014
       - SIMULATOR_PORT=8000
       - API_PORT=7131
+      - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
 

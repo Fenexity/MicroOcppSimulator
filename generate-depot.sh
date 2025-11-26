@@ -179,6 +179,38 @@ extract_charging_stations() {
 }
 
 # =============================================================================
+# CSV-Power-Extraktion
+# =============================================================================
+
+extract_max_power_from_csv() {
+    local csv_file="$1"
+    local station_id="$2"
+    
+    log_info "Extrahiere max_power für $station_id aus CSV..." >&2
+    
+    # Finde max_power für charging_station_id (Spalte 9 = station_id, Spalte 14 = max_power)
+    local max_power=$(awk -F',' -v station="$station_id" '
+        NR > 1 && $9 == station { 
+            gsub(/^[ \t]+|[ \t]+$/, "", $14);  # Trim whitespace
+            if ($14 != "" && $14 != "0") {
+                print $14; 
+                exit;
+            }
+        }
+    ' "$csv_file")
+    
+    if [[ -n "$max_power" && "$max_power" != "0" ]]; then
+        # Konvertiere zu Watt (CSV enthält kW)
+        local power_w=$((max_power * 1000))
+        log_info "Gefunden: ${max_power}kW = ${power_w}W für $station_id" >&2
+        echo "$power_w"
+    else
+        log_warning "Keine max_power für $station_id gefunden, verwende Standard 11kW" >&2
+        echo "11000"
+    fi
+}
+
+# =============================================================================
 # Konfigurationsgenerierung
 # =============================================================================
 
@@ -283,6 +315,7 @@ EOF
 generate_docker_compose() {
     local charging_stations_file="$1"
     local ocpp_version="$2"
+    local csv_file="$3"
     
     log_info "Generiere Docker Compose Konfiguration..."
     
@@ -350,6 +383,9 @@ EOF
         else
             image_name="microocpp-sim-v201:latest"
         fi
+        
+        # Extrahiere maximale Leistung aus CSV
+        local max_power_w=$(extract_max_power_from_csv "$csv_file" "$station_id")
 
         cat >> "$OUTPUT_COMPOSE" << EOF
   $service_name:
@@ -378,6 +414,7 @@ EOF
       - CHARGER_ID=$station_id
       - SIMULATOR_PORT=8000
       - API_PORT=$port
+      - MAX_POWER_W=$max_power_w
 EOF
         
         if [[ "$ocpp_version" == "1.6" ]]; then
@@ -417,8 +454,10 @@ create_templates() {
         rm -rf "$v16_template_dir"
         mkdir -p "$v16_template_dir"
         
-        # Kopiere mo_store_v16 Inhalte
-        cp -r "./mo_store_v16"/* "$v16_template_dir/"
+        # Kopiere mo_store_v16 Inhalte (nur wenn Template nicht existiert)
+        if [[ ! -f "$v16_template_dir/simulator.jsn" ]]; then
+            cp -r "./mo_store_v16"/* "$v16_template_dir/"
+        fi
         
         # Erstelle Platzhalter in Template-Dateien
         if [[ -f "${v16_template_dir}/ws-conn.jsn" ]]; then
@@ -439,8 +478,10 @@ create_templates() {
         rm -rf "$v201_template_dir"
         mkdir -p "$v201_template_dir"
         
-        # Kopiere mo_store_v201 Inhalte
-        cp -r "./mo_store_v201"/* "$v201_template_dir/"
+        # Kopiere mo_store_v201 Inhalte (nur wenn Template nicht existiert)
+        if [[ ! -f "$v201_template_dir/simulator.jsn" ]]; then
+            cp -r "./mo_store_v201"/* "$v201_template_dir/"
+        fi
         
         # Erstelle Platzhalter in Template-Dateien
         if [[ -f "${v201_template_dir}/ws-conn-v201.jsn" ]]; then
@@ -869,7 +910,7 @@ main() {
     
     # Generiere Konfigurationen
     generate_simulator_config "$charging_stations_file" "$OCPP_VERSION" "$csv_filename"
-    generate_docker_compose "$charging_stations_file" "$OCPP_VERSION"
+    generate_docker_compose "$charging_stations_file" "$OCPP_VERSION" "$CSV_FILE"
     generate_mo_store_directories "$charging_stations_file" "$OCPP_VERSION"
     
     echo ""
@@ -910,15 +951,15 @@ main() {
         echo ""
         
         # Warte kurz, dann starte alle Container neu für bessere CitrineOS-Erkennung
-        log_info "⏳ Warte 10 Sekunden, dann Neustart für CitrineOS-Optimierung..."
-        sleep 10
+        # log_info "⏳ Warte 10 Sekunden, dann Neustart für CitrineOS-Optimierung..."
+        # sleep 10
         
-        if restart_containers_in_batches "$OUTPUT_COMPOSE"; then
-            log_success "Batch-Neustart erfolgreich abgeschlossen"
-        else
-            log_error "Fehler beim Batch-Neustart"
-        fi
-        echo ""
+        # if restart_containers_in_batches "$OUTPUT_COMPOSE"; then
+        #     log_success "Batch-Neustart erfolgreich abgeschlossen"
+        # else
+        #     log_error "Fehler beim Batch-Neustart"
+        # fi
+        # echo ""
         
         # Zeige Container-Status
         log_info "Container-Status:"
