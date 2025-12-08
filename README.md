@@ -29,6 +29,12 @@ Laden einer csv Datei:
 ./generate-depot.sh depot-data/darmstadt-depot.csv 1.6
 ```
 
+NAch einem PC Neustart kann es sein, dass sich die interne IP vo CItrineos geändert hat, in dem Fall
+
+```bash
+./generate-depot.sh --update-url
+```
+
 Spezifische Konfiguration:
 
 ```bash
