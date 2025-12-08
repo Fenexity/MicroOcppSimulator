@@ -73,16 +73,19 @@ show_help() {
     echo ""
     echo "Verwendung:"
     echo "  $0 <CSV_FILE> [OCPP_VERSION] [--no-start]"
+    echo "  $0 --update-url"
     echo ""
     echo "Parameter:"
     echo "  CSV_FILE      Pfad zur Depot CSV-Datei (erforderlich)"
     echo "  OCPP_VERSION  OCPP Version: 1.6 oder 2.0.1 (Standard: 1.6)"
     echo "  --no-start    Nur generieren, Container nicht automatisch starten"
+    echo "  --update-url  Aktualisiere CitrineOS IP und starte Container neu"
     echo ""
     echo "Beispiele:"
     echo "  $0 depot-data/darmstadt-depot.csv"
     echo "  $0 depot-data/test.csv 1.6"
     echo "  $0 depot-data/hamburg.csv 2.0.1 --no-start"
+    echo "  $0 --update-url                    # IP aktualisieren + Container neu starten"
     echo ""
     echo "CSV-Anforderungen:"
     echo "  - Muss Header-Zeile mit 'charging_station_id' Spalte enthalten"
@@ -176,6 +179,130 @@ extract_charging_stations() {
     fi
     
     echo "$temp_file"
+}
+
+# =============================================================================
+# CitrineOS IP-Detection
+# =============================================================================
+
+detect_citrineos_ip() {
+    local citrineos_service="fenexity-citrineos"
+    local citrineos_ip
+    
+    log_info "🔍 Erkenne CitrineOS IP-Adresse..."
+    
+    citrineos_ip=$(docker inspect "$citrineos_service" --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' 2>/dev/null || echo "")
+    
+    if [[ -z "$citrineos_ip" || "$citrineos_ip" == "null" ]]; then
+        log_warning "CitrineOS Container '$citrineos_service' nicht gefunden oder keine IP verfügbar"
+        log_info "Verfügbare Container:"
+        docker ps --format "table {{.Names}}\t{{.Status}}" | grep -E "(citrineos|CitrineOS)" || log_warning "Keine CitrineOS Container gefunden"
+        citrineos_ip="172.18.0.3"  # Fallback
+        log_warning "Verwende Fallback IP: $citrineos_ip"
+    else
+        log_success "CitrineOS IP erkannt: $citrineos_ip"
+    fi
+    
+    echo "$citrineos_ip"
+}
+
+update_citrineos_ip_in_containers() {
+    local new_ip="$1"
+    
+    if [[ -z "$new_ip" ]]; then
+        log_error "Keine IP-Adresse angegeben"
+        return 1
+    fi
+    
+    log_info "🔄 Aktualisiere CitrineOS IP in allen laufenden Depot-Containern..."
+    
+    # Finde alle laufenden Depot-Container
+    local containers
+    containers=$(docker ps --format "{{.Names}}" | grep "^sim-CS-" || echo "")
+    
+    if [[ -z "$containers" ]]; then
+        log_warning "Keine laufenden Depot-Container gefunden"
+        return 0
+    fi
+    
+    local updated_count=0
+    local total_count=0
+    
+    while IFS= read -r container_name; do
+        [[ -z "$container_name" ]] && continue
+        ((total_count++))
+        
+        log_info "📝 Aktualisiere $container_name..."
+        
+        # Aktualisiere ocpp-config.jsn in Container
+        if docker exec "$container_name" sh -c "
+            if [[ -f /MicroOcppSimulator/mo_store/ocpp-config.jsn ]]; then
+                # Backup erstellen
+                cp /MicroOcppSimulator/mo_store/ocpp-config.jsn /MicroOcppSimulator/mo_store/ocpp-config.jsn.bak
+                
+                # IP in WebSocket URL aktualisieren
+                sed -i 's|ws://[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+:|ws://$new_ip:|g' /MicroOcppSimulator/mo_store/ocpp-config.jsn
+                
+                echo 'IP aktualisiert'
+            else
+                echo 'Konfigurationsdatei nicht gefunden'
+                exit 1
+            fi
+        " 2>/dev/null; then
+            ((updated_count++))
+            log_success "✅ $container_name aktualisiert"
+        else
+            log_error "❌ Fehler beim Aktualisieren von $container_name"
+        fi
+    done <<< "$containers"
+    
+    log_success "🎉 IP-Update abgeschlossen: $updated_count/$total_count Container aktualisiert"
+    
+    return 0
+}
+
+restart_depot_containers() {
+    local restart_mode="$1"  # "all" oder "updated"
+    
+    log_info "🔄 Starte Depot-Container neu..."
+    
+    if [[ ! -f "docker-compose-depot.yml" ]]; then
+        log_error "docker-compose-depot.yml nicht gefunden"
+        log_info "Führe zuerst './generate-depot.sh <csv-datei> <ocpp-version>' aus"
+        return 1
+    fi
+    
+    # Überprüfe ob Container laufen
+    local running_containers
+    running_containers=$(docker-compose -f docker-compose-depot.yml ps -q 2>/dev/null | wc -l | tr -d ' ')
+    
+    if [[ "$running_containers" -eq 0 ]]; then
+        log_warning "Keine laufenden Depot-Container gefunden"
+        log_info "Starte Container..."
+        if docker-compose -f docker-compose-depot.yml up -d; then
+            log_success "✅ Container erfolgreich gestartet"
+        else
+            log_error "❌ Fehler beim Starten der Container"
+            return 1
+        fi
+    else
+        log_info "Starte $running_containers Container neu..."
+        if docker-compose -f docker-compose-depot.yml restart; then
+            log_success "✅ Container erfolgreich neu gestartet"
+        else
+            log_error "❌ Fehler beim Neustarten der Container"
+            return 1
+        fi
+    fi
+    
+    # Warte kurz und überprüfe Status
+    sleep 5
+    local healthy_containers
+    healthy_containers=$(docker-compose -f docker-compose-depot.yml ps --filter "status=running" -q 2>/dev/null | wc -l | tr -d ' ')
+    
+    log_info "📊 Status: $healthy_containers/$running_containers Container laufen"
+    
+    return 0
 }
 
 # =============================================================================
@@ -529,15 +656,9 @@ generate_mo_store_single() {
     mkdir -p "$output_dir"
     cp -r "${template_dir}"/* "$output_dir/"
     
-    # Ermittle CitrineOS IP (wie im original configure-citrineos.sh)
-    local citrineos_service="fenexity-citrineos"
+    # Ermittle CitrineOS IP
     local citrineos_ip
-    citrineos_ip=$(docker inspect "$citrineos_service" --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' 2>/dev/null || echo "")
-    
-    if [[ -z "$citrineos_ip" || "$citrineos_ip" == "null" ]]; then
-        log_warning "CitrineOS IP konnte nicht ermittelt werden. Verwende Platzhalter." >&2
-        citrineos_ip="172.18.0.3"  # Fallback
-    fi
+    citrineos_ip=$(detect_citrineos_ip)
     
     # Erstelle IP-basierte CSMS URL (ersetze Service-Namen mit IP)
     local csms_url_with_ip
@@ -871,6 +992,30 @@ main() {
     # Hilfe anzeigen
     if [[ "$CSV_FILE" == "-h" || "$CSV_FILE" == "--help" ]]; then
         show_help
+        exit 0
+    fi
+    
+    # Update-URL Modus
+    if [[ "$CSV_FILE" == "--update-url" ]]; then
+        log_info "🔄 CitrineOS IP-Update Modus aktiviert"
+        
+        # Erkenne neue CitrineOS IP
+        local new_ip
+        new_ip=$(detect_citrineos_ip)
+        
+        if [[ -z "$new_ip" ]]; then
+            log_error "Konnte CitrineOS IP nicht ermitteln"
+            exit 1
+        fi
+        
+        # Aktualisiere Container
+        update_citrineos_ip_in_containers "$new_ip"
+        
+        # Starte Container neu
+        log_info ""
+        restart_depot_containers "all"
+        
+        log_success "🎉 IP-Update und Container-Neustart abgeschlossen!"
         exit 0
     fi
     
