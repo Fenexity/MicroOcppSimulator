@@ -697,10 +697,13 @@ ensure_images_exist() {
     log_info "Prüfe ob benötigte Docker Images existieren..."
     
     local image_name
+    local ghcr_image
     if [[ "$ocpp_version" == "1.6" ]]; then
         image_name="microocpp-sim-v16:latest"
+        ghcr_image="ghcr.io/fenexity/microocpp-sim-v16:latest"
     else
         image_name="microocpp-sim-v201:latest"
+        ghcr_image="ghcr.io/fenexity/microocpp-sim-v201:latest"
     fi
     
     # Prüfe ob Image existiert
@@ -709,7 +712,23 @@ ensure_images_exist() {
         return 0
     fi
     
-    log_info "🔨 Image $image_name nicht gefunden - starte Build-Prozess..."
+    log_info "🔨 Image $image_name nicht gefunden - versuche Pull von GHCR..."
+    log_info "📦 Lade Image: $ghcr_image"
+    echo ""
+    
+    # Versuche Pull von GHCR
+    if docker pull "$ghcr_image" 2>&1; then
+        # Tag das GHCR-Image lokal
+        docker tag "$ghcr_image" "$image_name"
+        echo ""
+        log_success "🎉 Image $image_name erfolgreich von GHCR gepullt!"
+        log_info "💾 Image ist jetzt lokal verfügbar"
+        echo ""
+        return 0
+    fi
+    
+    echo ""
+    log_warning "⚠️  Pull von GHCR fehlgeschlagen - versuche lokalen Build..."
     log_info "📦 Baue Docker Image für OCPP $ocpp_version..."
     
     # Zeige Build-Fortschritt
@@ -719,7 +738,7 @@ ensure_images_exist() {
     echo "   🏷️  Image Tag: $image_name"
     echo ""
     
-    # Baue Image mit Standard Build Args (OHNE individuelle API_PORT)
+    # Fallback: Lokaler Build
     log_info "⚙️  Starte Docker Build (das kann einige Minuten dauern)..."
     
     if docker build \
@@ -744,9 +763,9 @@ ensure_images_exist() {
         echo ""
         log_error "❌ Fehler beim Erstellen des Images $image_name"
         log_error "💡 Mögliche Lösungen:"
+        echo "   - Führe den GitHub Actions Workflow aus: .github/workflows/build-docker-image.yml"
         echo "   - Prüfe ob Docker läuft: docker info"
         echo "   - Prüfe ob Dockerfile.arm64 existiert: ls -la Dockerfile.arm64"
-        echo "   - Prüfe Docker-Logs: docker system events"
         echo ""
         return 1
     fi
