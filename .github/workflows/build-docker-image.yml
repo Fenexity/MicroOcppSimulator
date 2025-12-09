@@ -1,0 +1,163 @@
+name: Build and Push Docker Image
+
+on:
+  # Bei Pull Request auf main: Nur bauen (Test)
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'Dockerfile*'
+      - '.github/workflows/build-docker-image.yml'
+  
+  # Bei Push/Merge auf main: Bauen und pushen
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'Dockerfile*'
+      - '.github/workflows/build-docker-image.yml'
+  
+  # Manueller Trigger
+  workflow_dispatch:
+    inputs:
+      ocpp_version:
+        description: 'OCPP Version'
+        required: true
+        default: '1.6'
+        type: choice
+        options:
+          - '1.6'
+          - '2.0.1'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME_V16: fenexity/microocpp-sim-v16
+  IMAGE_NAME_V201: fenexity/microocpp-sim-v201
+
+jobs:
+  build-v16:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_V16 }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=
+            type=raw,value={{date 'YYYYMMDD'}}
+      
+      - name: Build and push OCPP 1.6 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.arm64
+          platforms: linux/arm64,linux/amd64
+          # Push nur bei merge auf main oder manuellem Trigger
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            OCPP_VERSION=1.6
+            SIMULATOR_PORT=8000
+            CHARGER_ID=depot-charger
+            API_PORT=8000
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-v201:
+    runs-on: ubuntu-latest
+    # Nur bei manuellem Trigger mit Version 2.0.1
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.ocpp_version == '2.0.1'
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_V201 }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=
+            type=raw,value={{date 'YYYYMMDD'}}
+      
+      - name: Build and push OCPP 2.0.1 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.arm64
+          platforms: linux/arm64,linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            OCPP_VERSION=2.0.1
+            SIMULATOR_PORT=8000
+            CHARGER_ID=depot-charger
+            API_PORT=8000
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  summary:
+    runs-on: ubuntu-latest
+    needs: [build-v16]
+    if: always()
+    steps:
+      - name: Summary
+        run: |
+          echo "## 🐳 Docker Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "✅ **Build erfolgreich** (kein Push bei PR)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ **Build + Push erfolgreich**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Pull Command:**" >> $GITHUB_STEP_SUMMARY
+            echo '```bash' >> $GITHUB_STEP_SUMMARY
+            echo "docker pull ghcr.io/fenexity/microocpp-sim-v16:latest" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
