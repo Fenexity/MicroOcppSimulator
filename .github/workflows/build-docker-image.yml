@@ -1,7 +1,7 @@
 name: Build and Push Docker Image
 
 on:
-  # Bei Pull Request auf main: Nur bauen (Test)
+  # Bei Pull Request auf main: Bauen und mit PR-Tag pushen
   pull_request:
     branches: [main]
     paths:
@@ -9,7 +9,7 @@ on:
       - 'Dockerfile*'
       - '.github/workflows/build-docker-image.yml'
   
-  # Bei Push/Merge auf main: Bauen und pushen
+  # Bei Push/Merge auf main: Re-tag zu latest
   push:
     branches: [main]
     paths:
@@ -52,7 +52,6 @@ jobs:
         uses: docker/setup-buildx-action@v3
       
       - name: Log in to GHCR
-        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -65,9 +64,12 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_V16 }}
           tags: |
-            type=raw,value=latest
-            type=sha,prefix=
-            type=raw,value={{date 'YYYYMMDD'}}
+            # Bei PR: Tag mit PR-Nummer (pr-123)
+            type=ref,event=pr
+            # Bei Push auf main: latest + sha + datum
+            type=raw,value=latest,enable=${{ github.event_name != 'pull_request' }}
+            type=sha,prefix=,enable=${{ github.event_name != 'pull_request' }}
+            type=raw,value={{date 'YYYYMMDD'}},enable=${{ github.event_name != 'pull_request' }}
       
       - name: Build and push OCPP 1.6 image
         uses: docker/build-push-action@v5
@@ -75,8 +77,8 @@ jobs:
           context: .
           file: ./Dockerfile.arm64
           platforms: linux/arm64,linux/amd64
-          # Push nur bei merge auf main oder manuellem Trigger
-          push: ${{ github.event_name != 'pull_request' }}
+          # Immer pushen - bei PR mit PR-Tag, bei merge mit latest
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
@@ -152,9 +154,13 @@ jobs:
           echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "✅ **Build erfolgreich** (kein Push bei PR)" >> $GITHUB_STEP_SUMMARY
+            echo "✅ **Image gebaut und mit PR-Tag gepusht**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Tag:** \`pr-${{ github.event.pull_request.number }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Nach dem Merge wird das Image automatisch als \`latest\` getaggt." >> $GITHUB_STEP_SUMMARY
           else
-            echo "✅ **Build + Push erfolgreich**" >> $GITHUB_STEP_SUMMARY
+            echo "✅ **Image gebaut und als latest gepusht**" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "**Pull Command:**" >> $GITHUB_STEP_SUMMARY
             echo '```bash' >> $GITHUB_STEP_SUMMARY
