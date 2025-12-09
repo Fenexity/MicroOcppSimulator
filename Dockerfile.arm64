@@ -1,7 +1,8 @@
 # =============================================================================
-# Fenexity MicroOCPP Simulator - ARM64 Unified Build
+# Fenexity MicroOCPP Simulator - Multi-Platform Build (ARM64/AMD64)
 # =============================================================================
-FROM --platform=linux/arm64 alpine:latest
+# Platform wird durch docker buildx --platform gesteuert
+FROM alpine:latest
 
 # Build arguments
 ARG OCPP_VERSION=1.6
@@ -30,12 +31,13 @@ COPY . .
 
 
 # Configure CMake build based on OCPP version
+# Note: CMAKE_POLICY_VERSION_MINIMUM=3.5 is needed for mbedtls compatibility with newer CMake
 RUN if [ "$OCPP_VERSION" = "2.0.1" ]; then \
         echo "Building for OCPP 2.0.1"; \
-        cmake -S . -B ./build -DMO_ENABLE_V201=1; \
+        cmake -S . -B ./build -DMO_ENABLE_V201=1 -DCMAKE_POLICY_VERSION_MINIMUM=3.5; \
     else \
         echo "Building for OCPP 1.6"; \
-        cmake -S . -B ./build -DMO_ENABLE_V201=0; \
+        cmake -S . -B ./build -DMO_ENABLE_V201=0 -DCMAKE_POLICY_VERSION_MINIMUM=3.5; \
     fi
 
 # Build the simulator with optimized parallel compilation
