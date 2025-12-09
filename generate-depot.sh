@@ -189,18 +189,18 @@ detect_citrineos_ip() {
     local citrineos_service="fenexity-citrineos"
     local citrineos_ip
     
-    log_info "🔍 Erkenne CitrineOS IP-Adresse..."
+    log_info "🔍 Erkenne CitrineOS IP-Adresse..." >&2
     
     citrineos_ip=$(docker inspect "$citrineos_service" --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' 2>/dev/null || echo "")
     
     if [[ -z "$citrineos_ip" || "$citrineos_ip" == "null" ]]; then
-        log_warning "CitrineOS Container '$citrineos_service' nicht gefunden oder keine IP verfügbar"
-        log_info "Verfügbare Container:"
-        docker ps --format "table {{.Names}}\t{{.Status}}" | grep -E "(citrineos|CitrineOS)" || log_warning "Keine CitrineOS Container gefunden"
+        log_warning "CitrineOS Container '$citrineos_service' nicht gefunden oder keine IP verfügbar" >&2
+        log_info "Verfügbare Container:" >&2
+        docker ps --format "table {{.Names}}\t{{.Status}}" | grep -E "(citrineos|CitrineOS)" >&2 || log_warning "Keine CitrineOS Container gefunden" >&2
         citrineos_ip="172.18.0.3"  # Fallback
-        log_warning "Verwende Fallback IP: $citrineos_ip"
+        log_warning "Verwende Fallback IP: $citrineos_ip" >&2
     else
-        log_success "CitrineOS IP erkannt: $citrineos_ip"
+        log_success "CitrineOS IP erkannt: $citrineos_ip" >&2
     fi
     
     echo "$citrineos_ip"
