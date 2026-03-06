@@ -1,0 +1,50 @@
+# =============================================================================
+# Fenexity MicroOCPP Simulator - Standalone (Single OCPP 1.6)
+# =============================================================================
+# Ein einzelner OCPP 1.6 Simulator fuer Tests gegen ein externes Backend.
+# Laeuft unabhaengig vom Depot-Build und dem lokalen CitrineOS.
+#
+# Verwendung: docker compose -f docker-compose-standalone.yml up -d
+#
+# Backend-URL anpassen: mo_store_standalone/ws-conn.jsn -> Cst_BackendUrl
+# Charger-ID anpassen:  mo_store_standalone/ws-conn.jsn -> Cst_ChargeBoxId
+# =============================================================================
+
+networks:
+  standalone:
+    driver: bridge
+
+services:
+  microocpp-standalone:
+    image: microocpp-sim-v16:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.arm64
+      args:
+        OCPP_VERSION: "1.6"
+        SIMULATOR_PORT: "8000"
+        CHARGER_ID: "standalone-charger"
+        API_PORT: "8501"
+    container_name: microocpp-standalone
+    platform: linux/arm64
+    ports:
+      - "8501:8000"
+    volumes:
+      - ./mo_store_standalone:/MicroOcppSimulator/mo_store:rw
+      - ./config:/MicroOcppSimulator/config:ro
+    networks:
+      - standalone
+    restart: unless-stopped
+    environment:
+      - OCPP_VERSION=1.6
+      - CHARGER_ID=standalone-charger
+      - SIMULATOR_PORT=8000
+      - API_PORT=8501
+      - MAX_POWER_W=150000
+      - MO_ENABLE_V201=0
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
