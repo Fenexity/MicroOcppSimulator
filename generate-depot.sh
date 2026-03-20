@@ -319,19 +319,32 @@ extract_max_power_from_csv() {
     
     log_info "Extrahiere max_power für $station_id aus CSV..." >&2
     
-    # Finde max_power für charging_station_id (Spalte 9 = station_id, Spalte 14 = max_power)
+    # Spaltenindizes dynamisch aus Header ermitteln
     local max_power=$(awk -F',' -v station="$station_id" '
-        NR > 1 && $9 == station { 
-            gsub(/^[ \t]+|[ \t]+$/, "", $14);  # Trim whitespace
-            if ($14 != "" && $14 != "0") {
-                print $14; 
-                exit;
+        NR == 1 {
+            for (i = 1; i <= NF; i++) {
+                col = $i;
+                gsub(/^[ \t]+|[ \t]+$/, "", col);
+                if (col == "charging_station_id") sid_col = i;
+                if (col == "max_power") power_col = i;
+            }
+            next;
+        }
+        sid_col && power_col {
+            sid = $sid_col;
+            gsub(/^[ \t]+|[ \t]+$/, "", sid);
+            if (sid == station) {
+                val = $power_col;
+                gsub(/^[ \t]+|[ \t]+$/, "", val);
+                if (val != "" && val+0 > 0) {
+                    print val;
+                    exit;
+                }
             }
         }
     ' "$csv_file")
     
     if [[ -n "$max_power" && "$max_power" != "0" ]]; then
-        # Konvertiere zu Watt (CSV enthält kW)
         local power_w=$((max_power * 1000))
         log_info "Gefunden: ${max_power}kW = ${power_w}W für $station_id" >&2
         echo "$power_w"

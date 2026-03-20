@@ -1,0 +1,10 @@
+floor_id,floor_name,spot_number,column,row,spot_width_units,spot_height_units,spot_type,charging_station_id,connector_id,max_vehicle_length,max_vehicle_width,max_vehicle_height,departure_blocked_by,arrival_blocked_by,max_power,notes
+erdgeschoss,Erdgeschoss,1,1,1,1,1.75,charging,CS-001,1,12,3,3.5,,2;3,150,
+erdgeschoss,Erdgeschoss,2,1,2,1,1.75,charging,CS-001,2,12,3,3.5,1,3,150,
+erdgeschoss,Erdgeschoss,3,1,3,1,1.75,charging,CS-001,3,12,3,3.5,1;2,,150,
+erdgeschoss,Erdgeschoss,4,2,1,1,1.75,charging,CS-002,1,12,3,3.5,,5;6,150,
+erdgeschoss,Erdgeschoss,5,2,2,1,1.75,charging,CS-002,2,12,3,3.5,4,6,150,
+erdgeschoss,Erdgeschoss,6,2,3,1,1.75,charging,CS-002,3,12,3,3.5,4;5,,150,
+erdgeschoss,Erdgeschoss,7,3,1,1,1.75,standard,,,12,3,3.5,,8;9,150,
+erdgeschoss,Erdgeschoss,8,3,2,1,1.75,standard,,,12,3,3.5,7,9,150,
+erdgeschoss,Erdgeschoss,9,3,3,1,1.75,standard,,,12,3,3.5,7;8,,150,

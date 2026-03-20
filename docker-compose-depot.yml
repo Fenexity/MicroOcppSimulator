@@ -3,7 +3,7 @@
 # =============================================================================
 # Automatisch generiert aus Depot CSV
 # OCPP Version: 1.6
-# Generiert am: 2026-01-28 19:46:48
+# Generiert am: 2026-03-17 17:20:24
 # =============================================================================
 
 # Docker Compose (version nicht mehr erforderlich)
@@ -27,9 +27,9 @@ services:
     networks:
       - fenexity-csms
 
-  sim-CS-1S-001:
+  sim-CS-EG-001:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-1S-001
+    container_name: sim-CS-EG-001
     platform: linux/arm64
     ports:
       - "7101:8000"
@@ -50,15 +50,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-1S-001
+      - CHARGER_ID=CS-EG-001
       - SIMULATOR_PORT=8000
       - API_PORT=7101
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=1000
       - MO_ENABLE_V201=0
 
-  sim-CS-1S-002:
+  sim-CS-EG-002:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-1S-002
+    container_name: sim-CS-EG-002
     platform: linux/arm64
     ports:
       - "7102:8000"
@@ -79,15 +79,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-1S-002
+      - CHARGER_ID=CS-EG-002
       - SIMULATOR_PORT=8000
       - API_PORT=7102
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=3000
       - MO_ENABLE_V201=0
 
-  sim-CS-1S-003:
+  sim-CS-EG-003:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-1S-003
+    container_name: sim-CS-EG-003
     platform: linux/arm64
     ports:
       - "7103:8000"
@@ -108,15 +108,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-1S-003
+      - CHARGER_ID=CS-EG-003
       - SIMULATOR_PORT=8000
       - API_PORT=7103
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=
       - MO_ENABLE_V201=0
 
-  sim-CS-1S-004:
+  sim-CS-EG-004:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-1S-004
+    container_name: sim-CS-EG-004
     platform: linux/arm64
     ports:
       - "7104:8000"
@@ -137,15 +137,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-1S-004
+      - CHARGER_ID=CS-EG-004
       - SIMULATOR_PORT=8000
       - API_PORT=7104
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=6000
       - MO_ENABLE_V201=0
 
-  sim-CS-1S-005:
+  sim-CS-EG-005:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-1S-005
+    container_name: sim-CS-EG-005
     platform: linux/arm64
     ports:
       - "7105:8000"
@@ -166,15 +166,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-1S-005
+      - CHARGER_ID=CS-EG-005
       - SIMULATOR_PORT=8000
       - API_PORT=7105
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=
       - MO_ENABLE_V201=0
 
-  sim-CS-1S-006:
+  sim-CS-EG-006:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-1S-006
+    container_name: sim-CS-EG-006
     platform: linux/arm64
     ports:
       - "7106:8000"
@@ -195,15 +195,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-1S-006
+      - CHARGER_ID=CS-EG-006
       - SIMULATOR_PORT=8000
       - API_PORT=7106
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=9000
       - MO_ENABLE_V201=0
 
-  sim-CS-1S-007:
+  sim-CS-EG-007:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-1S-007
+    container_name: sim-CS-EG-007
     platform: linux/arm64
     ports:
       - "7107:8000"
@@ -224,15 +224,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-1S-007
+      - CHARGER_ID=CS-EG-007
       - SIMULATOR_PORT=8000
       - API_PORT=7107
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=11000
       - MO_ENABLE_V201=0
 
-  sim-CS-1S-008:
+  sim-CS-EG-008:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-1S-008
+    container_name: sim-CS-EG-008
     platform: linux/arm64
     ports:
       - "7108:8000"
@@ -253,15 +253,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-1S-008
+      - CHARGER_ID=CS-EG-008
       - SIMULATOR_PORT=8000
       - API_PORT=7108
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=13000
       - MO_ENABLE_V201=0
 
-  sim-CS-1S-009:
+  sim-CS-EG-009:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-1S-009
+    container_name: sim-CS-EG-009
     platform: linux/arm64
     ports:
       - "7109:8000"
@@ -282,15 +282,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-1S-009
+      - CHARGER_ID=CS-EG-009
       - SIMULATOR_PORT=8000
       - API_PORT=7109
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=15000
       - MO_ENABLE_V201=0
 
-  sim-CS-1S-010:
+  sim-CS-EG-010:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-1S-010
+    container_name: sim-CS-EG-010
     platform: linux/arm64
     ports:
       - "7110:8000"
@@ -311,15 +311,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-1S-010
+      - CHARGER_ID=CS-EG-010
       - SIMULATOR_PORT=8000
       - API_PORT=7110
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=17000
       - MO_ENABLE_V201=0
 
-  sim-CS-1S-011:
+  sim-CS-EG-011:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-1S-011
+    container_name: sim-CS-EG-011
     platform: linux/arm64
     ports:
       - "7111:8000"
@@ -340,15 +340,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-1S-011
+      - CHARGER_ID=CS-EG-011
       - SIMULATOR_PORT=8000
       - API_PORT=7111
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=19000
       - MO_ENABLE_V201=0
 
-  sim-CS-1S-012:
+  sim-CS-EG-012:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-1S-012
+    container_name: sim-CS-EG-012
     platform: linux/arm64
     ports:
       - "7112:8000"
@@ -369,15 +369,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-1S-012
+      - CHARGER_ID=CS-EG-012
       - SIMULATOR_PORT=8000
       - API_PORT=7112
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=21000
       - MO_ENABLE_V201=0
 
-  sim-CS-1S-013:
+  sim-CS-EG-013:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-1S-013
+    container_name: sim-CS-EG-013
     platform: linux/arm64
     ports:
       - "7113:8000"
@@ -398,15 +398,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-1S-013
+      - CHARGER_ID=CS-EG-013
       - SIMULATOR_PORT=8000
       - API_PORT=7113
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=23000
       - MO_ENABLE_V201=0
 
-  sim-CS-1S-014:
+  sim-CS-EG-014:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-1S-014
+    container_name: sim-CS-EG-014
     platform: linux/arm64
     ports:
       - "7114:8000"
@@ -427,15 +427,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-1S-014
+      - CHARGER_ID=CS-EG-014
       - SIMULATOR_PORT=8000
       - API_PORT=7114
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=25000
       - MO_ENABLE_V201=0
 
-  sim-CS-1S-015:
+  sim-CS-UG-001:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-1S-015
+    container_name: sim-CS-UG-001
     platform: linux/arm64
     ports:
       - "7115:8000"
@@ -456,15 +456,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-1S-015
+      - CHARGER_ID=CS-UG-001
       - SIMULATOR_PORT=8000
       - API_PORT=7115
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=37000
       - MO_ENABLE_V201=0
 
-  sim-CS-1S-016:
+  sim-CS-UG-002:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-1S-016
+    container_name: sim-CS-UG-002
     platform: linux/arm64
     ports:
       - "7116:8000"
@@ -485,15 +485,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-1S-016
+      - CHARGER_ID=CS-UG-002
       - SIMULATOR_PORT=8000
       - API_PORT=7116
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=39000
       - MO_ENABLE_V201=0
 
-  sim-CS-1S-017:
+  sim-CS-UG-003:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-1S-017
+    container_name: sim-CS-UG-003
     platform: linux/arm64
     ports:
       - "7117:8000"
@@ -514,15 +514,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-1S-017
+      - CHARGER_ID=CS-UG-003
       - SIMULATOR_PORT=8000
       - API_PORT=7117
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=41000
       - MO_ENABLE_V201=0
 
-  sim-CS-EG-001:
+  sim-CS-UG-004:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-EG-001
+    container_name: sim-CS-UG-004
     platform: linux/arm64
     ports:
       - "7118:8000"
@@ -543,15 +543,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-EG-001
+      - CHARGER_ID=CS-UG-004
       - SIMULATOR_PORT=8000
       - API_PORT=7118
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=43000
       - MO_ENABLE_V201=0
 
-  sim-CS-EG-002:
+  sim-CS-UG-005:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-EG-002
+    container_name: sim-CS-UG-005
     platform: linux/arm64
     ports:
       - "7119:8000"
@@ -572,15 +572,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-EG-002
+      - CHARGER_ID=CS-UG-005
       - SIMULATOR_PORT=8000
       - API_PORT=7119
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=45000
       - MO_ENABLE_V201=0
 
-  sim-CS-EG-003:
+  sim-CS-UG-006:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-EG-003
+    container_name: sim-CS-UG-006
     platform: linux/arm64
     ports:
       - "7120:8000"
@@ -601,15 +601,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-EG-003
+      - CHARGER_ID=CS-UG-006
       - SIMULATOR_PORT=8000
       - API_PORT=7120
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=47000
       - MO_ENABLE_V201=0
 
-  sim-CS-EG-004:
+  sim-CS-UG-007:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-EG-004
+    container_name: sim-CS-UG-007
     platform: linux/arm64
     ports:
       - "7121:8000"
@@ -630,15 +630,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-EG-004
+      - CHARGER_ID=CS-UG-007
       - SIMULATOR_PORT=8000
       - API_PORT=7121
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=49000
       - MO_ENABLE_V201=0
 
-  sim-CS-EG-005:
+  sim-CS-UG-008:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-EG-005
+    container_name: sim-CS-UG-008
     platform: linux/arm64
     ports:
       - "7122:8000"
@@ -659,15 +659,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-EG-005
+      - CHARGER_ID=CS-UG-008
       - SIMULATOR_PORT=8000
       - API_PORT=7122
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=51000
       - MO_ENABLE_V201=0
 
-  sim-CS-EG-006:
+  sim-CS-UG-009:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-EG-006
+    container_name: sim-CS-UG-009
     platform: linux/arm64
     ports:
       - "7123:8000"
@@ -688,15 +688,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-EG-006
+      - CHARGER_ID=CS-UG-009
       - SIMULATOR_PORT=8000
       - API_PORT=7123
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=53000
       - MO_ENABLE_V201=0
 
-  sim-CS-EG-007:
+  sim-CS-UG-010:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-EG-007
+    container_name: sim-CS-UG-010
     platform: linux/arm64
     ports:
       - "7124:8000"
@@ -717,15 +717,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-EG-007
+      - CHARGER_ID=CS-UG-010
       - SIMULATOR_PORT=8000
       - API_PORT=7124
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=55000
       - MO_ENABLE_V201=0
 
-  sim-CS-EG-008:
+  sim-CS-UG-011:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-EG-008
+    container_name: sim-CS-UG-011
     platform: linux/arm64
     ports:
       - "7125:8000"
@@ -746,15 +746,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-EG-008
+      - CHARGER_ID=CS-UG-011
       - SIMULATOR_PORT=8000
       - API_PORT=7125
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=
       - MO_ENABLE_V201=0
 
-  sim-CS-EG-009:
+  sim-CS-UG-012:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-EG-009
+    container_name: sim-CS-UG-012
     platform: linux/arm64
     ports:
       - "7126:8000"
@@ -775,15 +775,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-EG-009
+      - CHARGER_ID=CS-UG-012
       - SIMULATOR_PORT=8000
       - API_PORT=7126
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=58000
       - MO_ENABLE_V201=0
 
-  sim-CS-EG-010:
+  sim-CS-UG-013:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-EG-010
+    container_name: sim-CS-UG-013
     platform: linux/arm64
     ports:
       - "7127:8000"
@@ -804,15 +804,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-EG-010
+      - CHARGER_ID=CS-UG-013
       - SIMULATOR_PORT=8000
       - API_PORT=7127
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=11000
       - MO_ENABLE_V201=0
 
-  sim-CS-EG-011:
+  sim-CS-UG-014:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-EG-011
+    container_name: sim-CS-UG-014
     platform: linux/arm64
     ports:
       - "7128:8000"
@@ -833,15 +833,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-EG-011
+      - CHARGER_ID=CS-UG-014
       - SIMULATOR_PORT=8000
       - API_PORT=7128
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=61000
       - MO_ENABLE_V201=0
 
-  sim-CS-EG-012:
+  sim-CS-UG-015:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-EG-012
+    container_name: sim-CS-UG-015
     platform: linux/arm64
     ports:
       - "7129:8000"
@@ -862,15 +862,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-EG-012
+      - CHARGER_ID=CS-UG-015
       - SIMULATOR_PORT=8000
       - API_PORT=7129
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=
       - MO_ENABLE_V201=0
 
-  sim-CS-EG-013:
+  sim-CS-UG-016:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-EG-013
+    container_name: sim-CS-UG-016
     platform: linux/arm64
     ports:
       - "7130:8000"
@@ -891,15 +891,15 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-EG-013
+      - CHARGER_ID=CS-UG-016
       - SIMULATOR_PORT=8000
       - API_PORT=7130
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=64000
       - MO_ENABLE_V201=0
 
-  sim-CS-EG-014:
+  sim-CS-UG-017:
     image: microocpp-sim-v16:latest
-    container_name: sim-CS-EG-014
+    container_name: sim-CS-UG-017
     platform: linux/arm64
     ports:
       - "7131:8000"
@@ -920,9 +920,9 @@ services:
       - depot-config
     environment:
       - OCPP_VERSION=1.6
-      - CHARGER_ID=CS-EG-014
+      - CHARGER_ID=CS-UG-017
       - SIMULATOR_PORT=8000
       - API_PORT=7131
-      - MAX_POWER_W=150000
+      - MAX_POWER_W=
       - MO_ENABLE_V201=0
 

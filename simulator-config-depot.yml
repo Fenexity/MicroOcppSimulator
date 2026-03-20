@@ -4,7 +4,7 @@
 # Automatisch generiert aus: darmstadt-depot.csv
 # OCPP Version: 1.6
 # Anzahl Ladesäulen:       31
-# Generiert am: 2026-01-28 19:46:48
+# Generiert am: 2026-03-17 17:20:24
 # =============================================================================
 
 global:
@@ -24,67 +24,67 @@ simulators:
       MO_ENABLE_V201: "0"
     # Depot-spezifische IDs (werden automatisch zugewiesen)
     depot_ids:
-      - id: "CS-1S-001"
-        index: 1
-      - id: "CS-1S-002"
-        index: 2
-      - id: "CS-1S-003"
-        index: 3
-      - id: "CS-1S-004"
-        index: 4
-      - id: "CS-1S-005"
-        index: 5
-      - id: "CS-1S-006"
-        index: 6
-      - id: "CS-1S-007"
-        index: 7
-      - id: "CS-1S-008"
-        index: 8
-      - id: "CS-1S-009"
-        index: 9
-      - id: "CS-1S-010"
-        index: 10
-      - id: "CS-1S-011"
-        index: 11
-      - id: "CS-1S-012"
-        index: 12
-      - id: "CS-1S-013"
-        index: 13
-      - id: "CS-1S-014"
-        index: 14
-      - id: "CS-1S-015"
-        index: 15
-      - id: "CS-1S-016"
-        index: 16
-      - id: "CS-1S-017"
-        index: 17
       - id: "CS-EG-001"
-        index: 18
+        index: 1
       - id: "CS-EG-002"
-        index: 19
+        index: 2
       - id: "CS-EG-003"
-        index: 20
+        index: 3
       - id: "CS-EG-004"
-        index: 21
+        index: 4
       - id: "CS-EG-005"
-        index: 22
+        index: 5
       - id: "CS-EG-006"
-        index: 23
+        index: 6
       - id: "CS-EG-007"
-        index: 24
+        index: 7
       - id: "CS-EG-008"
-        index: 25
+        index: 8
       - id: "CS-EG-009"
-        index: 26
+        index: 9
       - id: "CS-EG-010"
-        index: 27
+        index: 10
       - id: "CS-EG-011"
-        index: 28
+        index: 11
       - id: "CS-EG-012"
-        index: 29
+        index: 12
       - id: "CS-EG-013"
-        index: 30
+        index: 13
       - id: "CS-EG-014"
+        index: 14
+      - id: "CS-UG-001"
+        index: 15
+      - id: "CS-UG-002"
+        index: 16
+      - id: "CS-UG-003"
+        index: 17
+      - id: "CS-UG-004"
+        index: 18
+      - id: "CS-UG-005"
+        index: 19
+      - id: "CS-UG-006"
+        index: 20
+      - id: "CS-UG-007"
+        index: 21
+      - id: "CS-UG-008"
+        index: 22
+      - id: "CS-UG-009"
+        index: 23
+      - id: "CS-UG-010"
+        index: 24
+      - id: "CS-UG-011"
+        index: 25
+      - id: "CS-UG-012"
+        index: 26
+      - id: "CS-UG-013"
+        index: 27
+      - id: "CS-UG-014"
+        index: 28
+      - id: "CS-UG-015"
+        index: 29
+      - id: "CS-UG-016"
+        index: 30
+      - id: "CS-UG-017"
         index: 31
 
 templates:
