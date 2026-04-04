@@ -1,8 +1,8 @@
 # =============================================================================
-# Fenexity MicroOCPP Simulator - Unified ARM64 Dual OCPP Protocol Support
+# MicroOCPP Simulator - Unified ARM64 Dual OCPP Protocol Support
 # =============================================================================
-# Starte beide OCPP Simulatoren (1.6 + 2.0.1) mit einem Command
-# Verwendung: docker-compose up -d
+# Start both OCPP simulators (1.6 + 2.0.1) with one command
+# Usage: docker-compose up -d
 # Ports: 8001 (OCPP 1.6), 8002 (OCPP 2.0.1)
 
 # version: '3.8'  # Removed as it's obsolete in newer Docker Compose
@@ -10,12 +10,12 @@
 networks:
   default:
     driver: bridge
-    name: fenexity-csms
+    name: fnx-platform-net
     external: true
 
 services:
   # =============================================================================
-  # MicroOCPP Konfiguration (läuft vor Simulator-Start)
+  # MicroOCPP configuration runs before the simulators start.
   # =============================================================================
   microocpp-config:
     image: alpine:latest
@@ -28,15 +28,15 @@ services:
       - ./mo_store_v201:/output/mo_store_v201
     command: >
       sh -c "
-      echo '🔧 Starte MicroOCPP-Konfiguration...';
+      echo 'Starting MicroOCPP configuration...';
       apk add --no-cache bash grep curl docker-cli;
       cd /output && bash /configure-citrineos.sh;
-      echo '✅ Konfiguration abgeschlossen!';
+      echo 'Configuration finished.';
       "
-    restart: "no"  # Läuft nur einmal
+    restart: "no"  # Run once
 
   # =============================================================================
-  # OCPP 1.6 Simulator (ARM64)
+  # OCPP 1.6 simulator (ARM64)
   # =============================================================================
   microocpp-sim-v16:
     build:
@@ -50,11 +50,11 @@ services:
     container_name: microocpp-sim-v16
     platform: linux/arm64
     ports:
-      - "8001:8000"  # HTTP Frontend
+      - "8001:8000"  # HTTP frontend
     volumes:
       - ./mo_store_v16:/MicroOcppSimulator/mo_store:rw
       - ./config:/MicroOcppSimulator/config:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro  # Für IP-Check
+      - /var/run/docker.sock:/var/run/docker.sock:ro  # For IP checks
     environment:
       - OCPP_VERSION=1.6
       - CHARGER_ID=charger-1.6
@@ -75,7 +75,7 @@ services:
       start_period: 30s
 
   # =============================================================================
-  # OCPP 2.0.1 Simulator (ARM64)
+  # OCPP 2.0.1 simulator (ARM64)
   # =============================================================================
   microocpp-sim-v201:
     build:
@@ -89,11 +89,11 @@ services:
     container_name: microocpp-sim-v201
     platform: linux/arm64
     ports:
-      - "8002:8000"  # HTTP Frontend
+      - "8002:8000"  # HTTP frontend
     volumes:
       - ./mo_store_v201:/MicroOcppSimulator/mo_store:rw
       - ./config:/MicroOcppSimulator/config:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro  # Für IP-Check
+      - /var/run/docker.sock:/var/run/docker.sock:ro  # For IP checks
     environment:
       - OCPP_VERSION=2.0.1
       - CHARGER_ID=charger-201
@@ -115,7 +115,7 @@ services:
       start_period: 30s
 
 # =============================================================================
-# Volumes für persistente Daten
+# Volumes for persistent data
 # =============================================================================
 volumes:
   microocpp_v16_data:

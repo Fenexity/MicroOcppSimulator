@@ -1,22 +1,22 @@
 # =============================================================================
-# Fenexity MicroOCPP Simulator - Generierte Multi-Container Konfiguration
+# MicroOCPP Simulator - Generated Multi-Container Configuration
 # =============================================================================
-# ACHTUNG: Diese Datei wurde automatisch generiert!
-# Änderungen hier werden beim nächsten Aufruf von generate-simulators.sh überschrieben.
-# 
-# Für Konfigurationsänderungen bearbeite: simulator-config.yml
-# Dann führe aus: ./generate-simulators.sh
+# WARNING: This file is generated automatically.
+# Changes here will be overwritten by the next generate-simulators.sh run.
+#
+# Edit simulator-config.yml for configuration changes, then run:
+# ./generate-simulators.sh
 # =============================================================================
 
 networks:
   default:
     driver: bridge
-    name: fenexity-csms
+    name: fnx-platform-net
     external: true
 
 services:
   # =============================================================================
-  # Konfiguration Service (läuft vor Simulator-Start)
+  # Configuration service runs before the simulators start.
   # =============================================================================
   microocpp-multi-config:
     image: alpine:latest
@@ -30,14 +30,14 @@ services:
       - ./mo_store_generated/sim_v201_001:/output/sim_v201_001
     command: >
       sh -c "
-      echo '🔧 Starte Multi-Simulator-Konfiguration...';
+      echo 'Starting multi-simulator configuration...';
       apk add --no-cache bash grep curl docker-cli;
-      echo '✅ Multi-Simulator-Konfiguration abgeschlossen!';
+      echo 'Multi-simulator configuration finished.';
       "
     restart: "no"
 
   # =============================================================================
-  # OCPP 1.6 Simulatoren (2 Container)
+  # OCPP 1.6 simulators (2 containers)
   # =============================================================================
   microocpp-sim-v16-001:
     build:
@@ -112,7 +112,7 @@ services:
       start_period: 30s
 
   # =============================================================================
-  # OCPP 2.0.1 Simulatoren (1 Container)
+  # OCPP 2.0.1 simulators (1 container)
   # =============================================================================
   microocpp-sim-v201-001:
     build:
@@ -150,4 +150,3 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
-

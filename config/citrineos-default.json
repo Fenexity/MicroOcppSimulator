@@ -1,6 +1,6 @@
 {
-  "name": "CitrineOS Standard-Konfiguration",
-  "description": "Standardkonfiguration für OCPP-Tests mit CitrineOS",
+  "name": "CitrineOS Default Configuration",
+  "description": "Default configuration for OCPP tests with CitrineOS",
   "configurations": {
     "ocpp201": {
       "backendUrl": "ws://host.docker.internal:8080/ocpp20",
@@ -24,7 +24,7 @@
         "chargeBoxId": "charger-simulator-01"
       },
       "ocpp16": {
-        "backendUrl": "ws://localhost:8080/ocpp16", 
+        "backendUrl": "ws://localhost:8080/ocpp16",
         "chargeBoxId": "charger-simulator-01-v16"
       }
     },
@@ -38,25 +38,25 @@
   },
   "testScenarios": [
     {
-      "name": "Grundlegende Verbindung",
-      "description": "Test der WebSocket-Verbindung und BootNotification",
+      "name": "Basic Connection",
+      "description": "Test the WebSocket connection and BootNotification",
       "steps": [
-        "Container starten",
-        "WebSocket-Konfiguration setzen", 
-        "Verbindungsstatus prüfen",
-        "BootNotification in CitrineOS-Logs prüfen"
+        "Start the container",
+        "Set the WebSocket configuration",
+        "Verify the connection status",
+        "Check the BootNotification in CitrineOS logs"
       ]
     },
     {
-      "name": "Ladevorgang Simulation",
-      "description": "Kompletter Ladevorgang von Kabel einstecken bis Ende",
+      "name": "Charging Session Simulation",
+      "description": "Full charging flow from plug-in to end of session",
       "steps": [
-        "EVSE Kabel einstecken",
-        "EV Kabel einstecken", 
-        "Authorization mit RFID",
-        "Ladevorgang starten",
-        "Ladevorgang beenden"
+        "Plug in the EVSE cable",
+        "Plug in the EV cable",
+        "Authorize with RFID",
+        "Start charging",
+        "Stop charging"
       ]
     }
   ]
-} 
+}

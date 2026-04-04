@@ -1,28 +1,28 @@
 #!/bin/bash
 
 # =============================================================================
-# Fenexity MicroOCPP Simulator - Multi-Container Generator
+# MicroOCPP Simulator - Multi-Container Generator
 # =============================================================================
-# Automatische Generierung von Docker Compose Konfiguration und mo_store
-# Verzeichnissen basierend auf simulator-config.yml
+# Generate Docker Compose config and mo_store directories from
+# simulator-config.yml
 #
-# Verwendung:
+# Usage:
 #   ./generate-simulators.sh [--clean] [--config CONFIG_FILE]
 #
-# Optionen:
-#   --clean       Bereinige vorherige Generierungen vor der Erstellung
-#   --config      Verwende alternative Konfigurationsdatei (Standard: simulator-config.yml)
+# Options:
+#   --clean       Remove previously generated files first
+#   --config      Use an alternate config file
 #
-# Ausgabe:
+# Output:
 #   - docker-compose.generated.yml
-#   - mo_store_generated/sim_*/ Verzeichnisse
-#   - Aktualisierte Templates
+#   - mo_store_generated/sim_*/ directories
+#   - updated templates
 # =============================================================================
 
-set -e  # Beende bei Fehlern
+set -e  # Exit on failure
 
 # =============================================================================
-# Konfiguration und Variablen
+# Configuration and variables
 # =============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -31,7 +31,7 @@ OUTPUT_COMPOSE="${SCRIPT_DIR}/docker-compose.generated.yml"
 TEMPLATES_DIR="${SCRIPT_DIR}/templates"
 GENERATED_DIR="${SCRIPT_DIR}/mo_store_generated"
 
-# Farben für Output
+# Output colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -43,7 +43,7 @@ CLEAN_MODE=false
 VERBOSE=false
 
 # =============================================================================
-# Hilfsfunktionen
+# Helpers
 # =============================================================================
 
 log_info() {
@@ -64,19 +64,19 @@ log_error() {
 }
 
 check_dependencies() {
-    log_info "Überprüfe Abhängigkeiten..."
+    log_info "Checking dependencies..."
     
-    # Prüfe ob yq installiert ist (für YAML-Parsing)
+    # Check whether yq is installed for YAML parsing.
     if ! command -v yq &> /dev/null; then
-        log_error "yq ist nicht installiert. Installiere es mit: brew install yq (macOS) oder apt-get install yq (Ubuntu)"
+        log_error "yq is not installed. Install it with brew install yq or apt-get install yq."
     fi
     
-    # Prüfe ob Docker verfügbar ist
+    # Check whether Docker is available.
     if ! command -v docker &> /dev/null; then
-        log_error "Docker ist nicht installiert oder nicht verfügbar"
+        log_error "Docker is not installed or not available"
     fi
     
-    log_success "Alle Abhängigkeiten verfügbar"
+    log_success "Dependencies available"
 }
 
 parse_arguments() {
@@ -96,116 +96,124 @@ parse_arguments() {
                 ;;
             -h|--help)
                 cat << EOF
-Verwendung: $0 [OPTIONEN]
+Usage: $0 [OPTIONS]
 
-Generiert Docker Compose Konfiguration für mehrere OCPP-Simulatoren.
+Generate Docker Compose config for multiple OCPP simulators.
 
-OPTIONEN:
-    --clean         Bereinige vorherige Generierungen
-    --config FILE   Verwende alternative Konfigurationsdatei
-    --verbose       Detaillierte Ausgabe
-    -h, --help      Zeige diese Hilfe
+OPTIONS:
+    --clean         Remove previous generated files
+    --config FILE   Use an alternate config file
+    --verbose       Detailed output
+    -h, --help      Show this help
 
-BEISPIELE:
-    $0                              # Standardkonfiguration verwenden
-    $0 --clean                      # Bereinigen und neu generieren
-    $0 --config custom-config.yml   # Alternative Konfiguration
+EXAMPLES:
+    $0                              # Use the default config
+    $0 --clean                      # Clean and regenerate
+    $0 --config custom-config.yml   # Alternate config
 EOF
                 exit 0
                 ;;
             *)
-                log_error "Unbekannte Option: $1. Verwende --help für Hilfe."
+                log_error "Unknown option: $1. Use --help for usage."
                 ;;
         esac
     done
 }
 
 validate_config() {
-    log_info "Validiere Konfigurationsdatei: $CONFIG_FILE"
+    log_info "Validating config file: $CONFIG_FILE"
     
     if [[ ! -f "$CONFIG_FILE" ]]; then
-        log_error "Konfigurationsdatei nicht gefunden: $CONFIG_FILE"
+        log_error "Config file not found: $CONFIG_FILE"
     fi
     
-    # Prüfe grundlegende YAML-Struktur
+    # Check the basic YAML structure.
     if ! yq eval '.simulators' "$CONFIG_FILE" > /dev/null 2>&1; then
-        log_error "Ungültige YAML-Struktur in Konfigurationsdatei"
+        log_error "Invalid YAML structure in config file"
     fi
     
-    # Prüfe ob mindestens eine Simulator-Konfiguration existiert
+    # Check whether at least one simulator config exists.
     local simulator_count=$(yq eval '.simulators | keys | length' "$CONFIG_FILE")
     if [[ "$simulator_count" -eq 0 ]]; then
-        log_error "Keine Simulator-Konfigurationen in $CONFIG_FILE gefunden"
+        log_error "No simulator configurations found in $CONFIG_FILE"
     fi
     
-    log_success "Konfigurationsdatei ist gültig"
+    log_success "Config file is valid"
 }
 
 cleanup_previous() {
     if [[ "$CLEAN_MODE" == true ]]; then
-        log_info "Bereinige vorherige Generierungen..."
+        log_info "Cleaning previous generated files..."
         
-        # Entferne generierte Docker Compose Datei
+        # Remove the generated Docker Compose file.
         if [[ -f "$OUTPUT_COMPOSE" ]]; then
             rm "$OUTPUT_COMPOSE"
-            log_info "Entfernt: docker-compose.generated.yml"
+            log_info "Removed: docker-compose.generated.yml"
         fi
         
-        # Entferne generierte mo_store Verzeichnisse
+        # Remove generated mo_store directories.
         if [[ -d "$GENERATED_DIR" ]]; then
             rm -rf "$GENERATED_DIR"
-            log_info "Entfernt: mo_store_generated/"
+            log_info "Removed: mo_store_generated/"
         fi
         
-        log_success "Bereinigung abgeschlossen"
+        log_success "Cleanup finished"
     fi
 }
 
 create_templates() {
-    log_info "Erstelle/Aktualisiere Templates..."
+    log_info "Creating or refreshing templates..."
     
     mkdir -p "$TEMPLATES_DIR"
     
-    # Erstelle OCPP 1.6 Template
+    # Create the OCPP 1.6 template.
     if [[ -d "${SCRIPT_DIR}/mo_store_v16" ]]; then
-        log_info "Erstelle OCPP 1.6 Template aus mo_store_v16/"
+        log_info "Creating OCPP 1.6 template from mo_store_v16/"
         cp -r "${SCRIPT_DIR}/mo_store_v16" "${TEMPLATES_DIR}/mo_store_v16_template"
         
-        # Ersetze spezifische Werte durch Platzhalter in ws-conn.jsn
+        # Replace specific values with placeholders in ws-conn.jsn.
         if [[ -f "${TEMPLATES_DIR}/mo_store_v16_template/ws-conn.jsn" ]]; then
-            sed -i.bak 's/"charger-1\.6"/"{{CHARGER_ID}}"/g' "${TEMPLATES_DIR}/mo_store_v16_template/ws-conn.jsn"
-            sed -i.bak 's|ws://[^/]*/charger-1\.6|ws://{{CITRINEOS_IP}}:8092/{{CHARGER_ID}}|g' "${TEMPLATES_DIR}/mo_store_v16_template/ws-conn.jsn"
+            sed -i.bak 's/"charger-1\.6"/"{{CHARGER_ID}}"/g' \
+                "${TEMPLATES_DIR}/mo_store_v16_template/ws-conn.jsn"
+            sed -i.bak 's|ws://[^/]*/charger-1\.6|ws://{{CITRINEOS_IP}}:8092/{{CHARGER_ID}}|g' \
+                "${TEMPLATES_DIR}/mo_store_v16_template/ws-conn.jsn"
             rm "${TEMPLATES_DIR}/mo_store_v16_template/ws-conn.jsn.bak"
         fi
     else
-        log_warning "mo_store_v16/ nicht gefunden - OCPP 1.6 Template wird nicht erstellt"
+        log_warning "mo_store_v16/ not found. Skipping the OCPP 1.6 template."
     fi
     
-    # Erstelle OCPP 2.0.1 Template
+    # Create the OCPP 2.0.1 template.
     if [[ -d "${SCRIPT_DIR}/mo_store_v201" ]]; then
-        log_info "Erstelle OCPP 2.0.1 Template aus mo_store_v201/"
+        log_info "Creating OCPP 2.0.1 template from mo_store_v201/"
         cp -r "${SCRIPT_DIR}/mo_store_v201" "${TEMPLATES_DIR}/mo_store_v201_template"
         
-        # Ersetze spezifische Werte durch Platzhalter in ws-conn-v201.jsn
+        # Replace specific values with placeholders in ws-conn-v201.jsn.
         if [[ -f "${TEMPLATES_DIR}/mo_store_v201_template/ws-conn-v201.jsn" ]]; then
-            sed -i.bak 's/"charger-201"/"{{CHARGER_ID}}"/g' "${TEMPLATES_DIR}/mo_store_v201_template/ws-conn-v201.jsn"
-            sed -i.bak 's|ws://[^/]*/charger-201|ws://{{CITRINEOS_IP}}:8082/{{CHARGER_ID}}|g' "${TEMPLATES_DIR}/mo_store_v201_template/ws-conn-v201.jsn"
-            sed -i.bak 's/"fenexity_test_2025"/"{{AUTH_PASSWORD}}"/g' "${TEMPLATES_DIR}/mo_store_v201_template/ws-conn-v201.jsn"
+            sed -i.bak 's/"charger-201"/"{{CHARGER_ID}}"/g' \
+                "${TEMPLATES_DIR}/mo_store_v201_template/ws-conn-v201.jsn"
+            sed -i.bak 's|ws://[^/]*/charger-201|ws://{{CITRINEOS_IP}}:8082/{{CHARGER_ID}}|g' \
+                "${TEMPLATES_DIR}/mo_store_v201_template/ws-conn-v201.jsn"
+            sed -i.bak 's/"fenexity_test_2025"/"{{AUTH_PASSWORD}}"/g' \
+                "${TEMPLATES_DIR}/mo_store_v201_template/ws-conn-v201.jsn"
             rm "${TEMPLATES_DIR}/mo_store_v201_template/ws-conn-v201.jsn.bak"
         fi
         
-        # Ersetze Werte in ws-conn.jsn (Legacy-Format)
+        # Replace values in the legacy ws-conn.jsn format.
         if [[ -f "${TEMPLATES_DIR}/mo_store_v201_template/ws-conn.jsn" ]]; then
-            sed -i.bak 's/"charger-201"/"{{CHARGER_ID}}"/g' "${TEMPLATES_DIR}/mo_store_v201_template/ws-conn.jsn"
-            sed -i.bak 's|ws://[^/]*/charger-201|ws://{{CITRINEOS_IP}}:8082/{{CHARGER_ID}}|g' "${TEMPLATES_DIR}/mo_store_v201_template/ws-conn.jsn"
-            sed -i.bak 's/"fenexity_test_2025"/"{{AUTH_PASSWORD}}"/g' "${TEMPLATES_DIR}/mo_store_v201_template/ws-conn.jsn"
+            sed -i.bak 's/"charger-201"/"{{CHARGER_ID}}"/g' \
+                "${TEMPLATES_DIR}/mo_store_v201_template/ws-conn.jsn"
+            sed -i.bak 's|ws://[^/]*/charger-201|ws://{{CITRINEOS_IP}}:8082/{{CHARGER_ID}}|g' \
+                "${TEMPLATES_DIR}/mo_store_v201_template/ws-conn.jsn"
+            sed -i.bak 's/"fenexity_test_2025"/"{{AUTH_PASSWORD}}"/g' \
+                "${TEMPLATES_DIR}/mo_store_v201_template/ws-conn.jsn"
             rm "${TEMPLATES_DIR}/mo_store_v201_template/ws-conn.jsn.bak"
         fi
     else
-        log_warning "mo_store_v201/ nicht gefunden - OCPP 2.0.1 Template wird nicht erstellt"
+        log_warning "mo_store_v201/ not found. Skipping the OCPP 2.0.1 template."
     fi
     
-    log_success "Templates erstellt/aktualisiert"
+    log_success "Templates created or updated"
 }
 
 generate_mo_store() {
@@ -215,41 +223,48 @@ generate_mo_store() {
     local auth_password="$4"
     local output_dir="$5"
     
-    log_info "Generiere mo_store für $charger_id..."
+    log_info "Generating mo_store for $charger_id..."
     
-    # Bestimme Template-Verzeichnis
+    # Resolve the template directory.
     local template_dir
     if [[ "$version" == "1.6" ]]; then
         template_dir="${TEMPLATES_DIR}/mo_store_v16_template"
     elif [[ "$version" == "2.0.1" ]]; then
         template_dir="${TEMPLATES_DIR}/mo_store_v201_template"
     else
-        log_error "Unbekannte OCPP-Version: $version"
+        log_error "Unknown OCPP version: $version"
     fi
     
     if [[ ! -d "$template_dir" ]]; then
-        log_error "Template-Verzeichnis nicht gefunden: $template_dir"
+        log_error "Template directory not found: $template_dir"
     fi
     
-    # Kopiere Template-Dateien direkt
+    # Copy the template files.
     mkdir -p "$output_dir"
     cp -r "${template_dir}"/* "$output_dir/"
     
-    # Ermittle CitrineOS IP (wie im original configure-citrineos.sh)
-    local citrineos_service=$(yq eval '.global.citrineos_service // "fenexity-citrineos"' "$CONFIG_FILE")
+    # Detect the CitrineOS IP as in the original configure-citrineos.sh.
+    local citrineos_service
+    citrineos_service=$(
+        yq eval '.global.citrineos_service // "fenexity-citrineos"' "$CONFIG_FILE"
+    )
     local citrineos_ip
-    citrineos_ip=$(docker inspect "$citrineos_service" --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' 2>/dev/null || echo "")
+    citrineos_ip=$(
+        docker inspect "$citrineos_service" \
+            --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' \
+            2>/dev/null || echo ""
+    )
     
     if [[ -z "$citrineos_ip" || "$citrineos_ip" == "null" ]]; then
-        log_warning "CitrineOS IP konnte nicht ermittelt werden. Verwende Platzhalter."
+        log_warning "Could not detect a CitrineOS IP. Keeping the placeholder."
         citrineos_ip="{{CITRINEOS_IP}}"
     fi
     
-    # Erstelle IP-basierte CSMS URL (ersetze Service-Name mit IP)
+    # Replace the service name with the detected IP in the CSMS URL.
     local csms_url_with_ip
     csms_url_with_ip=$(echo "$csms_url" | sed "s/citrineos/$citrineos_ip/g")
     
-    # Ersetze Platzhalter in allen JSON-Dateien
+    # Replace placeholders in all JSON files.
     find "$output_dir" -name "*.jsn" -o -name "*.json" | while read -r file; do
         sed -i.bak "s/{{CHARGER_ID}}/$charger_id/g" "$file"
         sed -i.bak "s|{{CSMS_URL}}|$csms_url_with_ip|g" "$file"
@@ -258,28 +273,28 @@ generate_mo_store() {
         rm "$file.bak"
     done
     
-    log_success "mo_store für $charger_id erstellt: $output_dir"
+    log_success "Created mo_store for $charger_id: $output_dir"
 }
 
 generate_docker_compose() {
-    log_info "Generiere Docker Compose Konfiguration..."
+    log_info "Generating Docker Compose configuration..."
     
-    # Header der Docker Compose Datei
+    # Write the Docker Compose header.
     cat > "$OUTPUT_COMPOSE" << 'EOF'
 # =============================================================================
-# Fenexity MicroOCPP Simulator - Generierte Multi-Container Konfiguration
+# MicroOCPP Simulator - Generated Multi-Container Configuration
 # =============================================================================
-# ACHTUNG: Diese Datei wurde automatisch generiert!
-# Änderungen hier werden beim nächsten Aufruf von generate-simulators.sh überschrieben.
-# 
-# Für Konfigurationsänderungen bearbeite: simulator-config.yml
-# Dann führe aus: ./generate-simulators.sh
+# WARNING: This file is generated automatically.
+# Changes here will be overwritten by the next generate-simulators.sh run.
+#
+# Edit simulator-config.yml for configuration changes, then run:
+# ./generate-simulators.sh
 # =============================================================================
 
 EOF
 
-    # Netzwerk-Konfiguration
-    local network_name=$(yq eval '.global.network_name // "fenexity-csms"' "$CONFIG_FILE")
+    # Write network configuration.
+    local network_name=$(yq eval '.global.network_name // "fnx-platform-net"' "$CONFIG_FILE")
     cat >> "$OUTPUT_COMPOSE" << EOF
 networks:
   default:
@@ -290,10 +305,10 @@ networks:
 services:
 EOF
 
-    # Konfiguration Service (für CitrineOS IP-Ermittlung)
+    # Configuration service used for CitrineOS IP detection.
     cat >> "$OUTPUT_COMPOSE" << 'EOF'
   # =============================================================================
-  # Konfiguration Service (läuft vor Simulator-Start)
+  # Configuration service runs before the simulators start.
   # =============================================================================
   microocpp-multi-config:
     image: alpine:latest
@@ -304,7 +319,7 @@ EOF
       - ./configure-citrineos.sh:/configure-citrineos.sh:ro
 EOF
 
-    # Füge mo_store Volume-Mounts für Konfiguration Service hinzu
+    # Add mo_store volume mounts for the configuration service.
     local simulator_versions=$(yq eval '.simulators | keys | .[]' "$CONFIG_FILE")
     while IFS= read -r version; do
         local count=$(yq eval ".simulators.${version}.count" "$CONFIG_FILE")
@@ -317,24 +332,24 @@ EOF
         done
     done <<< "$simulator_versions"
 
-    # Konfiguration Service Command
+    # Configuration service command.
     cat >> "$OUTPUT_COMPOSE" << 'EOF'
     command: >
       sh -c "
-      echo '🔧 Starte Multi-Simulator-Konfiguration...';
+      echo 'Starting multi-simulator configuration...';
       apk add --no-cache bash grep curl docker-cli;
-      echo '✅ Multi-Simulator-Konfiguration abgeschlossen!';
+      echo 'Multi-simulator configuration finished.';
       "
     restart: "no"
 
 EOF
 
-    # Generiere Services für alle Simulator-Versionen
+    # Generate services for all simulator versions.
     while IFS= read -r version; do
         generate_simulator_services "$version"
     done <<< "$simulator_versions"
 
-    log_success "Docker Compose Konfiguration erstellt: $OUTPUT_COMPOSE"
+    log_success "Created Docker Compose configuration: $OUTPUT_COMPOSE"
 }
 
 generate_simulator_services() {
@@ -347,16 +362,16 @@ generate_simulator_services() {
     local container_prefix=$(yq eval ".simulators.${version}.container_prefix" "$CONFIG_FILE")
     local auth_password=$(yq eval ".simulators.${version}.auth_password // \"\"" "$CONFIG_FILE")
     
-    log_info "Generiere $count Simulatoren für OCPP $ocpp_version..."
+    log_info "Generating $count simulators for OCPP $ocpp_version..."
     
-    # Header für diese Version
+    # Header for this version section.
     cat >> "$OUTPUT_COMPOSE" << EOF
   # =============================================================================
-  # OCPP $ocpp_version Simulatoren ($count Container)
+  # OCPP $ocpp_version simulators ($count containers)
   # =============================================================================
 EOF
 
-    # Generiere jeden Simulator
+    # Generate each simulator.
     for ((i=1; i<=count; i++)); do
         local sim_id=$(printf "%03d" $i)
         local charger_id="${base_charger_id}-${sim_id}"
@@ -365,11 +380,16 @@ EOF
         local csms_url="${csms_url_template/\{charger_id\}/$charger_id}"
         local mo_store_path="./mo_store_generated/sim_${version}_${sim_id}"
         
-        # Erstelle mo_store für diesen Simulator
+        # Create mo_store for this simulator.
         mkdir -p "$GENERATED_DIR"
-        generate_mo_store "$ocpp_version" "$charger_id" "$csms_url" "$auth_password" "${GENERATED_DIR}/sim_${version}_${sim_id}"
+        generate_mo_store \
+            "$ocpp_version" \
+            "$charger_id" \
+            "$csms_url" \
+            "$auth_password" \
+            "${GENERATED_DIR}/sim_${version}_${sim_id}"
         
-        # Docker Service Definition
+        # Docker service definition.
         cat >> "$OUTPUT_COMPOSE" << EOF
   $container_name:
     build:
@@ -396,13 +416,17 @@ EOF
       - CENTRAL_SYSTEM_URL=$csms_url
 EOF
 
-        # Füge zusätzliche Umgebungsvariablen hinzu
+        # Append additional environment variables.
         local env_vars=$(yq eval ".simulators.${version}.environment // {}" "$CONFIG_FILE")
         if [[ "$env_vars" != "null" && "$env_vars" != "{}" ]]; then
-            yq eval ".simulators.${version}.environment | to_entries | .[] | \"      - \" + .key + \"=\" + .value" "$CONFIG_FILE" >> "$OUTPUT_COMPOSE"
+            yq eval \
+                ".simulators.${version}.environment | to_entries | .[]" \
+                "$CONFIG_FILE" \
+                | yq eval '"      - " + .key + "=" + .value' - \
+                >> "$OUTPUT_COMPOSE"
         fi
 
-        # Service-Konfiguration abschließen
+        # Finish the service definition.
         cat >> "$OUTPUT_COMPOSE" << EOF
     networks:
       - default
@@ -421,13 +445,13 @@ EOF
 }
 
 print_summary() {
-    log_success "Multi-Container-Generierung abgeschlossen!"
+    log_success "Multi-container generation finished"
     echo ""
-    echo "📋 Generierte Dateien:"
-    echo "   📄 Docker Compose: $OUTPUT_COMPOSE"
-    echo "   📁 mo_store Verzeichnisse: $GENERATED_DIR/"
+    echo "Generated files:"
+    echo "   Docker Compose: $OUTPUT_COMPOSE"
+    echo "   mo_store directories: $GENERATED_DIR/"
     echo ""
-    echo "📊 Simulator-Übersicht:"
+    echo "Simulator summary:"
     
     local simulator_versions=$(yq eval '.simulators | keys | .[]' "$CONFIG_FILE")
     local total_simulators=0
@@ -437,53 +461,54 @@ print_summary() {
         local base_port=$(yq eval ".simulators.${version}.base_port" "$CONFIG_FILE")
         local ocpp_version=$(yq eval ".simulators.${version}.ocpp_version" "$CONFIG_FILE")
         
-        echo "   🔌 OCPP $ocpp_version: $count Simulatoren (Ports $base_port-$((base_port + count - 1)))"
+        echo "   OCPP $ocpp_version: $count simulators "
+        echo "   (ports $base_port-$((base_port + count - 1)))"
         total_simulators=$((total_simulators + count))
     done <<< "$simulator_versions"
     
-    echo "   📈 Gesamt: $total_simulators Simulatoren"
+    echo "   Total: $total_simulators simulators"
     echo ""
-    echo "🚀 Nächste Schritte:"
+    echo "Next steps:"
     echo "   1. docker-compose -f docker-compose.generated.yml up -d"
-    echo "   2. Warte auf Container-Start (Health-Checks)"
-    echo "   3. Öffne Frontend: http://localhost:[PORT] für jeden Simulator"
+    echo "   2. Wait for the containers to pass their health checks"
+    echo "   3. Open http://localhost:[PORT] for each simulator"
     echo ""
-    echo "🛠️  Verwaltung:"
-    echo "   • Stoppen: docker-compose -f docker-compose.generated.yml down"
+    echo "Management:"
+    echo "   • Stop: docker-compose -f docker-compose.generated.yml down"
     echo "   • Logs: docker-compose -f docker-compose.generated.yml logs -f [service]"
-    echo "   • Bereinigen: ./cleanup-simulators.sh"
+    echo "   • Clean up: ./cleanup-simulators.sh"
 }
 
 # =============================================================================
-# Hauptprogramm
+# Main entry point
 # =============================================================================
 
 main() {
-    echo "🔧 Fenexity MicroOCPP Multi-Container Generator"
+    echo "MicroOCPP Multi-Container Generator"
     echo "============================================="
     echo ""
     
-    # Parse Argumente
+    # Parse arguments.
     parse_arguments "$@"
     
-    # Prüfe Abhängigkeiten
+    # Check dependencies.
     check_dependencies
     
-    # Validiere Konfiguration
+    # Validate config.
     validate_config
     
-    # Bereinige vorherige Generierungen
+    # Clean previous generated files.
     cleanup_previous
     
-    # Erstelle/Aktualisiere Templates
+    # Create or refresh templates.
     create_templates
     
-    # Generiere Docker Compose Konfiguration
+    # Generate Docker Compose config.
     generate_docker_compose
     
-    # Zusammenfassung ausgeben
+    # Print the summary.
     print_summary
 }
 
-# Führe Hauptprogramm aus
+# Run the main program.
 main "$@"
