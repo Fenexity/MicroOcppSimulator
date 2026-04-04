@@ -1,30 +1,35 @@
 # MicroOCPP Simulator Templates
 
-Dieses Verzeichnis enthält Template-Dateien für die automatische Generierung von mo_store-Konfigurationen für mehrere OCPP-Simulatoren.
+This directory contains template files used to generate `mo_store`
+configurations for multiple OCPP simulators.
 
-## Template-Struktur
+## Template Structure
 
-### mo_store_v16_template/
-Template-Dateien für OCPP 1.6 Simulatoren. Diese werden als Basis für jeden generierten OCPP 1.6 Simulator verwendet.
+### `mo_store_v16_template/`
 
-### mo_store_v201_template/
-Template-Dateien für OCPP 2.0.1 Simulatoren. Diese werden als Basis für jeden generierten OCPP 2.0.1 Simulator verwendet.
+Base files for generated OCPP 1.6 simulators.
 
-## Platzhalter
+### `mo_store_v201_template/`
 
-Die Template-Dateien verwenden folgende Platzhalter, die vom generate-simulators.sh Script automatisch ersetzt werden:
+Base files for generated OCPP 2.0.1 simulators.
 
-- `{{CHARGER_ID}}` - Eindeutige Charger-ID (z.B. charger-v16-001)
-- `{{CSMS_URL}}` - WebSocket-URL zum CSMS/Backend
-- `{{AUTH_PASSWORD}}` - BasicAuth-Passwort (nur OCPP 2.0.1)
-- `{{CITRINEOS_IP}}` - IP-Adresse des CitrineOS Containers
+## Placeholders
 
-## Automatische Generierung
+The generator scripts replace these placeholders automatically:
 
-Diese Templates werden NICHT manuell bearbeitet. Sie werden automatisch aus den aktuellen mo_store_v16/ und mo_store_v201/ Verzeichnissen generiert und mit Platzhaltern versehen.
+- `{{CHARGER_ID}}`: unique charger ID, for example `charger-v16-001`
+- `{{CSMS_URL}}`: WebSocket URL for the backend
+- `{{AUTH_PASSWORD}}`: Basic Auth password for OCPP 2.0.1
+- `{{CITRINEOS_IP}}`: detected IP address of the CitrineOS container
 
-Verwendung:
-1. `./generate-simulators.sh` ausführen
-2. Script kopiert aktuelle mo_store-Dateien in Templates
-3. Script ersetzt spezifische Werte durch Platzhalter
-4. Generierte Simulatoren verwenden diese Templates als Basis
+## Generation Flow
+
+Do not edit these templates manually if they are generated from
+`mo_store_v16/` or `mo_store_v201/`.
+
+Typical flow:
+
+1. Run `./generate-simulators.sh`.
+2. The script copies the current `mo_store` files into template folders.
+3. The script replaces concrete values with placeholders.
+4. Generated simulators use those templates as their base configuration.
