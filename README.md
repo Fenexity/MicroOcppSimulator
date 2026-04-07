@@ -1,456 +1,189 @@
-# Fenexity MicroOCPP Simulator
+# MicroOCPP Simulator
 
-This repository is a fork of [matth-x/MicroOcppSimulator](https://github.com/matth-x/MicroOcppSimulator) with integrated modifications for the Fenexity CSMS Platform.
+This repository extends
+[matth-x/MicroOcppSimulator](https://github.com/matth-x/MicroOcppSimulator)
+with project-specific Docker, depot generation, and CitrineOS integration.
 
-## Features
+## What This Repo Provides
 
-- **Dual OCPP Protocol Support**: OCPP 1.6 and OCPP 2.0.1 simultaneously
-- **Multi-Container Architecture**: Skalierbare Container für beliebig viele Simulatoren
-- **OCPP 1.6 Compliance Fix**: Integrated directly into the code
-- **Environment Variable Configuration**: Dynamic configuration support
-- **Automatic CitrineOS Integration**: Seamless connection with fenexity-csms network
-- **ARM64 Optimized**: Specifically developed for Apple Silicon
+- OCPP 1.6 and OCPP 2.0.1 simulator support
+- Docker-based local simulator setup
+- Depot CSV to simulator generation via `./generate-depot.sh`
+- Multi-container generation via `./generate-simulators.sh`
+- Automatic CitrineOS IP discovery for generated `mo_store` data
+
+## Requirements
+
+- Docker
+- Docker Compose (`docker compose` or `docker-compose`)
+- `yq` for `generate-simulators.sh`
+
+Create the shared external network before starting containers:
+
+```bash
+docker network create fnx-platform-net
+```
 
 ## Quick Start
 
-Clone this repository:
+Clone the repository:
 
 ```bash
 git clone git@github.com:Fenexity/MicroOcppSimulator.git
 cd MicroOcppSimulator
 ```
 
-### Multi-Container Setup (Empfohlen)
+### Depot Generator
 
-Laden einer csv Datei:
+Generate depot simulators from a CSV file:
 
 ```bash
-# 
 ./generate-depot.sh depot-data/chargers-darmstadt.csv 1.6
 ```
 
-Nach einem PC Neustart kann es sein, dass sich die interne IP von Citrineos geändert hat, in dem Fall
+If CitrineOS restarted and its container IP changed, refresh the stored URLs:
 
 ```bash
 ./generate-depot.sh --update-url
 ```
 
-Spezifische Konfiguration:
+Generate files only, without starting containers:
 
 ```bash
-# 1. Konfiguriere gewünschte Anzahl Simulatoren in simulator-config.yml
+./generate-depot.sh depot-data/darmstadt-depot.csv 1.6 --no-start
+```
+
+Generated outputs:
+
+- `simulator-config-depot.yml`
+- `docker-compose-depot.yml`
+- `mo_store_depot/`
+
+### Multi-Container Setup
+
+Edit the simulator definition:
+
+```bash
 nano simulator-config.yml
+```
 
-# 2. Starte alle Simulatoren mit einem Befehl
+Generate and start:
+
+```bash
 ./start-simulators.sh
 ```
 
-**Das war's!** 🎉 Das Script generiert automatisch alle benötigten Konfigurationen und startet die Container.
-
-
-
-
-
-
-
-
-#### Verwaltung
+Management commands:
 
 ```bash
-# Status prüfen
 docker-compose -f docker-compose.generated.yml ps
-
-# Logs anzeigen
 docker-compose -f docker-compose.generated.yml logs -f
-
-# Stoppen
 docker-compose -f docker-compose.generated.yml down
-
-# Komplett bereinigen
 ./cleanup-simulators.sh
 ```
 
-### Legacy Setup (Standard Docker Compose)
+### Standalone Setup
 
-Für einfache Tests mit 2 festen Simulatoren:
+For the fixed two-simulator setup:
 
 ```bash
-# Start both simulators
 docker-compose up -d
-
-# Stop
 docker-compose down
-
 ```
-
-## Konfiguration
-
-Die Anzahl und Art der Simulatoren wird in der Datei `simulator-config.yml` konfiguriert:
-
-```yaml
-# Beispiel-Konfiguration
-simulators:
-  v16:
-    count: 2                    # Anzahl OCPP 1.6 Simulatoren
-    base_port: 7101            # Startport für Frontend
-    csms_url_template: "ws://citrineos:8092/{charger_id}"
-    base_charger_id: "charger-v16"
-    
-  v201:
-    count: 1                    # Anzahl OCPP 2.0.1 Simulatoren  
-    base_port: 7201            # Startport für Frontend
-    csms_url_template: "ws://citrineos:8081/{charger_id}"
-    base_charger_id: "charger-v201"
-```
-
-**Einfach die Anzahl ändern und `./start-simulators.sh` ausführen!**
-
-### Häufige Anwendungsfälle
-
-```bash
-# Kleine Testumgebung (Standard)
-# v16: 2 Simulatoren, v201: 1 Simulator
-./start-simulators.sh
-
-# Große Testumgebung
-# Editiere simulator-config.yml: v16: count: 10, v201: count: 5
-./start-simulators.sh
-
-# Nach CitrineOS Neustart (IP-Änderung)
-./start-simulators.sh  # Erkennt automatisch neue IP
-
-# Komplett neu starten
-./cleanup-simulators.sh
-./start-simulators.sh
-```
-
-### Automatic CitrineOS Integration
-
-The simulators configure themselves **automatically** for CitrineOS:
-
-1. **Init-Container** dynamically determines CitrineOS IP address
-2. **WebSocket Configuration** is created at runtime
-3. **BasicAuth Passwords** are registered in CitrineOS database
-4. **Simulators start** with correct configuration
-
-**A single `docker-compose up -d` is sufficient!** ✅
-
-## Service URLs
-
-| Service | URL | Charge Point ID | OCPP Version |
-|---------|-----|-----------------|--------------|
-| OCPP 1.6 Simulator #1 | http://localhost:7101 | charger-v16-001 | 1.6 |
-| OCPP 1.6 Simulator #2 | http://localhost:7102 | charger-v16-002 | 1.6 |
-| OCPP 2.0.1 Simulator | http://localhost:7201 | charger-v201-001 | 2.0.1 |
-
-**Hinweis**: Die URLs und IDs werden automatisch basierend auf der Konfiguration in `simulator-config.yml` generiert.
-
-## Architecture
-
-### Multi-Container-Architektur
-
-Die neue skalierbare Multi-Container-Architektur ermöglicht es, beliebig viele OCPP-Simulatoren parallel zu betreiben:
-
-#### Kernkomponenten
-
-1. **`simulator-config.yml`** - Zentrale Konfigurationsdatei
-   - Definiert Anzahl der Simulatoren pro OCPP-Version
-   - Konfiguriert Ports, URLs und IDs
-   - Einfach anpassbar für verschiedene Testszenarien
-
-2. **`start-simulators.sh`** - One-Command Starter
-   - Führt automatisch generate-simulators.sh aus
-   - Startet alle Container mit docker-compose up -d
-   - Zeigt Status und URLs an
-   - Komplett automatisierter Workflow
-
-3. **`generate-simulators.sh`** - Automatischer Generator (wird intern aufgerufen)
-   - Liest simulator-config.yml
-   - Erstellt docker-compose.generated.yml
-   - Generiert individuelle mo_store-Verzeichnisse mit korrekten IPs
-   - Erkennt automatisch CitrineOS IP-Adresse (robust gegen Neustarts)
-   - Konfiguriert jeden Simulator mit eindeutiger ID
-
-4. **`cleanup-simulators.sh`** - Bereinigungsscript
-   - Stoppt alle generierten Container
-   - Entfernt generierte Dateien
-   - Verschiedene Bereinigungsoptionen
-
-#### Beispiel-Konfiguration
-
-```yaml
-# simulator-config.yml
-simulators:
-  v16:
-    count: 5          # 5x OCPP 1.6 Simulatoren
-    base_port: 8101   # Ports 8101-8105
-    base_charger_id: "charger-v16"
-  v201:
-    count: 3          # 3x OCPP 2.0.1 Simulatoren  
-    base_port: 8201   # Ports 8201-8203
-    base_charger_id: "charger-v201"
-```
-
-#### Generierte Container
-
-| Simulator | Container | Port | Charger ID | OCPP Version |
-|-----------|-----------|------|------------|--------------|
-| v16-001 | microocpp-sim-v16-001 | 8101 | charger-v16-001 | 1.6 |
-| v16-002 | microocpp-sim-v16-002 | 8102 | charger-v16-002 | 1.6 |
-| v201-001 | microocpp-sim-v201-001 | 8201 | charger-v201-001 | 2.0.1 |
-
-### Integrated Fenexity Modifications
-
-1. **OCPP 1.6 Compliance Fix** (directly in `lib/MicroOcpp/src/MicroOcpp/Operations/StartTransaction.cpp`):
-   - ✅ Correct StartTransaction.req without transactionId
-   - ✅ Accept Transaction ID from CSMS (OCPP 1.6 standard)
-   - ✅ No own Transaction ID generation
-
-2. **Environment Variable Support** (directly in `src/main.cpp`):
-   - ✅ `CENTRAL_SYSTEM_URL` for WebSocket endpoint
-   - ✅ `CHARGER_ID` for charger identification
-   - ✅ Automatic fallback values
-
-3. **Unified ARM64 Docker Build**:
-   - ✅ One Dockerfile for both OCPP versions
-   - ✅ Dynamic CMake configuration
-   - ✅ Environment-based configuration
 
 ## Configuration
 
-### Environment Variables
+The shared external network is configured in:
 
-| Variable | OCPP 1.6 | OCPP 2.0.1 | Description |
-|----------|----------|------------|-------------|
-| `CENTRAL_SYSTEM_URL` | `ws://citrineos:8092/ocpp16` | `ws://citrineos:8082/ocpp201` | WebSocket endpoint |
-| `CHARGER_ID` | `charger-1.6` | `charger-201` | Charger identification |
-| `MO_ENABLE_V201` | `0` | `1` | Enable OCPP version |
-| `BASIC_AUTH_PASSWORD` | - | `fenexity_test_2025` | Auth for OCPP 2.0.1 |
+- `docker-compose.yml`
+- `docker-compose.generated.yml`
+- `docker-compose-depot.yml`
+- `simulator-config.yml`
+- `simulator-config-depot.yml`
 
-### Multi-Container Configuration
+The current external network name is:
 
-#### Konfigurationsdatei: `simulator-config.yml`
+```text
+fnx-platform-net
+```
+
+### `simulator-config.yml`
+
+Example:
 
 ```yaml
+global:
+  network_name: "fnx-platform-net"
+  citrineos_service: "fenexity-citrineos"
+  mo_store_base_path: "./mo_store_generated"
+
 simulators:
   v16:
-    count: 3                    # Anzahl OCPP 1.6 Simulatoren
-    base_port: 8101            # Startport (8101, 8102, 8103)
-    ocpp_version: "1.6"        # OCPP Version
-    base_charger_id: "charger-v16"  # Basis-ID
+    count: 2
+    base_port: 7101
+    ocpp_version: "1.6"
     csms_url_template: "ws://citrineos:8092/{charger_id}"
-    
+    base_charger_id: "charger-v16"
+    container_prefix: "microocpp-sim-v16"
+    environment:
+      MO_ENABLE_V201: "0"
+
   v201:
-    count: 2                   # Anzahl OCPP 2.0.1 Simulatoren  
-    base_port: 8201           # Startport (8201, 8202)
-    ocpp_version: "2.0.1"     # OCPP Version
+    count: 1
+    base_port: 7201
+    ocpp_version: "2.0.1"
+    csms_url_template: "ws://citrineos:8081/{charger_id}"
     base_charger_id: "charger-v201"
-    auth_password: "fenexity_test_2025"
-```
-
-#### Workflow
-
-1. **Konfiguration anpassen**: `simulator-config.yml` bearbeiten
-2. **Generierung**: `./generate-simulators.sh` ausführen  
-3. **Start**: `docker-compose -f docker-compose.generated.yml up -d`
-4. **Bereinigung**: `./cleanup-simulators.sh`
-
-### Directory Structure
-
-```
-MicroOcppSimulator/
-├── lib/MicroOcpp/                  # ✅ Modified MicroOCPP library
-│   └── src/MicroOcpp/Operations/
-│       └── StartTransaction.cpp    # 🔧 OCPP 1.6 Compliance Fix integrated
-├── src/main.cpp                    # 🔧 Environment Variable Support integrated
-├── config/                         # 📁 OCPP configuration files
-├── mo_store_v16/                   # 📁 OCPP 1.6 state files (Template)
-├── mo_store_v201/                  # 📁 OCPP 2.0.1 state files (Template)
-├── mo_store_generated/             # 📁 Generierte Simulator-Konfigurationen
-│   ├── sim_v16_001/               # 📁 Simulator 1 (OCPP 1.6)
-│   ├── sim_v16_002/               # 📁 Simulator 2 (OCPP 1.6)
-│   └── sim_v201_001/              # 📁 Simulator 1 (OCPP 2.0.1)
-├── templates/                      # 📁 mo_store Templates
-├── simulator-config.yml            # ⚙️ Multi-Container Konfiguration
-├── generate-simulators.sh         # 🔧 Generator-Script
-├── cleanup-simulators.sh          # 🧹 Bereinigungsscript
-├── docker-compose.yml              # 🐳 Standard 2-Container Setup
-├── docker-compose.generated.yml   # 🐳 Generierte Multi-Container Orchestration
-└── Dockerfile.arm64                # 🐳 ARM64-optimized build
-```
-
-## Testing
-
-### Basic Functionality Test
-
-1. Start the simulators:
-   ```bash
-   docker-compose up -d
-   ```
-
-2. Check API connectivity:
-   ```bash
-   # Test OCPP 1.6
-   curl http://localhost:8001/api/connectors
-   
-   # Test OCPP 2.0.1
-   curl http://localhost:8002/api/connectors
-   ```
-
-3. Open web interfaces:
-   - OCPP 1.6: http://localhost:8001
-   - OCPP 2.0.1: http://localhost:8002
-
-### OCPP Protocol Tests
-
-#### Standard Setup (2 Container)
-1. **OCPP 1.6**: ChargePoint `charger-1.6` on port 8001
-2. **OCPP 2.0.1**: ChargePoint `charger-201` on port 8002
-
-#### Multi-Container Setup (Skalierbar)
-1. **OCPP 1.6**: ChargePoint `charger-v16-001`, `charger-v16-002`, etc.
-2. **OCPP 2.0.1**: ChargePoint `charger-v201-001`, `charger-v201-002`, etc.
-3. **Port-Range**: Konfigurierbar über `simulator-config.yml`
-
-#### Test-Szenarien
-- **Load Testing**: Viele Simulatoren für Lasttests
-- **Feature Testing**: Verschiedene OCPP-Versionen parallel  
-- **Development**: Einzelne Simulatoren für spezifische Tests
-
-### Multi-Container Management
-
-```bash
-# Alle Container-Status anzeigen
-docker-compose -f docker-compose.generated.yml ps
-
-# Logs eines spezifischen Simulators
-docker-compose -f docker-compose.generated.yml logs -f microocpp-sim-v16-001
-
-# Einzelnen Simulator stoppen
-docker-compose -f docker-compose.generated.yml stop microocpp-sim-v16-001
-
-# Einzelnen Simulator neustarten  
-docker-compose -f docker-compose.generated.yml restart microocpp-sim-v201-002
-
-# Alle Simulatoren skalieren
-# 1. simulator-config.yml anpassen
-# 2. ./generate-simulators.sh --clean
-# 3. docker-compose -f docker-compose.generated.yml up -d
+    container_prefix: "microocpp-sim-v201"
+    auth_password: ""
+    environment:
+      MO_ENABLE_V201: "1"
+      BASIC_AUTH_PASSWORD: ""
 ```
 
 ## CitrineOS Integration
 
-### Automatic Network Configuration
+The simulator workflow expects:
 
-- **Network**: `fenexity-csms` (external)
-- **OCPP 1.6 Endpoint**: `ws://citrineos:8092/ocpp16`
-- **OCPP 2.0.1 Endpoint**: `ws://citrineos:8082/ocpp201`
+- a running CitrineOS container
+- the simulator containers attached to `fnx-platform-net`
+- the CitrineOS container discoverable by name for IP detection
 
-### Charger Registration
-
-The simulators automatically register with CitrineOS:
-- **OCPP 1.6**: `charger-1.6`
-- **OCPP 2.0.1**: `charger-201`
-
-## Debugging
-
-### Container Logs
+The scripts update generated WebSocket configuration with the detected
+CitrineOS container IP. If the IP changes after a restart, run:
 
 ```bash
-# All logs
-docker-compose logs -f
-
-# OCPP 1.6 only
-docker-compose logs -f microocpp-sim-v16
-
-# OCPP 2.0.1 only
-docker-compose logs -f microocpp-sim-v201
+./generate-depot.sh --update-url
 ```
 
-### OCPP 1.6 Compliance Debugging
+## Repository Layout
 
-```bash
-# Filter StartTransaction logs
-docker-compose logs microocpp-sim-v16 | grep -E "FENEXITY_OCPP16_FIX|Transaction|StartTransaction"
+```text
+.
+├── AGENTS.md
+├── Dockerfile.arm64
+├── README.md
+├── cleanup-simulators.sh
+├── config/
+├── depot-data/
+├── docker-compose-depot.yml
+├── docker-compose.generated.yml
+├── docker-compose.standalone.yml
+├── docker-compose.yml
+├── generate-depot.sh
+├── generate-simulators.sh
+├── mo_store/
+├── scripts/
+├── simulator-config-depot.yml
+├── simulator-config.yml
+├── start-simulators.sh
+└── templates/
 ```
 
-### Configuration Debugging
+## Notes
 
-```bash
-# Show current WebSocket configuration
-cat mo_store_v16/ws-conn.jsn | grep -E '"value"|"valActual"'
-cat mo_store_v201/ws-conn-v201.jsn | grep -E '"valActual"'
-```
-
-## Important Notes
-
-### ARM64 Performance
-
-- ⚡ **Native Performance**: Optimized for Apple Silicon
-- 🔧 **Build Time**: Longer compilation time due to architecture optimization
-- 📦 **Image Size**: Compact Alpine-based images
-
-### Network Configuration
-
-- 🌐 **External Network**: `fenexity-csms` must exist
-- 🔌 **Port Mapping**: 8001 (OCPP 1.6), 8002 (OCPP 2.0.1)
-- 🔐 **Security**: OCPP 2.0.1 with Basic Auth
-
-### Port Conflict Avoidance
-
-- Port 8001: Exclusive for OCPP 1.6 Simulator
-- Port 8002: Exclusive for OCPP 2.0.1 Simulator
-- Check with `docker-compose ps` for status
-
-## Production Deployment
-
-### Prerequisites
-
-```bash
-# Create Fenexity CSMS network
-docker network create fenexity-csms
-
-# Start CitrineOS (separate repository)
-# ...
-```
-
-### Deployment
-
-```bash
-# Clone repository
-git clone https://github.com/Fenexity/MicroOcppSimulator.git
-cd MicroOcppSimulator
-
-# Start simulators
-docker-compose up -d
-
-# Test functionality
-curl http://localhost:8001/api/connectors
-curl http://localhost:8002/api/connectors
-```
-
-## Development
-
-### Code Modifications
-
-The main Fenexity modifications are directly integrated into the code:
-
-1. **StartTransaction.cpp**: OCPP 1.6 Compliance Fix
-2. **main.cpp**: Environment Variable Support
-3. **Dockerfile.arm64**: Unified ARM64 Build
-4. **docker-compose.yml**: Dual-Simulator Setup
-
-### Upstream Updates
-
-```bash
-# Add upstream remote
-git remote add upstream https://github.com/matth-x/MicroOcppSimulator.git
-
-# Fetch updates (careful due to modifications)
-git fetch upstream
-git merge upstream/main  # Manual conflict resolution required
-```
-
----
-
-**Fenexity CSMS Platform** - Developed for ARM64 with OCPP 1.6/2.0.1 Dual-Support 🚀
+- `docker-compose.generated.yml` and `docker-compose-depot.yml` are generated
+  artifacts and may be overwritten by the scripts.
+- Depot generation uses `charging_station_id` from the input CSV.
+- OCPP 1.6 and OCPP 2.0.1 use different backend ports and `mo_store`
+  templates.

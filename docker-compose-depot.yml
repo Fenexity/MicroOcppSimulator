@@ -1,15 +1,15 @@
 # =============================================================================
-# Fenexity MicroOCPP Simulator - Depot Docker Compose
+# MicroOCPP Simulator - Depot Docker Compose
 # =============================================================================
-# Automatisch generiert aus Depot CSV
+# Generated automatically from the depot CSV
 # OCPP Version: 1.6
-# Generiert am: 2026-03-20 17:52:03
+# Generated at: 2026-04-04 10:38:16
 # =============================================================================
 
-# Docker Compose (version nicht mehr erforderlich)
+# Docker Compose version field omitted intentionally
 
 networks:
-  fenexity-csms:
+  fnx-platform-net:
     external: true
 
 services:
@@ -18,14 +18,14 @@ services:
     container_name: depot-multi-config
     command: >
       sh -c "
-        echo '🔧 Starting Depot Multi-Container Configuration...'
-        echo '📊 OCPP Version: 1.6'
-        echo '📈 Total Simulators:       31'
-        echo '🎯 Configuration completed successfully!'
+        echo 'Starting depot multi-container configuration...'
+        echo 'OCPP version: 1.6'
+        echo 'Total simulators: 31'
+        echo 'Configuration completed.'
         sleep 5
       "
     networks:
-      - fenexity-csms
+      - fnx-platform-net
 
   sim-CS-EG-001:
     image: microocpp-sim-v16:latest
@@ -38,7 +38,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -67,7 +67,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -96,7 +96,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -125,7 +125,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -154,7 +154,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -183,7 +183,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -212,7 +212,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -241,7 +241,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -270,7 +270,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -299,7 +299,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -328,7 +328,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -357,7 +357,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -386,7 +386,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -415,7 +415,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -444,7 +444,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -473,7 +473,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -502,7 +502,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -531,7 +531,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -560,7 +560,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -589,7 +589,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -618,7 +618,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -647,7 +647,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -676,7 +676,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -705,7 +705,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -734,7 +734,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -763,7 +763,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -792,7 +792,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -821,7 +821,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -850,7 +850,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -879,7 +879,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -908,7 +908,7 @@ services:
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -925,4 +925,3 @@ services:
       - API_PORT=7131
       - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
-

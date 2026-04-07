@@ -3,7 +3,7 @@
 # =============================================================================
 
 global:
-  network_name: "fenexity-csms"
+  network_name: "fnx-platform-net"
   citrineos_service: "fenexity-citrineos"
   mo_store_base_path: "./mo_store_generated"
 

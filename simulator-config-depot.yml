@@ -1,20 +1,20 @@
 # =============================================================================
-# Fenexity MicroOCPP Simulator - Depot Configuration
+# MicroOCPP Simulator - Depot Configuration
 # =============================================================================
-# Automatisch generiert aus: chargers-darmstadt.csv
+# Generated automatically from: chargers-darmstadt.csv
 # OCPP Version: 1.6
-# Anzahl Ladesäulen:       31
-# Generiert am: 2026-03-20 17:52:03
+# Charging stations: 31
+# Generated at: 2026-04-04 10:38:16
 # =============================================================================
 
 global:
-  network_name: "fenexity-csms"
+  network_name: "fnx-platform-net"
   citrineos_service: "fenexity-citrineos"
   mo_store_base_path: "./mo_store_depot"
 
 simulators:
   v16:
-    count:       31
+    count: 31
     base_port: 7101
     ocpp_version: "1.6"
     csms_url_template: "ws://citrineos:8092/{charger_id}"
@@ -22,7 +22,7 @@ simulators:
     container_prefix: "depot-sim-v16"
     environment:
       MO_ENABLE_V201: "0"
-    # Depot-spezifische IDs (werden automatisch zugewiesen)
+    # Depot-specific IDs assigned by the generator.
     depot_ids:
       - id: "CS-EG-001"
         index: 1

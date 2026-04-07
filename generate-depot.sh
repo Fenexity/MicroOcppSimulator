@@ -1,46 +1,46 @@
 #!/bin/bash
 
 # =============================================================================
-# Fenexity MicroOCPP Simulator - Depot Generator
+# MicroOCPP Simulator - Depot Generator
 # =============================================================================
-# Automatische Generierung von OCPP-Simulatoren basierend auf Charger CSV-Dateien
+# Generate OCPP simulators from charger CSV files
 #
-# Verwendung:
+# Usage:
 #   ./generate-depot.sh <CSV_FILE> [OCPP_VERSION]
 #   ./generate-depot.sh depot-data/chargers-darmstadt.csv 1.6
 #   ./generate-depot.sh depot-data/chargers-hamburg.csv 2.0.1
 #
-# Parameter:
-#   CSV_FILE      - Pfad zur Charger CSV-Datei
-#   OCPP_VERSION  - OCPP Version (1.6 oder 2.0.1, Standard: 1.6)
+# Parameters:
+#   CSV_FILE      - path to the charger CSV file
+#   OCPP_VERSION  - OCPP version (1.6 or 2.0.1, default: 1.6)
 #
-# CSV Format (Charger-Datei):
-#   - Muss eine Spalte "charger_id" enthalten
-#   - Muss eine Spalte "max_power_kw" enthalten (Leistung in kW)
-#   - Mehrere Zeilen pro Charger moeglich (eine pro Connector)
-#   - Eindeutige charger_id werden automatisch erkannt
+# CSV format (charger file):
+#   - must contain a "charger_id" column
+#   - must contain a "max_power_kw" column (power in kW)
+#   - multiple rows per charger allowed (one per connector)
+#   - unique charger_id values are detected automatically
 #
-# Ausgabe:
-#   - simulator-config-depot.yml (generierte Konfiguration)
-#   - docker-compose-depot.yml (Docker Compose fuer Depot)
-#   - mo_store_depot/ (Generierte mo_store Verzeichnisse)
+# Output:
+#   - simulator-config-depot.yml (generated configuration)
+#   - docker-compose-depot.yml (Docker Compose for the depot setup)
+#   - mo_store_depot/ (generated mo_store directories)
 # =============================================================================
 
-set -e  # Beende bei Fehlern
+set -e  # Exit on failure
 
 # =============================================================================
-# Konfiguration und Variablen
+# Configuration and variables
 # =============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CSV_FILE=""
-OCPP_VERSION="1.6"  # Standard
-NO_START=false      # Standard: Container automatisch starten
+OCPP_VERSION="1.6"  # Default
+NO_START=false      # Default: start containers automatically
 OUTPUT_CONFIG="${SCRIPT_DIR}/simulator-config-depot.yml"
 OUTPUT_COMPOSE="${SCRIPT_DIR}/docker-compose-depot.yml"
 GENERATED_DIR="${SCRIPT_DIR}/mo_store_depot"
 
-# Farben für Output
+# Output colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -49,7 +49,7 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # =============================================================================
-# Hilfsfunktionen
+# Helpers
 # =============================================================================
 
 log_info() {
@@ -69,46 +69,46 @@ log_error() {
 }
 
 show_help() {
-    echo "🔧 Fenexity MicroOCPP Depot Generator"
+    echo "MicroOCPP Depot Generator"
     echo "====================================="
     echo ""
-    echo "Verwendung:"
+    echo "Usage:"
     echo "  $0 <CSV_FILE> [OCPP_VERSION] [--no-start]"
     echo "  $0 --update-url"
     echo ""
-    echo "Parameter:"
-    echo "  CSV_FILE      Pfad zur Charger CSV-Datei (erforderlich)"
-    echo "  OCPP_VERSION  OCPP Version: 1.6 oder 2.0.1 (Standard: 1.6)"
-    echo "  --no-start    Nur generieren, Container nicht automatisch starten"
-    echo "  --update-url  Aktualisiere CitrineOS IP und starte Container neu"
+    echo "Parameters:"
+    echo "  CSV_FILE      Path to the charger CSV file (required)"
+    echo "  OCPP_VERSION  OCPP version: 1.6 or 2.0.1 (default: 1.6)"
+    echo "  --no-start    Generate files only, do not start containers"
+    echo "  --update-url  Refresh the CitrineOS IP and restart containers"
     echo ""
-    echo "Beispiele:"
+    echo "Examples:"
     echo "  $0 depot-data/chargers-darmstadt.csv"
     echo "  $0 depot-data/chargers-darmstadt.csv 1.6"
     echo "  $0 depot-data/chargers-hamburg.csv 2.0.1 --no-start"
-    echo "  $0 --update-url                    # IP aktualisieren + Container neu starten"
+    echo "  $0 --update-url                    # refresh IP + restart containers"
     echo ""
-    echo "CSV-Anforderungen (Charger-Datei):"
-    echo "  - Muss Header-Zeile mit 'charger_id' Spalte enthalten"
-    echo "  - Muss 'max_power_kw' Spalte enthalten (Leistung in kW)"
-    echo "  - Mehrere Zeilen pro Charger moeglich (eine pro Connector)"
-    echo "  - Eindeutige charger_id werden automatisch erkannt"
+    echo "CSV requirements (charger file):"
+    echo "  - Must contain a header row with a 'charger_id' column"
+    echo "  - Must contain a 'max_power_kw' column (power in kW)"
+    echo "  - Multiple rows per charger allowed (one per connector)"
+    echo "  - Unique charger_id values are detected automatically"
     echo ""
-    echo "Ausgabe:"
-    echo "  📄 simulator-config-depot.yml"
-    echo "  🐳 docker-compose-depot.yml"
-    echo "  📁 mo_store_depot/"
+    echo "Output:"
+    echo "  simulator-config-depot.yml"
+    echo "  docker-compose-depot.yml"
+    echo "  mo_store_depot/"
 }
 
 # =============================================================================
-# Validierungsfunktionen
+# Validation helpers
 # =============================================================================
 
 validate_csv_file() {
     local csv_file="$1"
     
     if [[ ! -f "$csv_file" ]]; then
-        log_error "CSV-Datei nicht gefunden: $csv_file"
+        log_error "CSV file not found: $csv_file"
         return 1
     fi
     
@@ -116,18 +116,18 @@ validate_csv_file() {
     header=$(head -1 "$csv_file")
     
     if ! echo "$header" | grep -q "charger_id"; then
-        log_error "CSV-Datei muss eine 'charger_id' Spalte enthalten"
-        log_error "Gefundene Header: $header"
+        log_error "CSV file must contain a 'charger_id' column"
+        log_error "Detected headers: $header"
         return 1
     fi
     
     if ! echo "$header" | grep -q "max_power_kw"; then
-        log_error "CSV-Datei muss eine 'max_power_kw' Spalte enthalten"
-        log_error "Gefundene Header: $header"
+        log_error "CSV file must contain a 'max_power_kw' column"
+        log_error "Detected headers: $header"
         return 1
     fi
     
-    log_success "CSV-Datei validiert: $csv_file"
+    log_success "Validated CSV file: $csv_file"
     return 0
 }
 
@@ -135,38 +135,45 @@ validate_ocpp_version() {
     local version="$1"
     
     if [[ "$version" != "1.6" && "$version" != "2.0.1" ]]; then
-        log_error "Ungültige OCPP-Version: $version"
-        log_error "Erlaubte Versionen: 1.6, 2.0.1"
+        log_error "Invalid OCPP version: $version"
+        log_error "Allowed versions: 1.6, 2.0.1"
         return 1
     fi
     
-    log_success "OCPP-Version validiert: $version"
+    log_success "Validated OCPP version: $version"
     return 0
 }
 
 # =============================================================================
-# CSV-Parsing Funktionen
+# CSV parsing helpers
 # =============================================================================
 
 extract_charging_stations() {
     local csv_file="$1"
     local temp_file=$(mktemp)
     
-    log_info "Extrahiere Charger-IDs aus CSV..." >&2
+    log_info "Extracting charger IDs from the CSV..." >&2
     
     local header=$(head -1 "$csv_file")
-    local column_index=$(echo "$header" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | grep -n "^charger_id$" | cut -d: -f1)
+    local column_index
+    column_index=$(
+        echo "$header" \
+            | tr ',' '\n' \
+            | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
+            | grep -n "^charger_id$" \
+            | cut -d: -f1
+    )
     
     if [[ -z "$column_index" ]]; then
-        log_error "charger_id Spalte nicht gefunden"
-        log_error "Header-Zeile: $header"
-        log_error "Bereinigte Spalten:"
+        log_error "charger_id column not found"
+        log_error "Header row: $header"
+        log_error "Normalized columns:"
         echo "$header" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | nl >&2
         rm -f "$temp_file"
         return 1
     fi
     
-    log_info "charger_id gefunden in Spalte $column_index" >&2
+    log_info "Found charger_id in column $column_index" >&2
     
     tail -n +2 "$csv_file" | \
         cut -d',' -f"$column_index" | \
@@ -175,13 +182,13 @@ extract_charging_stations() {
         sort -u > "$temp_file"
     
     local count=$(wc -l < "$temp_file")
-    log_success "Gefunden: $count eindeutige Charger" >&2
+    log_success "Found $count unique chargers" >&2
     
     if [[ $count -gt 0 ]]; then
-        log_info "Beispiel-IDs:" >&2
+        log_info "Example IDs:" >&2
         head -5 "$temp_file" | sed 's/^/  - /' >&2
         if [[ $count -gt 5 ]]; then
-            echo "  ... und $(($count - 5)) weitere" >&2
+            echo "  ... and $(($count - 5)) more" >&2
         fi
     fi
     
@@ -189,7 +196,7 @@ extract_charging_stations() {
 }
 
 # =============================================================================
-# CitrineOS IP-Detection
+# CitrineOS IP detection
 # =============================================================================
 
 is_valid_ipv4() {
@@ -200,19 +207,25 @@ detect_citrineos_ip() {
     local citrineos_service="fenexity-citrineos"
     local raw_ip
     
-    log_info "🔍 Erkenne CitrineOS IP-Adresse..." >&2
+    log_info "Detecting the CitrineOS IP address..." >&2
     
-    raw_ip=$(docker inspect "$citrineos_service" --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' 2>/dev/null || echo "")
+    raw_ip=$(
+        docker inspect "$citrineos_service" \
+            --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' \
+            2>/dev/null || echo ""
+    )
     
     if is_valid_ipv4 "$raw_ip"; then
-        log_success "CitrineOS IP erkannt: $raw_ip" >&2
+        log_success "Detected CitrineOS IP: $raw_ip" >&2
         echo "$raw_ip"
         return 0
     fi
     
-    log_warning "CitrineOS Container '$citrineos_service': keine gültige IP (Antwort: '$raw_ip')" >&2
-    log_info "Verfügbare Container:" >&2
-    docker ps --format "table {{.Names}}\t{{.Status}}" | grep -E "(citrineos|CitrineOS)" >&2 || log_warning "Keine CitrineOS Container gefunden" >&2
+    log_warning "CitrineOS container '$citrineos_service' has no valid IP "
+    log_warning "(response: '$raw_ip')" >&2
+    log_info "Available containers:" >&2
+    docker ps --format "table {{.Names}}\t{{.Status}}" | grep -E "(citrineos|CitrineOS)" >&2 \
+        || log_warning "No CitrineOS containers found" >&2
     
     echo ""
     return 1
@@ -222,22 +235,22 @@ update_citrineos_ip_in_containers() {
     local new_ip="$1"
     
     if [[ -z "$new_ip" ]]; then
-        log_error "Keine IP-Adresse angegeben"
+        log_error "No IP address provided"
         return 1
     fi
     
     if ! is_valid_ipv4 "$new_ip"; then
-        log_error "Ungültige IP-Adresse: '$new_ip'"
+        log_error "Invalid IP address: '$new_ip'"
         return 1
     fi
     
-    log_info "🔄 Aktualisiere CitrineOS IP ($new_ip) in allen Depot-Containern..."
+    log_info "Updating the CitrineOS IP ($new_ip) in all depot containers..."
     
     local containers
     containers=$(docker ps --format "{{.Names}}" | grep "^sim-CS-" || echo "")
     
     if [[ -z "$containers" ]]; then
-        log_warning "Keine laufenden Depot-Container gefunden"
+        log_warning "No running depot containers found"
         return 0
     fi
     
@@ -248,83 +261,88 @@ update_citrineos_ip_in_containers() {
         [[ -z "$container_name" ]] && continue
         ((total_count++))
         
-        log_info "📝 Aktualisiere $container_name..."
+        log_info "Updating $container_name..."
         
         if docker exec "$container_name" sh -c "
             CONFIG_FILE=/MicroOcppSimulator/mo_store/ws-conn.jsn
             if [ -f \"\$CONFIG_FILE\" ]; then
                 sed -i 's|ws://[^:]*:|ws://$new_ip:|g' \"\$CONFIG_FILE\"
-                echo 'ws-conn.jsn aktualisiert'
+                echo 'ws-conn.jsn updated'
             else
-                echo 'ws-conn.jsn nicht gefunden'
+                echo 'ws-conn.jsn not found'
                 exit 1
             fi
         " 2>/dev/null; then
             ((updated_count++))
-            log_success "✅ $container_name aktualisiert"
+            log_success "Updated $container_name"
         else
-            log_error "❌ Fehler beim Aktualisieren von $container_name"
+            log_error "Failed to update $container_name"
         fi
     done <<< "$containers"
     
-    log_success "🎉 IP-Update abgeschlossen: $updated_count/$total_count Container aktualisiert"
+    log_success "IP update finished: $updated_count/$total_count containers updated"
     
     return 0
 }
 
 restart_depot_containers() {
-    local restart_mode="$1"  # "all" oder "updated"
+    local restart_mode="$1"  # "all" or "updated"
     
-    log_info "🔄 Starte Depot-Container neu..."
+    log_info "Restarting depot containers..."
     
     if [[ ! -f "docker-compose-depot.yml" ]]; then
-        log_error "docker-compose-depot.yml nicht gefunden"
-        log_info "Führe zuerst './generate-depot.sh <csv-datei> <ocpp-version>' aus"
+        log_error "docker-compose-depot.yml not found"
+        log_info "Run './generate-depot.sh <csv-file> <ocpp-version>' first"
         return 1
     fi
     
-    # Überprüfe ob Container laufen
+    # Check whether containers are already running.
     local running_containers
-    running_containers=$(docker-compose -f docker-compose-depot.yml ps -q 2>/dev/null | wc -l | tr -d ' ')
+    running_containers=$(
+        docker-compose -f docker-compose-depot.yml ps -q 2>/dev/null | wc -l | tr -d ' '
+    )
     
     if [[ "$running_containers" -eq 0 ]]; then
-        log_warning "Keine laufenden Depot-Container gefunden"
-        log_info "Starte Container..."
+        log_warning "No running depot containers found"
+        log_info "Starting containers..."
         if docker-compose -f docker-compose-depot.yml up -d; then
-            log_success "✅ Container erfolgreich gestartet"
+            log_success "Started containers successfully"
         else
-            log_error "❌ Fehler beim Starten der Container"
+            log_error "Failed to start containers"
             return 1
         fi
     else
-        log_info "Starte $running_containers Container neu..."
+        log_info "Restarting $running_containers containers..."
         if docker-compose -f docker-compose-depot.yml restart; then
-            log_success "✅ Container erfolgreich neu gestartet"
+            log_success "Restarted containers successfully"
         else
-            log_error "❌ Fehler beim Neustarten der Container"
+            log_error "Failed to restart containers"
             return 1
         fi
     fi
     
-    # Warte kurz und überprüfe Status
+    # Wait briefly and then check status.
     sleep 5
     local healthy_containers
-    healthy_containers=$(docker-compose -f docker-compose-depot.yml ps --filter "status=running" -q 2>/dev/null | wc -l | tr -d ' ')
+    healthy_containers=$(
+        docker-compose -f docker-compose-depot.yml ps --filter "status=running" -q \
+            2>/dev/null | wc -l | tr -d ' '
+    )
     
-    log_info "📊 Status: $healthy_containers/$running_containers Container laufen"
+    log_info "Status: $healthy_containers/$running_containers containers running"
     
     return 0
 }
 
 # =============================================================================
-# Charger-Power-Extraktion
+# Charger power extraction
 # =============================================================================
 
 extract_max_power_from_csv() {
     local csv_file="$1"
     local charger_id="$2"
     
-    log_info "Extrahiere max_power fuer $charger_id aus CSV..." >&2
+    log_info "Extracting max_power for $charger_id from the CSV..." >&2
     
     local max_power_kw=$(awk -F',' -v cid="$charger_id" '
         NR == 1 {
@@ -352,16 +370,16 @@ extract_max_power_from_csv() {
     
     if [[ -n "$max_power_kw" && "$max_power_kw" != "0" ]]; then
         local power_w=$((max_power_kw * 1000))
-        log_info "Gefunden: ${max_power_kw}kW = ${power_w}W fuer $charger_id" >&2
+        log_info "Found ${max_power_kw}kW = ${power_w}W for $charger_id" >&2
         echo "$power_w"
     else
-        log_warning "Keine max_power_kw fuer $charger_id gefunden, verwende Standard 11kW" >&2
+        log_warning "No max_power_kw found for $charger_id. Using default 11kW." >&2
         echo "11000"
     fi
 }
 
 # =============================================================================
-# Konfigurationsgenerierung
+# Configuration generation
 # =============================================================================
 
 generate_simulator_config() {
@@ -369,7 +387,7 @@ generate_simulator_config() {
     local ocpp_version="$2"
     local csv_filename="$3"
     
-    log_info "Generiere Simulator-Konfiguration..."
+    log_info "Generating simulator configuration..."
     
     local count=$(wc -l < "$charging_stations_file")
     local version_key
@@ -391,16 +409,16 @@ generate_simulator_config() {
     
     cat > "$OUTPUT_CONFIG" << EOF
 # =============================================================================
-# Fenexity MicroOCPP Simulator - Depot Configuration
+# MicroOCPP Simulator - Depot Configuration
 # =============================================================================
-# Automatisch generiert aus: $csv_filename
+# Generated automatically from: $csv_filename
 # OCPP Version: $ocpp_version
-# Anzahl Ladesäulen: $count
-# Generiert am: $(date '+%Y-%m-%d %H:%M:%S')
+# Charging stations: $count
+# Generated at: $(date '+%Y-%m-%d %H:%M:%S')
 # =============================================================================
 
 global:
-  network_name: "fenexity-csms"
+  network_name: "fnx-platform-net"
   citrineos_service: "fenexity-citrineos"
   mo_store_base_path: "./mo_store_depot"
 
@@ -423,11 +441,11 @@ EOF
     cat >> "$OUTPUT_CONFIG" << EOF
     environment:
       $env_vars
-    # Depot-spezifische IDs (werden automatisch zugewiesen)
+    # Depot-specific IDs assigned by the generator.
     depot_ids:
 EOF
 
-    # Füge alle charging station IDs hinzu
+    # Add all charging station IDs.
     local index=1
     while IFS= read -r station_id; do
         echo "      - id: \"$station_id\"" >> "$OUTPUT_CONFIG"
@@ -454,12 +472,12 @@ docker:
     start_period: "30s"
 EOF
 
-    log_success "Konfiguration erstellt: $OUTPUT_CONFIG"
+    log_success "Created configuration: $OUTPUT_CONFIG"
 }
 
 
 # =============================================================================
-# Docker Compose Generierung
+# Docker Compose generation
 # =============================================================================
 
 generate_docker_compose() {
@@ -467,7 +485,7 @@ generate_docker_compose() {
     local ocpp_version="$2"
     local csv_file="$3"
     
-    log_info "Generiere Docker Compose Konfiguration..."
+    log_info "Generating Docker Compose configuration..."
     
     local version_key
     local dockerfile="Dockerfile.arm64"
@@ -478,20 +496,20 @@ generate_docker_compose() {
         version_key="v201"
     fi
     
-    # Docker Compose Header
+    # Docker Compose header.
     cat > "$OUTPUT_COMPOSE" << EOF
 # =============================================================================
-# Fenexity MicroOCPP Simulator - Depot Docker Compose
+# MicroOCPP Simulator - Depot Docker Compose
 # =============================================================================
-# Automatisch generiert aus Depot CSV
+# Generated automatically from the depot CSV
 # OCPP Version: $ocpp_version
-# Generiert am: $(date '+%Y-%m-%d %H:%M:%S')
+# Generated at: $(date '+%Y-%m-%d %H:%M:%S')
 # =============================================================================
 
-# Docker Compose (version nicht mehr erforderlich)
+# Docker Compose version field omitted intentionally
 
 networks:
-  fenexity-csms:
+  fnx-platform-net:
     external: true
 
 services:
@@ -500,18 +518,18 @@ services:
     container_name: depot-multi-config
     command: >
       sh -c "
-        echo '🔧 Starting Depot Multi-Container Configuration...'
-        echo '📊 OCPP Version: $ocpp_version'
-        echo '📈 Total Simulators: $(wc -l < "$charging_stations_file")'
-        echo '🎯 Configuration completed successfully!'
+        echo 'Starting depot multi-container configuration...'
+        echo 'OCPP version: $ocpp_version'
+        echo 'Total simulators: $(wc -l < "$charging_stations_file")'
+        echo 'Configuration completed.'
         sleep 5
       "
     networks:
-      - fenexity-csms
+      - fnx-platform-net
 
 EOF
 
-    # Generiere Services für jede Ladesäule
+    # Generate services for each charging station.
     local index=1
     local base_port
     
@@ -525,8 +543,10 @@ EOF
         local port=$((base_port + index - 1))
         local container_name="sim-${station_id}"
         local service_name="sim-${station_id}"
+        local mo_store_volume
+        mo_store_volume="./mo_store_depot/depot_${version_key}_$(printf "%03d" $index)"
         
-        # Bestimme Image-Name basierend auf OCPP Version
+        # Resolve the image name from the OCPP version.
         local image_name
         if [[ "$ocpp_version" == "1.6" ]]; then
             image_name="microocpp-sim-v16:latest"
@@ -534,7 +554,7 @@ EOF
             image_name="microocpp-sim-v201:latest"
         fi
         
-        # Extrahiere maximale Leistung aus CSV
+        # Extract max power from the CSV.
         local max_power_w=$(extract_max_power_from_csv "$csv_file" "$station_id")
 
         cat >> "$OUTPUT_COMPOSE" << EOF
@@ -545,11 +565,11 @@ EOF
     ports:
       - "$port:8000"
     volumes:
-      - "./mo_store_depot/depot_${version_key}_$(printf "%03d" $index):/MicroOcppSimulator/mo_store:rw"
+      - "$mo_store_volume:/MicroOcppSimulator/mo_store:rw"
       - "./config:/MicroOcppSimulator/config:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - fenexity-csms
+      - fnx-platform-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
@@ -579,39 +599,40 @@ EOF
         ((index++))
     done < "$charging_stations_file"
     
-    log_success "Docker Compose erstellt: $OUTPUT_COMPOSE"
+    log_success "Created Docker Compose file: $OUTPUT_COMPOSE"
 }
 
 # =============================================================================
-# mo_store Generierung
+# mo_store generation
 # =============================================================================
 
 # =============================================================================
-# Template-Erstellung (exakt wie in generate-simulators.sh)
+# Template creation, matching generate-simulators.sh
 # =============================================================================
 
 create_templates() {
     local templates_dir="./templates"
     
-    log_info "Erstelle/Aktualisiere Templates..." >&2
+    log_info "Creating or refreshing templates..." >&2
     
-    # Erstelle Templates-Verzeichnis
+    # Create the templates directory.
     mkdir -p "$templates_dir"
     
-    # OCPP 1.6 Template
+    # OCPP 1.6 template.
     if [[ -d "./mo_store_v16" ]]; then
         local v16_template_dir="${templates_dir}/mo_store_v16_template"
         rm -rf "$v16_template_dir"
         mkdir -p "$v16_template_dir"
         
-        # Kopiere mo_store_v16 Inhalte (nur wenn Template nicht existiert)
+        # Copy mo_store_v16 content.
         if [[ ! -f "$v16_template_dir/simulator.jsn" ]]; then
             cp -r "./mo_store_v16"/* "$v16_template_dir/"
         fi
         
-        # Erstelle Platzhalter in Template-Dateien
+        # Create placeholders in template files.
         if [[ -f "${v16_template_dir}/ws-conn.jsn" ]]; then
-            sed -i.bak 's|ws://[^/]*/charger-1.6|ws://{{CITRINEOS_IP}}:8092/{{CHARGER_ID}}|g' "${v16_template_dir}/ws-conn.jsn"
+            sed -i.bak 's|ws://[^/]*/charger-1.6|ws://{{CITRINEOS_IP}}:8092/{{CHARGER_ID}}|g' \
+                "${v16_template_dir}/ws-conn.jsn"
             sed -i.bak 's/"charger-1.6"/"{{CHARGER_ID}}"/g' "${v16_template_dir}/ws-conn.jsn"
             rm -f "${v16_template_dir}/ws-conn.jsn.bak"
         fi
@@ -622,22 +643,25 @@ create_templates() {
         fi
     fi
     
-    # OCPP 2.0.1 Template
+    # OCPP 2.0.1 template.
     if [[ -d "./mo_store_v201" ]]; then
         local v201_template_dir="${templates_dir}/mo_store_v201_template"
         rm -rf "$v201_template_dir"
         mkdir -p "$v201_template_dir"
         
-        # Kopiere mo_store_v201 Inhalte (nur wenn Template nicht existiert)
+        # Copy mo_store_v201 content.
         if [[ ! -f "$v201_template_dir/simulator.jsn" ]]; then
             cp -r "./mo_store_v201"/* "$v201_template_dir/"
         fi
         
-        # Erstelle Platzhalter in Template-Dateien
+        # Create placeholders in template files.
         if [[ -f "${v201_template_dir}/ws-conn-v201.jsn" ]]; then
-            sed -i.bak 's|ws://[^/]*/charger-201|ws://{{CITRINEOS_IP}}:8081/{{CHARGER_ID}}|g' "${v201_template_dir}/ws-conn-v201.jsn"
-            sed -i.bak 's/"charger-201"/"{{CHARGER_ID}}"/g' "${v201_template_dir}/ws-conn-v201.jsn"
-            sed -i.bak 's/"fenexity_test_2025"/"{{AUTH_PASSWORD}}"/g' "${v201_template_dir}/ws-conn-v201.jsn"
+            sed -i.bak 's|ws://[^/]*/charger-201|ws://{{CITRINEOS_IP}}:8081/{{CHARGER_ID}}|g' \
+                "${v201_template_dir}/ws-conn-v201.jsn"
+            sed -i.bak 's/"charger-201"/"{{CHARGER_ID}}"/g' \
+                "${v201_template_dir}/ws-conn-v201.jsn"
+            sed -i.bak 's/"fenexity_test_2025"/"{{AUTH_PASSWORD}}"/g' \
+                "${v201_template_dir}/ws-conn-v201.jsn"
             rm -f "${v201_template_dir}/ws-conn-v201.jsn.bak"
         fi
         
@@ -647,7 +671,7 @@ create_templates() {
         fi
     fi
     
-    log_success "Templates erstellt/aktualisiert" >&2
+    log_success "Templates created or updated" >&2
 }
 
 generate_mo_store_single() {
@@ -657,42 +681,42 @@ generate_mo_store_single() {
     local auth_password="$4"
     local output_dir="$5"
     
-    log_info "Generiere mo_store für $charger_id..." >&2
+    log_info "Generating mo_store for $charger_id..." >&2
     
-    # Bestimme Template-Verzeichnis
+    # Resolve the template directory.
     local template_dir
     if [[ "$version" == "1.6" ]]; then
         template_dir="./templates/mo_store_v16_template"
     elif [[ "$version" == "2.0.1" ]]; then
         template_dir="./templates/mo_store_v201_template"
     else
-        log_error "Unbekannte OCPP-Version: $version"
+        log_error "Unknown OCPP version: $version"
         return 1
     fi
     
     if [[ ! -d "$template_dir" ]]; then
-        log_error "Template-Verzeichnis nicht gefunden: $template_dir" >&2
+        log_error "Template directory not found: $template_dir" >&2
         return 1
     fi
     
-    # Kopiere Template-Dateien direkt
+    # Copy the template files.
     mkdir -p "$output_dir"
     cp -r "${template_dir}"/* "$output_dir/"
     
-    # Ermittle CitrineOS IP
+    # Detect the CitrineOS IP.
     local citrineos_ip
     citrineos_ip=$(detect_citrineos_ip)
     
     if [[ -z "$citrineos_ip" ]]; then
-        log_error "Konnte keine gültige CitrineOS IP ermitteln. Container muss laufen!" >&2
+        log_error "Could not determine a valid CitrineOS IP. The container must be running." >&2
         return 1
     fi
     
-    # Erstelle IP-basierte CSMS URL (ersetze Service-Namen mit IP)
+    # Replace the service name with the detected IP in the CSMS URL.
     local csms_url_with_ip
     csms_url_with_ip=$(echo "$csms_url" | sed "s/citrineos/$citrineos_ip/g")
     
-    # Ersetze Platzhalter in allen JSON-Dateien (exakt wie in generate-simulators.sh)
+    # Replace placeholders in all JSON files.
     find "$output_dir" -name "*.jsn" -o -name "*.json" | while read -r file; do
         sed -i.bak "s/{{CHARGER_ID}}/$charger_id/g" "$file"
         sed -i.bak "s|{{CSMS_URL}}|$csms_url_with_ip|g" "$file"
@@ -701,28 +725,28 @@ generate_mo_store_single() {
         rm -f "$file.bak"
     done
     
-    log_success "mo_store für $charger_id erstellt: $output_dir" >&2
+    log_success "Created mo_store for $charger_id: $output_dir" >&2
 }
 
 cleanup_old_mo_store() {
-    log_info "Bereinige alte mo_store Dateien..."
+    log_info "Cleaning previous mo_store files..."
     
-    # Entferne komplettes mo_store_depot Verzeichnis falls vorhanden
+    # Remove the existing mo_store_depot directory if it exists.
     if [[ -d "mo_store_depot" ]]; then
-        log_info "Lösche vorhandenes mo_store_depot Verzeichnis..."
+        log_info "Removing the existing mo_store_depot directory..."
         rm -rf mo_store_depot
-        log_success "Altes mo_store_depot Verzeichnis entfernt"
+        log_success "Removed the previous mo_store_depot directory"
     fi
     
-    # Erstelle neues leeres Verzeichnis
+    # Create a fresh directory.
     mkdir -p mo_store_depot
-    log_success "Neues mo_store_depot Verzeichnis erstellt"
+    log_success "Created a fresh mo_store_depot directory"
 }
 
 ensure_images_exist() {
     local ocpp_version="$1"
     
-    log_info "Prüfe ob benötigte Docker Images existieren..."
+    log_info "Checking whether the required Docker images exist..."
     
     local image_name
     local ghcr_image
@@ -734,40 +758,40 @@ ensure_images_exist() {
         ghcr_image="ghcr.io/fenexity/microocpp-sim-v201:latest"
     fi
     
-    # Prüfe ob Image existiert
+    # Check whether the image already exists.
     if docker image inspect "$image_name" >/dev/null 2>&1; then
-        log_success "✅ Image $image_name bereits vorhanden"
+        log_success "Image $image_name is already available"
         return 0
     fi
     
-    log_info "🔨 Image $image_name nicht gefunden - versuche Pull von GHCR..."
-    log_info "📦 Lade Image: $ghcr_image"
+    log_info "Image $image_name not found. Trying to pull it from GHCR..."
+    log_info "Pulling image: $ghcr_image"
     echo ""
     
-    # Versuche Pull von GHCR
+    # Try pulling from GHCR first.
     if docker pull "$ghcr_image" 2>&1; then
-        # Tag das GHCR-Image lokal
+        # Tag the GHCR image locally.
         docker tag "$ghcr_image" "$image_name"
         echo ""
-        log_success "🎉 Image $image_name erfolgreich von GHCR gepullt!"
-        log_info "💾 Image ist jetzt lokal verfügbar"
+        log_success "Pulled $image_name from GHCR successfully"
+        log_info "The image is now available locally"
         echo ""
         return 0
     fi
     
     echo ""
-    log_warning "⚠️  Pull von GHCR fehlgeschlagen - versuche lokalen Build..."
-    log_info "📦 Baue Docker Image für OCPP $ocpp_version..."
+    log_warning "GHCR pull failed. Trying a local build..."
+    log_info "Building the Docker image for OCPP $ocpp_version..."
     
-    # Zeige Build-Fortschritt
-    echo "   🔧 Platform: linux/arm64"
-    echo "   📋 Dockerfile: Dockerfile.arm64"
-    echo "   🔌 OCPP Version: $ocpp_version"
-    echo "   🏷️  Image Tag: $image_name"
+    # Show basic build information.
+    echo "   Platform: linux/arm64"
+    echo "   Dockerfile: Dockerfile.arm64"
+    echo "   OCPP version: $ocpp_version"
+    echo "   Image tag: $image_name"
     echo ""
     
-    # Fallback: Lokaler Build
-    log_info "⚙️  Starte Docker Build (das kann einige Minuten dauern)..."
+    # Fallback: local build.
+    log_info "Starting Docker build. This can take a few minutes..."
     
     if docker build \
         --platform linux/arm64 \
@@ -778,22 +802,24 @@ ensure_images_exist() {
         --build-arg API_PORT=8000 \
         -t "$image_name" \
         . 2>&1 | while IFS= read -r line; do
-            # Zeige nur wichtige Build-Schritte
-            if echo "$line" | grep -E "(Step [0-9]+/|Successfully built|Successfully tagged)" >/dev/null; then
+            # Show only important build steps.
+            if echo "$line" \
+                | grep -E "(Step [0-9]+/|Successfully built|Successfully tagged)" \
+                    >/dev/null; then
                 echo "   $line"
             fi
         done; then
         echo ""
-        log_success "🎉 Image $image_name erfolgreich erstellt!"
-        log_info "💾 Image ist jetzt verfügbar für alle Container"
+        log_success "Built $image_name successfully"
+        log_info "The image is now available for all containers"
         echo ""
     else
         echo ""
-        log_error "❌ Fehler beim Erstellen des Images $image_name"
-        log_error "💡 Mögliche Lösungen:"
-        echo "   - Führe den GitHub Actions Workflow aus: .github/workflows/build-docker-image.yml"
-        echo "   - Prüfe ob Docker läuft: docker info"
-        echo "   - Prüfe ob Dockerfile.arm64 existiert: ls -la Dockerfile.arm64"
+        log_error "Failed to build the image $image_name"
+        log_error "Possible next steps:"
+        echo "   - Run .github/workflows/build-docker-image.yml"
+        echo "   - Check Docker: docker info"
+        echo "   - Check the Dockerfile: ls -la Dockerfile.arm64"
         echo ""
         return 1
     fi
@@ -803,12 +829,12 @@ generate_mo_store_directories() {
     local charging_stations_file="$1"
     local ocpp_version="$2"
     
-    log_info "Generiere mo_store Verzeichnisse..." >&2
+    log_info "Generating mo_store directories..." >&2
     
-    # Erstelle Templates zuerst
+    # Create templates first.
     create_templates
     
-    # Bereinige und erstelle Basis-Verzeichnis
+    # Recreate the base directory.
     rm -rf "$GENERATED_DIR"
     mkdir -p "$GENERATED_DIR"
     
@@ -819,12 +845,13 @@ generate_mo_store_directories() {
         version_key="v201"
     fi
     
-    # Generiere mo_store für jede Ladesäule
+    # Generate mo_store for each charging station.
     local index=1
     while IFS= read -r station_id; do
-        local output_dir="${GENERATED_DIR}/depot_${version_key}_$(printf "%03d" $index)"
+        local output_dir
+        output_dir="${GENERATED_DIR}/depot_${version_key}_$(printf "%03d" $index)"
         
-        # Erstelle URLs basierend auf OCPP Version
+        # Build the CSMS URL from the OCPP version.
         local csms_url
         local auth_password=""
         if [[ "$ocpp_version" == "1.6" ]]; then
@@ -833,30 +860,39 @@ generate_mo_store_directories() {
             csms_url="ws://citrineos:8081/${station_id}"
         fi
         
-        # Verwende exakt die gleiche Funktion wie generate-simulators.sh
-        generate_mo_store_single "$ocpp_version" "$station_id" "$csms_url" "$auth_password" "$output_dir"
+        # Reuse the same helper as generate-simulators.sh.
+        generate_mo_store_single \
+            "$ocpp_version" \
+            "$station_id" \
+            "$csms_url" \
+            "$auth_password" \
+            "$output_dir"
         
         ((index++))
     done < "$charging_stations_file"
     
-    log_success "Alle mo_store Verzeichnisse generiert in: $GENERATED_DIR" >&2
+    log_success "Generated all mo_store directories in: $GENERATED_DIR" >&2
 }
 
 # =============================================================================
-# Batch-Start-Funktion
+# Batch startup
 # =============================================================================
 
 start_containers_in_batches() {
     local compose_file="$1"
-    local batch_size=${2:-5}  # Standard: 5 Container pro Batch
+    local batch_size=${2:-5}  # Default: 5 containers per batch
     
-    log_info "Batch-Größe: $batch_size Container gleichzeitig"
+    log_info "Batch size: $batch_size containers at a time"
     
-    # Extrahiere alle Service-Namen aus der Docker Compose Datei (ohne yq)
-    # Ignoriere den 'depot-config' Service
+    # Extract all service names from the Docker Compose file without yq.
+    # Ignore the depot-config service.
     local services
-    if ! services=$(awk '/^services:/{flag=1; next} /^[a-zA-Z]/{flag=0} flag && /^  [a-zA-Z0-9_-]+:/ {print $1}' "$compose_file" | sed 's/:$//' | grep -v 'depot-config'); then
-        log_error "Fehler beim Extrahieren der Service-Namen aus $compose_file"
+    if ! services=$(
+        awk '/^services:/{flag=1; next} /^[a-zA-Z]/{flag=0} flag && \
+            /^  [a-zA-Z0-9_-]+:/ {print $1}' \
+            "$compose_file" | sed 's/:$//' | grep -v 'depot-config'
+    ); then
+        log_error "Failed to extract service names from $compose_file"
         return 1
     fi
     
@@ -864,22 +900,22 @@ start_containers_in_batches() {
     service_count=$(echo "$services" | wc -l | tr -d ' ')
     
     if [[ "$service_count" -eq 0 ]]; then
-        log_error "Keine Services in $compose_file gefunden."
+        log_error "No services found in $compose_file."
         return 1
     fi
     
-    log_success "Gefunden: $service_count Services"
+    log_success "Found $service_count services"
     
-    # Starte zuerst den Konfigurationsservice
-    log_info "Starte Konfigurations-Service..."
+    # Start the configuration service first.
+    log_info "Starting configuration service..."
     if ! docker-compose -f "$compose_file" up -d depot-config 2>/dev/null; then
-        log_info "Kein depot-config Service gefunden - überspringe"
+        log_info "No depot-config service found. Skipping it."
     else
         log_success "depot-config gestartet"
     fi
     
     echo ""
-    log_info "Starte Container in Batches..."
+    log_info "Starting containers in batches..."
     
     local current_batch=0
     local services_started=0
@@ -889,59 +925,65 @@ start_containers_in_batches() {
         batch_services+=("$service_name")
         ((current_batch++))
         
-        # Wenn Batch voll ist oder letzter Service erreicht
-        if [[ "$current_batch" -eq "$batch_size" ]] || [[ "$services_started" -eq $((service_count - current_batch)) ]]; then
+        # Start when the batch is full or the last service is reached.
+        if [[ "$current_batch" -eq "$batch_size" ]] \
+            || [[ "$services_started" -eq $((service_count - current_batch)) ]]; then
             local batch_number=$(((services_started / batch_size) + 1))
-            log_info "📦 Batch $batch_number ($current_batch Services): ${batch_services[*]}"
+            log_info "Batch $batch_number ($current_batch services):"
+            log_info "${batch_services[*]}"
             
-            # Starte aktuellen Batch
+            # Start the current batch.
             if ! docker-compose -f "$compose_file" up -d "${batch_services[@]}"; then
-                log_error "Fehler beim Starten von Batch $batch_number"
+                log_error "Failed to start batch $batch_number"
                 return 1
             fi
             
-            log_success "Batch $batch_number erfolgreich gestartet"
+            log_success "Started batch $batch_number successfully"
             services_started=$((services_started + current_batch))
             
-            # Reset für nächsten Batch
+            # Reset for the next batch.
             batch_services=()
             current_batch=0
             
-            # Warte zwischen Batches (außer beim letzten)
+            # Wait between batches except after the last one.
             if [[ "$services_started" -lt "$service_count" ]]; then
-                log_info "⏳ Warte 3 Sekunden vor nächstem Batch..."
+                log_info "Waiting 3 seconds before the next batch..."
                 sleep 3
             fi
         fi
     done <<< "$services"
     
     echo ""
-    log_success "🎉 Batch-Start abgeschlossen!"
+    log_success "Batch startup finished"
     echo ""
-    echo "📊 Zusammenfassung:"
-    echo "   ✅ Erfolgreich gestartet: $services_started Services"
-    echo "   📈 Gesamt: $service_count Services"
+    echo "Summary:"
+    echo "   ✅ Started successfully: $services_started services"
+    echo "   Total: $service_count services"
     echo ""
     
     return 0
 }
 
 # =============================================================================
-# Batch-Neustart-Funktion
+# Batch restart
 # =============================================================================
 
 restart_containers_in_batches() {
     local compose_file="$1"
-    local batch_size=${2:-5}  # Standard: 5 Container pro Batch
+    local batch_size=${2:-5}  # Default: 5 containers per batch
     
-    log_info "🔄 Starte Batch-Neustart für bessere CitrineOS-Erkennung..."
-    log_info "Batch-Größe: $batch_size Container gleichzeitig"
+    log_info "Restarting containers in batches for better CitrineOS detection..."
+    log_info "Batch size: $batch_size containers at a time"
     
-    # Extrahiere alle Service-Namen aus der Docker Compose Datei (ohne yq)
-    # Ignoriere den 'depot-config' Service
+    # Extract all service names from the Docker Compose file without yq.
+    # Ignore the depot-config service.
     local services
-    if ! services=$(awk '/^services:/{flag=1; next} /^[a-zA-Z]/{flag=0} flag && /^  [a-zA-Z0-9_-]+:/ {print $1}' "$compose_file" | sed 's/:$//' | grep -v 'depot-config'); then
-        log_error "Fehler beim Extrahieren der Service-Namen aus $compose_file"
+    if ! services=$(
+        awk '/^services:/{flag=1; next} /^[a-zA-Z]/{flag=0} flag && \
+            /^  [a-zA-Z0-9_-]+:/ {print $1}' \
+            "$compose_file" | sed 's/:$//' | grep -v 'depot-config'
+    ); then
+        log_error "Failed to extract service names from $compose_file"
         return 1
     fi
     
@@ -949,14 +991,14 @@ restart_containers_in_batches() {
     service_count=$(echo "$services" | wc -l | tr -d ' ')
     
     if [[ "$service_count" -eq 0 ]]; then
-        log_error "Keine Services in $compose_file gefunden."
+        log_error "No services found in $compose_file."
         return 1
     fi
     
-    log_success "Gefunden: $service_count Services für Neustart"
+    log_success "Found $service_count services to restart"
     
     echo ""
-    log_info "Starte Container-Neustarts in Batches..."
+    log_info "Restarting containers in batches..."
     
     local current_batch=0
     local services_restarted=0
@@ -966,55 +1008,57 @@ restart_containers_in_batches() {
         batch_services+=("$service_name")
         ((current_batch++))
         
-        # Wenn Batch voll ist oder letzter Service erreicht
-        if [[ "$current_batch" -eq "$batch_size" ]] || [[ "$services_restarted" -eq $((service_count - current_batch)) ]]; then
+        # Restart when the batch is full or the last service is reached.
+        if [[ "$current_batch" -eq "$batch_size" ]] \
+            || [[ "$services_restarted" -eq $((service_count - current_batch)) ]]; then
             local batch_number=$(((services_restarted / batch_size) + 1))
-            log_info "🔄 Neustart Batch $batch_number ($current_batch Services): ${batch_services[*]}"
+            log_info "Restart batch $batch_number ($current_batch services):"
+            log_info "${batch_services[*]}"
             
-            # Starte aktuellen Batch neu
+            # Restart the current batch.
             if ! docker-compose -f "$compose_file" restart "${batch_services[@]}"; then
-                log_error "Fehler beim Neustart von Batch $batch_number"
+                log_error "Failed to restart batch $batch_number"
                 return 1
             fi
             
-            log_success "Batch $batch_number erfolgreich neugestartet"
+            log_success "Restarted batch $batch_number successfully"
             services_restarted=$((services_restarted + current_batch))
             
-            # Reset für nächsten Batch
+            # Reset for the next batch.
             batch_services=()
             current_batch=0
             
-            # Warte zwischen Batches (außer beim letzten)
+            # Wait between batches except after the last one.
             if [[ "$services_restarted" -lt "$service_count" ]]; then
-                log_info "⏳ Warte 5 Sekunden vor nächstem Neustart-Batch..."
+                log_info "Waiting 5 seconds before the next restart batch..."
                 sleep 5
             fi
         fi
     done <<< "$services"
     
     echo ""
-    log_success "🎉 Batch-Neustart abgeschlossen!"
+    log_success "Batch restart finished"
     echo ""
-    echo "📊 Neustart-Zusammenfassung:"
-    echo "   ✅ Erfolgreich neugestartet: $services_restarted Services"
-    echo "   📈 Gesamt: $service_count Services"
+    echo "Restart summary:"
+    echo "   ✅ Restarted successfully: $services_restarted services"
+    echo "   Total: $service_count services"
     echo ""
     
     return 0
 }
 
 # =============================================================================
-# Hauptfunktion
+# Main entry point
 # =============================================================================
 
 main() {
-    echo "🔧 Fenexity MicroOCPP Depot Generator"
+    echo "MicroOCPP Depot Generator"
     echo "====================================="
     echo ""
     
-    # Parameter verarbeiten
+    # Parse parameters.
     if [[ $# -lt 1 ]]; then
-        log_error "CSV-Datei ist erforderlich"
+        log_error "A CSV file is required"
         echo ""
         show_help
         exit 1
@@ -1022,7 +1066,7 @@ main() {
     
     CSV_FILE="$1"
     
-    # Parse alle Parameter
+    # Parse all parameters.
     for arg in "$@"; do
         case $arg in
             --no-start)
@@ -1036,134 +1080,134 @@ main() {
         esac
     done
     
-    # Hilfe anzeigen
+    # Show help.
     if [[ "$CSV_FILE" == "-h" || "$CSV_FILE" == "--help" ]]; then
         show_help
         exit 0
     fi
     
-    # Update-URL Modus
+    # Update URL mode.
     if [[ "$CSV_FILE" == "--update-url" ]]; then
-        log_info "🔄 CitrineOS IP-Update Modus aktiviert"
+        log_info "CitrineOS IP update mode enabled"
         
-        # Erkenne neue CitrineOS IP
+        # Detect the new CitrineOS IP.
         local new_ip
         new_ip=$(detect_citrineos_ip)
         
         if [[ -z "$new_ip" ]]; then
-            log_error "Konnte CitrineOS IP nicht ermitteln"
+            log_error "Could not determine the CitrineOS IP"
             exit 1
         fi
         
-        # Aktualisiere Container
+        # Update containers.
         update_citrineos_ip_in_containers "$new_ip"
         
-        # Starte Container neu
+        # Restart containers.
         log_info ""
         restart_depot_containers "all"
         
-        log_success "🎉 IP-Update und Container-Neustart abgeschlossen!"
+        log_success "IP update and container restart finished"
         exit 0
     fi
     
-    # Validierungen
+    # Validate inputs.
     validate_csv_file "$CSV_FILE" || exit 1
     validate_ocpp_version "$OCPP_VERSION" || exit 1
     
-    # CSV-Dateinamen für Dokumentation
+    # Keep the CSV file name for generated comments.
     local csv_filename=$(basename "$CSV_FILE")
     
-    log_info "Starte Depot-Generierung..."
-    log_info "📄 CSV-Datei: $CSV_FILE"
-    log_info "🔌 OCPP-Version: $OCPP_VERSION"
+    log_info "Starting depot generation..."
+    log_info "CSV file: $CSV_FILE"
+    log_info "OCPP version: $OCPP_VERSION"
     
-    # Extrahiere Ladesäulen
+    # Extract charging stations.
     local charging_stations_file
     charging_stations_file=$(extract_charging_stations "$CSV_FILE")
     local extract_result=$?
     
     if [[ $extract_result -ne 0 || ! -f "$charging_stations_file" ]]; then
-        log_error "Fehler beim Extrahieren der Charger-IDs"
+        log_error "Failed to extract charger IDs"
         exit 1
     fi
     
     local station_count=$(wc -l < "$charging_stations_file")
     if [[ $station_count -eq 0 ]]; then
-        log_error "Keine gueltigen Charger-IDs in CSV gefunden"
+        log_error "No valid charger IDs found in the CSV"
         rm -f "$charging_stations_file"
         exit 1
     fi
     
-    # Bereinige alte mo_store Dateien
+    # Clean previous mo_store files.
     cleanup_old_mo_store
     
-    # Stelle sicher, dass benötigte Docker Images existieren
+    # Ensure the required Docker images exist.
     ensure_images_exist "$OCPP_VERSION"
     
-    # Generiere Konfigurationen
+    # Generate configs.
     generate_simulator_config "$charging_stations_file" "$OCPP_VERSION" "$csv_filename"
     generate_docker_compose "$charging_stations_file" "$OCPP_VERSION" "$CSV_FILE"
     generate_mo_store_directories "$charging_stations_file" "$OCPP_VERSION"
     
     echo ""
-    log_success "🎉 Depot-Generierung abgeschlossen!"
+    log_success "Depot generation finished"
     echo ""
-    echo "📋 Generierte Dateien:"
-    echo "   📄 Konfiguration: $OUTPUT_CONFIG"
-    echo "   🐳 Docker Compose: $OUTPUT_COMPOSE"
-    echo "   📁 mo_store: $GENERATED_DIR"
+    echo "Generated files:"
+    echo "   Configuration: $OUTPUT_CONFIG"
+    echo "   Docker Compose: $OUTPUT_COMPOSE"
+    echo "   mo_store: $GENERATED_DIR"
     echo ""
-    echo "📊 Depot-Übersicht:"
-    echo "   🏢 Depot: $csv_filename"
-    echo "   🔌 OCPP-Version: $OCPP_VERSION"
-    echo "   📈 Ladesäulen: $station_count"
+    echo "Depot summary:"
+    echo "   Depot: $csv_filename"
+    echo "   OCPP version: $OCPP_VERSION"
+    echo "   Charging stations: $station_count"
     echo ""
     
-    # Starte Container automatisch (falls nicht --no-start gesetzt)
+    # Start containers automatically unless --no-start is set.
     if [[ "$NO_START" == "true" ]]; then
-        log_info "🔧 Container nicht gestartet (--no-start Flag gesetzt)"
+        log_info "Containers were not started (--no-start was set)"
         echo ""
-        echo "📋 Nächste Schritte:"
-        echo "   🚀 Container starten: docker-compose -f docker-compose-depot.yml up -d"
-        echo "   📊 Status prüfen: docker-compose -f docker-compose-depot.yml ps"
-        echo "   📋 Logs anzeigen: docker-compose -f docker-compose-depot.yml logs -f"
+        echo "Next steps:"
+        echo "   Start containers: docker-compose -f docker-compose-depot.yml up -d"
+        echo "   Check status: docker-compose -f docker-compose-depot.yml ps"
+        echo "   Show logs: docker-compose -f docker-compose-depot.yml logs -f"
         echo ""
-        echo "🛑 Stoppen:"
+        echo "Stop:"
         echo "   docker-compose -f docker-compose-depot.yml down"
         echo ""
-        echo "🧹 Bereinigen:"
+        echo "Clean up:"
         echo "   docker-compose -f docker-compose-depot.yml down"
         echo "   rm -f simulator-config-depot.yml docker-compose-depot.yml"
         echo "   rm -rf mo_store_depot"
     else
-        log_info "Starte Depot-Simulatoren in Batches..."
+        log_info "Starting depot simulators in batches..."
         
         if start_containers_in_batches "$OUTPUT_COMPOSE"; then
-        log_success "Container erfolgreich gestartet"
+        log_success "Containers started successfully"
         echo ""
         
-        # Warte kurz, dann starte alle Container neu für bessere CitrineOS-Erkennung
-        # log_info "⏳ Warte 10 Sekunden, dann Neustart für CitrineOS-Optimierung..."
+        # Optional restart retained for future tuning.
+        # log_info "Waiting 10 seconds before optimized restart..."
         # sleep 10
         
         # if restart_containers_in_batches "$OUTPUT_COMPOSE"; then
-        #     log_success "Batch-Neustart erfolgreich abgeschlossen"
+        #     log_success "Batch restart finished successfully"
         # else
-        #     log_error "Fehler beim Batch-Neustart"
+        #     log_error "Batch restart failed"
         # fi
         # echo ""
         
-        # Zeige Container-Status
-        log_info "Container-Status:"
+        # Show container status.
+        log_info "Container status:"
         docker-compose -f "$OUTPUT_COMPOSE" ps
         
         echo ""
-        log_success "🎉 Depot-Simulatoren erfolgreich gestartet!"
+        log_success "Depot simulators started successfully"
         echo ""
-        echo "📋 Nächste Schritte:"
-        echo "   🌐 Öffne Frontend-URLs:"
+        echo "Next steps:"
+        echo "   Open frontend URLs:"
         
-        # Generiere Frontend-URLs basierend auf Ports
+        # Build frontend URLs from the generated ports.
         local base_port
         if [[ "$OCPP_VERSION" == "1.6" ]]; then
             base_port=7101
@@ -1177,34 +1221,34 @@ main() {
             echo "      http://localhost:$port (ID: $station_id)"
             ((index++))
             if [[ $index -gt 5 ]]; then
-                echo "      ... und $((station_count - 5)) weitere URLs"
+                echo "      ... and $((station_count - 5)) more URLs"
                 break
             fi
         done < "$charging_stations_file"
         
         echo ""
-        echo "   📊 Status prüfen: docker-compose -f docker-compose-depot.yml ps"
-        echo "   📋 Logs anzeigen: docker-compose -f docker-compose-depot.yml logs -f"
+        echo "   Check status: docker-compose -f docker-compose-depot.yml ps"
+        echo "   Show logs: docker-compose -f docker-compose-depot.yml logs -f"
         echo ""
-        echo "🛑 Stoppen:"
+        echo "Stop:"
         echo "   docker-compose -f docker-compose-depot.yml down"
         echo ""
-        echo "🧹 Bereinigen:"
+        echo "Clean up:"
         echo "   docker-compose -f docker-compose-depot.yml down"
         echo "   rm -f simulator-config-depot.yml docker-compose-depot.yml"
         echo "   rm -rf mo_store_depot"
     else
-        log_error "Fehler beim Starten der Container"
+        log_error "Failed to start containers"
         echo ""
-        echo "🔧 Manueller Start:"
+        echo "Manual start:"
         echo "   docker-compose -f docker-compose-depot.yml up -d"
         exit 1
     fi
     fi
     
-    # Bereinige temporäre Datei am Ende
+    # Remove the temporary file at the end.
     rm -f "$charging_stations_file"
 }
 
-# Führe Hauptfunktion aus
+# Run the main function.
 main "$@"

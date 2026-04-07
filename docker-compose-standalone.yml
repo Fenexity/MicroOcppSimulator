@@ -1,13 +1,13 @@
 # =============================================================================
-# Fenexity MicroOCPP Simulator - Standalone (Single OCPP 1.6)
+# MicroOCPP Simulator - Standalone (Single OCPP 1.6)
 # =============================================================================
-# Ein einzelner OCPP 1.6 Simulator fuer Tests gegen ein externes Backend.
-# Laeuft unabhaengig vom Depot-Build und dem lokalen CitrineOS.
+# A single OCPP 1.6 simulator for tests against an external backend.
+# Runs independently from the depot build and the local CitrineOS setup.
 #
-# Verwendung: docker compose -f docker-compose-standalone.yml up -d
+# Usage: docker compose -f docker-compose-standalone.yml up -d
 #
-# Backend-URL anpassen: mo_store_standalone/ws-conn.jsn -> Cst_BackendUrl
-# Charger-ID anpassen:  mo_store_standalone/ws-conn.jsn -> Cst_ChargeBoxId
+# Adjust backend URL: mo_store_standalone/ws-conn.jsn -> Cst_BackendUrl
+# Adjust charger ID:  mo_store_standalone/ws-conn.jsn -> Cst_ChargeBoxId
 # =============================================================================
 
 networks:
