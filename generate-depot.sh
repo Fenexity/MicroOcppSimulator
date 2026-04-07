@@ -3,25 +3,26 @@
 # =============================================================================
 # Fenexity MicroOCPP Simulator - Depot Generator
 # =============================================================================
-# Automatische Generierung von OCPP-Simulatoren basierend auf Depot CSV-Dateien
+# Automatische Generierung von OCPP-Simulatoren basierend auf Charger CSV-Dateien
 #
 # Verwendung:
 #   ./generate-depot.sh <CSV_FILE> [OCPP_VERSION]
-#   ./generate-depot.sh depot-data/darmstadt-depot.csv 1.6
-#   ./generate-depot.sh depot-data/test.csv 2.0.1
+#   ./generate-depot.sh depot-data/chargers-darmstadt.csv 1.6
+#   ./generate-depot.sh depot-data/chargers-hamburg.csv 2.0.1
 #
 # Parameter:
-#   CSV_FILE      - Pfad zur Depot CSV-Datei
+#   CSV_FILE      - Pfad zur Charger CSV-Datei
 #   OCPP_VERSION  - OCPP Version (1.6 oder 2.0.1, Standard: 1.6)
 #
-# CSV Format:
-#   - Muss eine Spalte "charging_station_id" enthalten
-#   - Leere charging_station_id Zeilen werden ignoriert
-#   - Eindeutige charging_station_id werden automatisch erkannt
+# CSV Format (Charger-Datei):
+#   - Muss eine Spalte "charger_id" enthalten
+#   - Muss eine Spalte "max_power_kw" enthalten (Leistung in kW)
+#   - Mehrere Zeilen pro Charger moeglich (eine pro Connector)
+#   - Eindeutige charger_id werden automatisch erkannt
 #
 # Ausgabe:
 #   - simulator-config-depot.yml (generierte Konfiguration)
-#   - docker-compose-depot.yml (Docker Compose für Depot)
+#   - docker-compose-depot.yml (Docker Compose fuer Depot)
 #   - mo_store_depot/ (Generierte mo_store Verzeichnisse)
 # =============================================================================
 
@@ -76,21 +77,22 @@ show_help() {
     echo "  $0 --update-url"
     echo ""
     echo "Parameter:"
-    echo "  CSV_FILE      Pfad zur Depot CSV-Datei (erforderlich)"
+    echo "  CSV_FILE      Pfad zur Charger CSV-Datei (erforderlich)"
     echo "  OCPP_VERSION  OCPP Version: 1.6 oder 2.0.1 (Standard: 1.6)"
     echo "  --no-start    Nur generieren, Container nicht automatisch starten"
     echo "  --update-url  Aktualisiere CitrineOS IP und starte Container neu"
     echo ""
     echo "Beispiele:"
-    echo "  $0 depot-data/darmstadt-depot.csv"
-    echo "  $0 depot-data/test.csv 1.6"
-    echo "  $0 depot-data/hamburg.csv 2.0.1 --no-start"
+    echo "  $0 depot-data/chargers-darmstadt.csv"
+    echo "  $0 depot-data/chargers-darmstadt.csv 1.6"
+    echo "  $0 depot-data/chargers-hamburg.csv 2.0.1 --no-start"
     echo "  $0 --update-url                    # IP aktualisieren + Container neu starten"
     echo ""
-    echo "CSV-Anforderungen:"
-    echo "  - Muss Header-Zeile mit 'charging_station_id' Spalte enthalten"
-    echo "  - Leere charging_station_id werden ignoriert"
-    echo "  - Eindeutige IDs werden automatisch erkannt"
+    echo "CSV-Anforderungen (Charger-Datei):"
+    echo "  - Muss Header-Zeile mit 'charger_id' Spalte enthalten"
+    echo "  - Muss 'max_power_kw' Spalte enthalten (Leistung in kW)"
+    echo "  - Mehrere Zeilen pro Charger moeglich (eine pro Connector)"
+    echo "  - Eindeutige charger_id werden automatisch erkannt"
     echo ""
     echo "Ausgabe:"
     echo "  📄 simulator-config-depot.yml"
@@ -110,10 +112,18 @@ validate_csv_file() {
         return 1
     fi
     
-    # Prüfe ob charging_station_id Spalte existiert
-    if ! head -1 "$csv_file" | grep -q "charging_station_id"; then
-        log_error "CSV-Datei muss eine 'charging_station_id' Spalte enthalten"
-        log_error "Gefundene Header: $(head -1 "$csv_file")"
+    local header
+    header=$(head -1 "$csv_file")
+    
+    if ! echo "$header" | grep -q "charger_id"; then
+        log_error "CSV-Datei muss eine 'charger_id' Spalte enthalten"
+        log_error "Gefundene Header: $header"
+        return 1
+    fi
+    
+    if ! echo "$header" | grep -q "max_power_kw"; then
+        log_error "CSV-Datei muss eine 'max_power_kw' Spalte enthalten"
+        log_error "Gefundene Header: $header"
         return 1
     fi
     
@@ -142,14 +152,13 @@ extract_charging_stations() {
     local csv_file="$1"
     local temp_file=$(mktemp)
     
-    log_info "Extrahiere Ladesäulen-IDs aus CSV..." >&2
+    log_info "Extrahiere Charger-IDs aus CSV..." >&2
     
-    # Finde charging_station_id Spalten-Index (berücksichtige Leerzeichen)
     local header=$(head -1 "$csv_file")
-    local column_index=$(echo "$header" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | grep -n "charging_station_id" | cut -d: -f1)
+    local column_index=$(echo "$header" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | grep -n "^charger_id$" | cut -d: -f1)
     
     if [[ -z "$column_index" ]]; then
-        log_error "charging_station_id Spalte nicht gefunden"
+        log_error "charger_id Spalte nicht gefunden"
         log_error "Header-Zeile: $header"
         log_error "Bereinigte Spalten:"
         echo "$header" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | nl >&2
@@ -157,9 +166,8 @@ extract_charging_stations() {
         return 1
     fi
     
-    log_info "charging_station_id gefunden in Spalte $column_index" >&2
+    log_info "charger_id gefunden in Spalte $column_index" >&2
     
-    # Extrahiere eindeutige, nicht-leere charging_station_id
     tail -n +2 "$csv_file" | \
         cut -d',' -f"$column_index" | \
         sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | \
@@ -167,9 +175,8 @@ extract_charging_stations() {
         sort -u > "$temp_file"
     
     local count=$(wc -l < "$temp_file")
-    log_success "Gefunden: $count eindeutige Ladesäulen" >&2
+    log_success "Gefunden: $count eindeutige Charger" >&2
     
-    # Zeige erste paar IDs als Vorschau
     if [[ $count -gt 0 ]]; then
         log_info "Beispiel-IDs:" >&2
         head -5 "$temp_file" | sed 's/^/  - /' >&2
@@ -310,30 +317,29 @@ restart_depot_containers() {
 }
 
 # =============================================================================
-# CSV-Power-Extraktion
+# Charger-Power-Extraktion
 # =============================================================================
 
 extract_max_power_from_csv() {
     local csv_file="$1"
-    local station_id="$2"
+    local charger_id="$2"
     
-    log_info "Extrahiere max_power für $station_id aus CSV..." >&2
+    log_info "Extrahiere max_power fuer $charger_id aus CSV..." >&2
     
-    # Spaltenindizes dynamisch aus Header ermitteln
-    local max_power=$(awk -F',' -v station="$station_id" '
+    local max_power_kw=$(awk -F',' -v cid="$charger_id" '
         NR == 1 {
             for (i = 1; i <= NF; i++) {
                 col = $i;
                 gsub(/^[ \t]+|[ \t]+$/, "", col);
-                if (col == "charging_station_id") sid_col = i;
-                if (col == "max_power") power_col = i;
+                if (col == "charger_id") id_col = i;
+                if (col == "max_power_kw") power_col = i;
             }
             next;
         }
-        sid_col && power_col {
-            sid = $sid_col;
-            gsub(/^[ \t]+|[ \t]+$/, "", sid);
-            if (sid == station) {
+        id_col && power_col {
+            id = $id_col;
+            gsub(/^[ \t]+|[ \t]+$/, "", id);
+            if (id == cid) {
                 val = $power_col;
                 gsub(/^[ \t]+|[ \t]+$/, "", val);
                 if (val != "" && val+0 > 0) {
@@ -344,12 +350,12 @@ extract_max_power_from_csv() {
         }
     ' "$csv_file")
     
-    if [[ -n "$max_power" && "$max_power" != "0" ]]; then
-        local power_w=$((max_power * 1000))
-        log_info "Gefunden: ${max_power}kW = ${power_w}W für $station_id" >&2
+    if [[ -n "$max_power_kw" && "$max_power_kw" != "0" ]]; then
+        local power_w=$((max_power_kw * 1000))
+        log_info "Gefunden: ${max_power_kw}kW = ${power_w}W fuer $charger_id" >&2
         echo "$power_w"
     else
-        log_warning "Keine max_power für $station_id gefunden, verwende Standard 11kW" >&2
+        log_warning "Keine max_power_kw fuer $charger_id gefunden, verwende Standard 11kW" >&2
         echo "11000"
     fi
 }
@@ -1077,13 +1083,13 @@ main() {
     local extract_result=$?
     
     if [[ $extract_result -ne 0 || ! -f "$charging_stations_file" ]]; then
-        log_error "Fehler beim Extrahieren der Ladesäulen-IDs"
+        log_error "Fehler beim Extrahieren der Charger-IDs"
         exit 1
     fi
     
     local station_count=$(wc -l < "$charging_stations_file")
     if [[ $station_count -eq 0 ]]; then
-        log_error "Keine gültigen Ladesäulen-IDs in CSV gefunden"
+        log_error "Keine gueltigen Charger-IDs in CSV gefunden"
         rm -f "$charging_stations_file"
         exit 1
     fi

@@ -1,0 +1,57 @@
+charger_id,max_power_kw,power_sharing_mode,power_step_kw,min_power_kw,connector_id,connector_max_power_kw,connector_type,notes
+CS-EG-001,150,exclusive,1,1,1,150,CCS2,Erdgeschoss - 2er Gruppe
+CS-EG-001,150,exclusive,1,1,2,150,CCS2,Erdgeschoss - 2er Gruppe
+CS-EG-002,150,exclusive,1,1,1,150,CCS2,Erdgeschoss - 3er Gruppe
+CS-EG-002,150,exclusive,1,1,2,150,CCS2,Erdgeschoss - 3er Gruppe
+CS-EG-003,150,exclusive,1,1,1,150,CCS2,Erdgeschoss - 3er Gruppe Aussen
+CS-EG-004,150,exclusive,1,1,1,150,CCS2,Erdgeschoss - 3er Gruppe
+CS-EG-004,150,exclusive,1,1,2,150,CCS2,Erdgeschoss - 3er Gruppe
+CS-EG-005,150,exclusive,1,1,1,150,CCS2,Erdgeschoss - 3er Gruppe Aussen
+CS-EG-006,150,exclusive,1,1,1,150,CCS2,Erdgeschoss - 2er Gruppe
+CS-EG-006,150,exclusive,1,1,2,150,CCS2,Erdgeschoss - 2er Gruppe
+CS-EG-007,150,exclusive,1,1,1,150,CCS2,Erdgeschoss - 2er Gruppe
+CS-EG-007,150,exclusive,1,1,2,150,CCS2,Erdgeschoss - 2er Gruppe
+CS-EG-008,150,exclusive,1,1,1,150,CCS2,Erdgeschoss - 2er Gruppe
+CS-EG-008,150,exclusive,1,1,2,150,CCS2,Erdgeschoss - 2er Gruppe
+CS-EG-009,150,exclusive,1,1,1,150,CCS2,Erdgeschoss - 2er Gruppe
+CS-EG-009,150,exclusive,1,1,2,150,CCS2,Erdgeschoss - 2er Gruppe
+CS-EG-010,150,exclusive,1,1,1,150,CCS2,Erdgeschoss - 2er Gruppe
+CS-EG-010,150,exclusive,1,1,2,150,CCS2,Erdgeschoss - 2er Gruppe
+CS-EG-011,150,exclusive,1,1,1,150,CCS2,Erdgeschoss - 2er Gruppe
+CS-EG-011,150,exclusive,1,1,2,150,CCS2,Erdgeschoss - 2er Gruppe
+CS-EG-012,150,exclusive,1,1,1,150,CCS2,Erdgeschoss - 2er Gruppe
+CS-EG-012,150,exclusive,1,1,2,150,CCS2,Erdgeschoss - 2er Gruppe
+CS-EG-013,150,exclusive,1,1,1,150,CCS2,Erdgeschoss - 2er Gruppe
+CS-EG-013,150,exclusive,1,1,2,150,CCS2,Erdgeschoss - 2er Gruppe
+CS-EG-014,150,exclusive,1,1,1,150,CCS2,Erdgeschoss - 2er Gruppe
+CS-EG-014,150,exclusive,1,1,2,150,CCS2,Erdgeschoss - 2er Gruppe
+CS-UG-001,150,exclusive,1,1,1,150,CCS2,Untergeschoss - 2er Gruppe
+CS-UG-001,150,exclusive,1,1,2,150,CCS2,Untergeschoss - 2er Gruppe
+CS-UG-002,150,exclusive,1,1,1,150,CCS2,Untergeschoss - 2er Gruppe
+CS-UG-002,150,exclusive,1,1,2,150,CCS2,Untergeschoss - 2er Gruppe
+CS-UG-003,150,exclusive,1,1,1,150,CCS2,Untergeschoss - 2er Gruppe
+CS-UG-003,150,exclusive,1,1,2,150,CCS2,Untergeschoss - 2er Gruppe
+CS-UG-004,150,exclusive,1,1,1,150,CCS2,Untergeschoss - 2er Gruppe
+CS-UG-004,150,exclusive,1,1,2,150,CCS2,Untergeschoss - 2er Gruppe
+CS-UG-005,150,exclusive,1,1,1,150,CCS2,Untergeschoss - 2er Gruppe
+CS-UG-005,150,exclusive,1,1,2,150,CCS2,Untergeschoss - 2er Gruppe
+CS-UG-006,150,exclusive,1,1,1,150,CCS2,Untergeschoss - 2er Gruppe
+CS-UG-006,150,exclusive,1,1,2,150,CCS2,Untergeschoss - 2er Gruppe
+CS-UG-007,150,exclusive,1,1,1,150,CCS2,Untergeschoss - 2er Gruppe
+CS-UG-007,150,exclusive,1,1,2,150,CCS2,Untergeschoss - 2er Gruppe
+CS-UG-008,150,exclusive,1,1,1,150,CCS2,Untergeschoss - 2er Gruppe
+CS-UG-008,150,exclusive,1,1,2,150,CCS2,Untergeschoss - 2er Gruppe
+CS-UG-009,150,exclusive,1,1,1,150,CCS2,Untergeschoss - 2er Gruppe
+CS-UG-009,150,exclusive,1,1,2,150,CCS2,Untergeschoss - 2er Gruppe
+CS-UG-010,150,exclusive,1,1,1,150,CCS2,Untergeschoss - 3er Gruppe
+CS-UG-010,150,exclusive,1,1,2,150,CCS2,Untergeschoss - 3er Gruppe
+CS-UG-011,150,exclusive,1,1,1,150,CCS2,Untergeschoss - 3er Gruppe Aussen
+CS-UG-012,150,exclusive,1,1,1,150,CCS2,Untergeschoss - 3er Gruppe
+CS-UG-012,150,exclusive,1,1,2,150,CCS2,Untergeschoss - 3er Gruppe
+CS-UG-013,150,exclusive,1,1,1,150,CCS2,Untergeschoss - 3er Gruppe Aussen
+CS-UG-014,150,exclusive,1,1,1,150,CCS2,Untergeschoss - 3er Gruppe
+CS-UG-014,150,exclusive,1,1,2,150,CCS2,Untergeschoss - 3er Gruppe
+CS-UG-015,150,exclusive,1,1,1,150,CCS2,Untergeschoss - 3er Gruppe Aussen
+CS-UG-016,150,exclusive,1,1,1,150,CCS2,Untergeschoss - 3er Gruppe
+CS-UG-016,150,exclusive,1,1,2,150,CCS2,Untergeschoss - 3er Gruppe
+CS-UG-017,150,exclusive,1,1,1,150,CCS2,Untergeschoss - 3er Gruppe Aussen

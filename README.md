@@ -26,7 +26,7 @@ Laden einer csv Datei:
 
 ```bash
 # 
-./generate-depot.sh depot-data/darmstadt-depot.csv 1.6
+./generate-depot.sh depot-data/chargers-darmstadt.csv 1.6
 ```
 
 Nach einem PC Neustart kann es sein, dass sich die interne IP von Citrineos geändert hat, in dem Fall
