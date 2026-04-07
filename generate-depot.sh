@@ -3,21 +3,22 @@
 # =============================================================================
 # MicroOCPP Simulator - Depot Generator
 # =============================================================================
-# Generate OCPP simulators from depot CSV files
+# Generate OCPP simulators from charger CSV files
 #
 # Usage:
 #   ./generate-depot.sh <CSV_FILE> [OCPP_VERSION]
-#   ./generate-depot.sh depot-data/darmstadt-depot.csv 1.6
-#   ./generate-depot.sh depot-data/test.csv 2.0.1
+#   ./generate-depot.sh depot-data/chargers-darmstadt.csv 1.6
+#   ./generate-depot.sh depot-data/chargers-hamburg.csv 2.0.1
 #
 # Parameters:
-#   CSV_FILE      - path to the depot CSV file
+#   CSV_FILE      - path to the charger CSV file
 #   OCPP_VERSION  - OCPP version (1.6 or 2.0.1, default: 1.6)
 #
-# CSV format:
-#   - must contain a "charging_station_id" column
-#   - empty charging_station_id rows are ignored
-#   - unique charging_station_id values are detected automatically
+# CSV format (charger file):
+#   - must contain a "charger_id" column
+#   - must contain a "max_power_kw" column (power in kW)
+#   - multiple rows per charger allowed (one per connector)
+#   - unique charger_id values are detected automatically
 #
 # Output:
 #   - simulator-config-depot.yml (generated configuration)
@@ -76,21 +77,22 @@ show_help() {
     echo "  $0 --update-url"
     echo ""
     echo "Parameters:"
-    echo "  CSV_FILE      Path to the depot CSV file (required)"
+    echo "  CSV_FILE      Path to the charger CSV file (required)"
     echo "  OCPP_VERSION  OCPP version: 1.6 or 2.0.1 (default: 1.6)"
     echo "  --no-start    Generate files only, do not start containers"
     echo "  --update-url  Refresh the CitrineOS IP and restart containers"
     echo ""
     echo "Examples:"
-    echo "  $0 depot-data/darmstadt-depot.csv"
-    echo "  $0 depot-data/test.csv 1.6"
-    echo "  $0 depot-data/hamburg.csv 2.0.1 --no-start"
+    echo "  $0 depot-data/chargers-darmstadt.csv"
+    echo "  $0 depot-data/chargers-darmstadt.csv 1.6"
+    echo "  $0 depot-data/chargers-hamburg.csv 2.0.1 --no-start"
     echo "  $0 --update-url                    # refresh IP + restart containers"
     echo ""
-    echo "CSV requirements:"
-    echo "  - Must contain a header row with a 'charging_station_id' column"
-    echo "  - Empty charging_station_id values are ignored"
-    echo "  - Unique IDs are detected automatically"
+    echo "CSV requirements (charger file):"
+    echo "  - Must contain a header row with a 'charger_id' column"
+    echo "  - Must contain a 'max_power_kw' column (power in kW)"
+    echo "  - Multiple rows per charger allowed (one per connector)"
+    echo "  - Unique charger_id values are detected automatically"
     echo ""
     echo "Output:"
     echo "  simulator-config-depot.yml"
@@ -110,10 +112,18 @@ validate_csv_file() {
         return 1
     fi
     
-    # Check whether the charging_station_id column exists.
-    if ! head -1 "$csv_file" | grep -q "charging_station_id"; then
-        log_error "CSV file must contain a 'charging_station_id' column"
-        log_error "Detected headers: $(head -1 "$csv_file")"
+    local header
+    header=$(head -1 "$csv_file")
+    
+    if ! echo "$header" | grep -q "charger_id"; then
+        log_error "CSV file must contain a 'charger_id' column"
+        log_error "Detected headers: $header"
+        return 1
+    fi
+    
+    if ! echo "$header" | grep -q "max_power_kw"; then
+        log_error "CSV file must contain a 'max_power_kw' column"
+        log_error "Detected headers: $header"
         return 1
     fi
     
@@ -142,21 +152,20 @@ extract_charging_stations() {
     local csv_file="$1"
     local temp_file=$(mktemp)
     
-    log_info "Extracting charging station IDs from the CSV..." >&2
+    log_info "Extracting charger IDs from the CSV..." >&2
     
-    # Find the charging_station_id column index while ignoring whitespace.
     local header=$(head -1 "$csv_file")
     local column_index
     column_index=$(
         echo "$header" \
             | tr ',' '\n' \
             | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
-            | grep -n "charging_station_id" \
+            | grep -n "^charger_id$" \
             | cut -d: -f1
     )
     
     if [[ -z "$column_index" ]]; then
-        log_error "charging_station_id column not found"
+        log_error "charger_id column not found"
         log_error "Header row: $header"
         log_error "Normalized columns:"
         echo "$header" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | nl >&2
@@ -164,9 +173,8 @@ extract_charging_stations() {
         return 1
     fi
     
-    log_info "Found charging_station_id in column $column_index" >&2
+    log_info "Found charger_id in column $column_index" >&2
     
-    # Extract unique, non-empty charging_station_id values.
     tail -n +2 "$csv_file" | \
         cut -d',' -f"$column_index" | \
         sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | \
@@ -174,9 +182,8 @@ extract_charging_stations() {
         sort -u > "$temp_file"
     
     local count=$(wc -l < "$temp_file")
-    log_success "Found $count unique charging stations" >&2
+    log_success "Found $count unique chargers" >&2
     
-    # Show a short preview of the IDs.
     if [[ $count -gt 0 ]]; then
         log_info "Example IDs:" >&2
         head -5 "$temp_file" | sed 's/^/  - /' >&2
@@ -328,33 +335,45 @@ restart_depot_containers() {
 }
 
 # =============================================================================
-# CSV power extraction
+# Charger power extraction
 # =============================================================================
 
 extract_max_power_from_csv() {
     local csv_file="$1"
-    local station_id="$2"
+    local charger_id="$2"
     
-    log_info "Extracting max_power for $station_id from the CSV..." >&2
+    log_info "Extracting max_power for $charger_id from the CSV..." >&2
     
-    # Column 9 is station_id and column 14 is max_power.
-    local max_power=$(awk -F',' -v station="$station_id" '
-        NR > 1 && $9 == station { 
-            gsub(/^[ \t]+|[ \t]+$/, "", $14);  # Trim whitespace
-            if ($14 != "" && $14 != "0") {
-                print $14; 
-                exit;
+    local max_power_kw=$(awk -F',' -v cid="$charger_id" '
+        NR == 1 {
+            for (i = 1; i <= NF; i++) {
+                col = $i;
+                gsub(/^[ \t]+|[ \t]+$/, "", col);
+                if (col == "charger_id") id_col = i;
+                if (col == "max_power_kw") power_col = i;
+            }
+            next;
+        }
+        id_col && power_col {
+            id = $id_col;
+            gsub(/^[ \t]+|[ \t]+$/, "", id);
+            if (id == cid) {
+                val = $power_col;
+                gsub(/^[ \t]+|[ \t]+$/, "", val);
+                if (val != "" && val+0 > 0) {
+                    print val;
+                    exit;
+                }
             }
         }
     ' "$csv_file")
     
-    if [[ -n "$max_power" && "$max_power" != "0" ]]; then
-        # Convert from kW to W.
-        local power_w=$((max_power * 1000))
-        log_info "Found ${max_power}kW = ${power_w}W for $station_id" >&2
+    if [[ -n "$max_power_kw" && "$max_power_kw" != "0" ]]; then
+        local power_w=$((max_power_kw * 1000))
+        log_info "Found ${max_power_kw}kW = ${power_w}W for $charger_id" >&2
         echo "$power_w"
     else
-        log_warning "No max_power found for $station_id. Using default 11kW." >&2
+        log_warning "No max_power_kw found for $charger_id. Using default 11kW." >&2
         echo "11000"
     fi
 }
@@ -1108,13 +1127,13 @@ main() {
     local extract_result=$?
     
     if [[ $extract_result -ne 0 || ! -f "$charging_stations_file" ]]; then
-        log_error "Failed to extract charging station IDs"
+        log_error "Failed to extract charger IDs"
         exit 1
     fi
     
     local station_count=$(wc -l < "$charging_stations_file")
     if [[ $station_count -eq 0 ]]; then
-        log_error "No valid charging station IDs found in the CSV"
+        log_error "No valid charger IDs found in the CSV"
         rm -f "$charging_stations_file"
         exit 1
     fi

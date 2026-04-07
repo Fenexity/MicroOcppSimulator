@@ -38,7 +38,7 @@ cd MicroOcppSimulator
 Generate depot simulators from a CSV file:
 
 ```bash
-./generate-depot.sh depot-data/darmstadt-depot.csv 1.6
+./generate-depot.sh depot-data/chargers-darmstadt.csv 1.6
 ```
 
 If CitrineOS restarted and its container IP changed, refresh the stored URLs:
