@@ -161,7 +161,7 @@ CitrineOS container IP. If the IP changes after a restart, run:
 ```text
 .
 ├── AGENTS.md
-├── Dockerfile.arm64
+├── Dockerfile
 ├── README.md
 ├── cleanup-simulators.sh
 ├── config/

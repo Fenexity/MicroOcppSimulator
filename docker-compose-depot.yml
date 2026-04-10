@@ -30,7 +30,7 @@ services:
   sim-CS-EG-001:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-EG-001
-    platform: linux/arm64
+
     ports:
       - "7101:8000"
     volumes:
@@ -59,7 +59,7 @@ services:
   sim-CS-EG-002:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-EG-002
-    platform: linux/arm64
+
     ports:
       - "7102:8000"
     volumes:
@@ -88,7 +88,7 @@ services:
   sim-CS-EG-003:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-EG-003
-    platform: linux/arm64
+
     ports:
       - "7103:8000"
     volumes:
@@ -117,7 +117,7 @@ services:
   sim-CS-EG-004:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-EG-004
-    platform: linux/arm64
+
     ports:
       - "7104:8000"
     volumes:
@@ -146,7 +146,7 @@ services:
   sim-CS-EG-005:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-EG-005
-    platform: linux/arm64
+
     ports:
       - "7105:8000"
     volumes:
@@ -175,7 +175,7 @@ services:
   sim-CS-EG-006:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-EG-006
-    platform: linux/arm64
+
     ports:
       - "7106:8000"
     volumes:
@@ -204,7 +204,7 @@ services:
   sim-CS-EG-007:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-EG-007
-    platform: linux/arm64
+
     ports:
       - "7107:8000"
     volumes:
@@ -233,7 +233,7 @@ services:
   sim-CS-EG-008:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-EG-008
-    platform: linux/arm64
+
     ports:
       - "7108:8000"
     volumes:
@@ -262,7 +262,7 @@ services:
   sim-CS-EG-009:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-EG-009
-    platform: linux/arm64
+
     ports:
       - "7109:8000"
     volumes:
@@ -291,7 +291,7 @@ services:
   sim-CS-EG-010:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-EG-010
-    platform: linux/arm64
+
     ports:
       - "7110:8000"
     volumes:
@@ -320,7 +320,7 @@ services:
   sim-CS-EG-011:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-EG-011
-    platform: linux/arm64
+
     ports:
       - "7111:8000"
     volumes:
@@ -349,7 +349,7 @@ services:
   sim-CS-EG-012:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-EG-012
-    platform: linux/arm64
+
     ports:
       - "7112:8000"
     volumes:
@@ -378,7 +378,7 @@ services:
   sim-CS-EG-013:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-EG-013
-    platform: linux/arm64
+
     ports:
       - "7113:8000"
     volumes:
@@ -407,7 +407,7 @@ services:
   sim-CS-EG-014:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-EG-014
-    platform: linux/arm64
+
     ports:
       - "7114:8000"
     volumes:
@@ -436,7 +436,7 @@ services:
   sim-CS-UG-001:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-UG-001
-    platform: linux/arm64
+
     ports:
       - "7115:8000"
     volumes:
@@ -465,7 +465,7 @@ services:
   sim-CS-UG-002:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-UG-002
-    platform: linux/arm64
+
     ports:
       - "7116:8000"
     volumes:
@@ -494,7 +494,7 @@ services:
   sim-CS-UG-003:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-UG-003
-    platform: linux/arm64
+
     ports:
       - "7117:8000"
     volumes:
@@ -523,7 +523,7 @@ services:
   sim-CS-UG-004:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-UG-004
-    platform: linux/arm64
+
     ports:
       - "7118:8000"
     volumes:
@@ -552,7 +552,7 @@ services:
   sim-CS-UG-005:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-UG-005
-    platform: linux/arm64
+
     ports:
       - "7119:8000"
     volumes:
@@ -581,7 +581,7 @@ services:
   sim-CS-UG-006:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-UG-006
-    platform: linux/arm64
+
     ports:
       - "7120:8000"
     volumes:
@@ -610,7 +610,7 @@ services:
   sim-CS-UG-007:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-UG-007
-    platform: linux/arm64
+
     ports:
       - "7121:8000"
     volumes:
@@ -639,7 +639,7 @@ services:
   sim-CS-UG-008:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-UG-008
-    platform: linux/arm64
+
     ports:
       - "7122:8000"
     volumes:
@@ -668,7 +668,7 @@ services:
   sim-CS-UG-009:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-UG-009
-    platform: linux/arm64
+
     ports:
       - "7123:8000"
     volumes:
@@ -697,7 +697,7 @@ services:
   sim-CS-UG-010:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-UG-010
-    platform: linux/arm64
+
     ports:
       - "7124:8000"
     volumes:
@@ -726,7 +726,7 @@ services:
   sim-CS-UG-011:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-UG-011
-    platform: linux/arm64
+
     ports:
       - "7125:8000"
     volumes:
@@ -755,7 +755,7 @@ services:
   sim-CS-UG-012:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-UG-012
-    platform: linux/arm64
+
     ports:
       - "7126:8000"
     volumes:
@@ -784,7 +784,7 @@ services:
   sim-CS-UG-013:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-UG-013
-    platform: linux/arm64
+
     ports:
       - "7127:8000"
     volumes:
@@ -813,7 +813,7 @@ services:
   sim-CS-UG-014:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-UG-014
-    platform: linux/arm64
+
     ports:
       - "7128:8000"
     volumes:
@@ -842,7 +842,7 @@ services:
   sim-CS-UG-015:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-UG-015
-    platform: linux/arm64
+
     ports:
       - "7129:8000"
     volumes:
@@ -871,7 +871,7 @@ services:
   sim-CS-UG-016:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-UG-016
-    platform: linux/arm64
+
     ports:
       - "7130:8000"
     volumes:
@@ -900,7 +900,7 @@ services:
   sim-CS-UG-017:
     image: microocpp-sim-v16:latest
     container_name: sim-CS-UG-017
-    platform: linux/arm64
+
     ports:
       - "7131:8000"
     volumes:
