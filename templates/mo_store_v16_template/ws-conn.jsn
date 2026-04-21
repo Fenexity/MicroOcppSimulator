@@ -7,7 +7,7 @@
     {
       "type": "string",
       "key": "Cst_BackendUrl",
-      "value": "ws://{{CITRINEOS_IP}}:8092/{{CHARGER_ID}}"
+      "value": "ws://{{CITRINEOS_IP}}:8081/{{CHARGER_ID}}"
     },
     {
       "type": "string",

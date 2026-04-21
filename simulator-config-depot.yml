@@ -3,8 +3,8 @@
 # =============================================================================
 # Generated automatically from: chargers-darmstadt.csv
 # OCPP Version: 1.6
-# Charging stations: 31
-# Generated at: 2026-04-04 10:38:16
+# Charging stations:       31
+# Generated at: 2026-04-20 19:13:42
 # =============================================================================
 
 global:
@@ -14,10 +14,10 @@ global:
 
 simulators:
   v16:
-    count: 31
+    count:       31
     base_port: 7101
     ocpp_version: "1.6"
-    csms_url_template: "ws://citrineos:8092/{charger_id}"
+    csms_url_template: "ws://citrineos:8081/{charger_id}"
     base_charger_id: "depot-charger"
     container_prefix: "depot-sim-v16"
     environment:

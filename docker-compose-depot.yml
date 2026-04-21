@@ -3,7 +3,7 @@
 # =============================================================================
 # Generated automatically from the depot CSV
 # OCPP Version: 1.6
-# Generated at: 2026-04-04 10:38:16
+# Generated at: 2026-04-20 19:13:42
 # =============================================================================
 
 # Docker Compose version field omitted intentionally
@@ -20,7 +20,7 @@ services:
       sh -c "
         echo 'Starting depot multi-container configuration...'
         echo 'OCPP version: 1.6'
-        echo 'Total simulators: 31'
+        echo 'Total simulators:       31'
         echo 'Configuration completed.'
         sleep 5
       "
@@ -925,3 +925,4 @@ services:
       - API_PORT=7131
       - MAX_POWER_W=150000
       - MO_ENABLE_V201=0
+
