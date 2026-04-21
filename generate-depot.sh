@@ -460,8 +460,7 @@ templates:
   v201_mo_store: "./mo_store_v201"
 
 docker:
-  dockerfile: "Dockerfile.arm64"
-  platform: "linux/arm64"
+  dockerfile: "Dockerfile"
   context: "."
   restart_policy: "unless-stopped"
   healthcheck:
@@ -488,7 +487,6 @@ generate_docker_compose() {
     log_info "Generating Docker Compose configuration..."
     
     local version_key
-    local dockerfile="Dockerfile.arm64"
     
     if [[ "$ocpp_version" == "1.6" ]]; then
         version_key="v16"
@@ -561,7 +559,6 @@ EOF
   $service_name:
     image: $image_name
     container_name: $container_name
-    platform: linux/arm64
     ports:
       - "$port:8000"
     volumes:
@@ -784,8 +781,7 @@ ensure_images_exist() {
     log_info "Building the Docker image for OCPP $ocpp_version..."
     
     # Show basic build information.
-    echo "   Platform: linux/arm64"
-    echo "   Dockerfile: Dockerfile.arm64"
+    echo "   Dockerfile: Dockerfile"
     echo "   OCPP version: $ocpp_version"
     echo "   Image tag: $image_name"
     echo ""
@@ -794,8 +790,7 @@ ensure_images_exist() {
     log_info "Starting Docker build. This can take a few minutes..."
     
     if docker build \
-        --platform linux/arm64 \
-        -f Dockerfile.arm64 \
+        -f Dockerfile \
         --build-arg OCPP_VERSION="$ocpp_version" \
         --build-arg SIMULATOR_PORT=8000 \
         --build-arg CHARGER_ID="depot-charger" \
@@ -819,7 +814,7 @@ ensure_images_exist() {
         log_error "Possible next steps:"
         echo "   - Run .github/workflows/build-docker-image.yml"
         echo "   - Check Docker: docker info"
-        echo "   - Check the Dockerfile: ls -la Dockerfile.arm64"
+        echo "   - Check the Dockerfile: ls -la Dockerfile"
         echo ""
         return 1
     fi

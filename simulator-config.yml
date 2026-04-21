@@ -35,8 +35,7 @@ templates:
   v201_mo_store: "./mo_store_v201"
 
 docker:
-  dockerfile: "Dockerfile.arm64"
-  platform: "linux/arm64"
+  dockerfile: "Dockerfile"
   context: "."
   restart_policy: "unless-stopped"
   healthcheck:

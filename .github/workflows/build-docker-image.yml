@@ -75,7 +75,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile.arm64
+          file: ./Dockerfile
           platforms: linux/arm64,linux/amd64
           # Immer pushen - bei PR mit PR-Tag, bei merge mit latest
           push: true
@@ -128,7 +128,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile.arm64
+          file: ./Dockerfile
           platforms: linux/arm64,linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}

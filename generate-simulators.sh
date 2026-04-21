@@ -313,7 +313,6 @@ EOF
   microocpp-multi-config:
     image: alpine:latest
     container_name: microocpp-multi-config
-    platform: linux/arm64
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./configure-citrineos.sh:/configure-citrineos.sh:ro
@@ -394,14 +393,13 @@ EOF
   $container_name:
     build:
       context: .
-      dockerfile: Dockerfile.arm64
+      dockerfile: Dockerfile
       args:
         OCPP_VERSION: "$ocpp_version"
         SIMULATOR_PORT: "8000"
         CHARGER_ID: "$charger_id"
         API_PORT: "$port"
     container_name: $container_name
-    platform: linux/arm64
     ports:
       - "$port:8000"
     volumes:
