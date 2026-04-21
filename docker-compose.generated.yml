@@ -21,7 +21,7 @@ services:
   microocpp-multi-config:
     image: alpine:latest
     container_name: microocpp-multi-config
-    platform: linux/arm64
+
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./configure-citrineos.sh:/configure-citrineos.sh:ro
@@ -42,14 +42,14 @@ services:
   microocpp-sim-v16-001:
     build:
       context: .
-      dockerfile: Dockerfile.arm64
+      dockerfile: Dockerfile
       args:
         OCPP_VERSION: "1.6"
         SIMULATOR_PORT: "8000"
         CHARGER_ID: "charger-v16-001"
         API_PORT: "7101"
     container_name: microocpp-sim-v16-001
-    platform: linux/arm64
+
     ports:
       - "7101:8000"
     volumes:
@@ -78,14 +78,14 @@ services:
   microocpp-sim-v16-002:
     build:
       context: .
-      dockerfile: Dockerfile.arm64
+      dockerfile: Dockerfile
       args:
         OCPP_VERSION: "1.6"
         SIMULATOR_PORT: "8000"
         CHARGER_ID: "charger-v16-002"
         API_PORT: "7102"
     container_name: microocpp-sim-v16-002
-    platform: linux/arm64
+
     ports:
       - "7102:8000"
     volumes:
@@ -117,14 +117,14 @@ services:
   microocpp-sim-v201-001:
     build:
       context: .
-      dockerfile: Dockerfile.arm64
+      dockerfile: Dockerfile
       args:
         OCPP_VERSION: "2.0.1"
         SIMULATOR_PORT: "8000"
         CHARGER_ID: "charger-v201-001"
         API_PORT: "7201"
     container_name: microocpp-sim-v201-001
-    platform: linux/arm64
+
     ports:
       - "7201:8000"
     volumes:

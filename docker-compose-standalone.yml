@@ -19,14 +19,13 @@ services:
     image: microocpp-sim-v16:latest
     build:
       context: .
-      dockerfile: Dockerfile.arm64
+      dockerfile: Dockerfile
       args:
         OCPP_VERSION: "1.6"
         SIMULATOR_PORT: "8000"
         CHARGER_ID: "standalone-charger"
         API_PORT: "8501"
     container_name: microocpp-standalone
-    platform: linux/arm64
     ports:
       - "8501:8000"
     volumes:
