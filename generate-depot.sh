@@ -398,7 +398,7 @@ generate_simulator_config() {
     if [[ "$ocpp_version" == "1.6" ]]; then
         version_key="v16"
         base_port=7101
-        csms_url_template="ws://citrineos:8092/{charger_id}"
+        csms_url_template="ws://citrineos:8081/{charger_id}"
         env_vars="MO_ENABLE_V201: \"0\""
     else
         version_key="v201"
@@ -628,7 +628,7 @@ create_templates() {
         
         # Create placeholders in template files.
         if [[ -f "${v16_template_dir}/ws-conn.jsn" ]]; then
-            sed -i.bak 's|ws://[^/]*/charger-1.6|ws://{{CITRINEOS_IP}}:8092/{{CHARGER_ID}}|g' \
+            sed -i.bak 's|ws://[^/]*/charger-1.6|ws://{{CITRINEOS_IP}}:8081/{{CHARGER_ID}}|g' \
                 "${v16_template_dir}/ws-conn.jsn"
             sed -i.bak 's/"charger-1.6"/"{{CHARGER_ID}}"/g' "${v16_template_dir}/ws-conn.jsn"
             rm -f "${v16_template_dir}/ws-conn.jsn.bak"
@@ -850,7 +850,7 @@ generate_mo_store_directories() {
         local csms_url
         local auth_password=""
         if [[ "$ocpp_version" == "1.6" ]]; then
-            csms_url="ws://citrineos:8092/${station_id}"
+            csms_url="ws://citrineos:8081/${station_id}"
         else
             csms_url="ws://citrineos:8081/${station_id}"
         fi
