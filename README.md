@@ -107,6 +107,17 @@ The current external network name is:
 fnx-platform-net
 ```
 
+### Firmware version
+
+Every simulator reports `firmwareVersion` in its BootNotification. It comes
+from the environment variable `FIRMWARE_VERSION`; the default is
+`fenexity-sim-1.0.0` (`DEFAULT_FIRMWARE_VERSION` in `src/main.cpp`).
+
+Interoperability profiles in Fenexity Charging Management match the firmware
+version exactly. Change the default only when the simulator's charging
+behaviour changes, and create a new profile revision from an FNX Testing run
+for the new version.
+
 ### `simulator-config.yml`
 
 Example:
