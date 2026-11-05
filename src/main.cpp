@@ -113,11 +113,17 @@ void load_ocpp_version(std::shared_ptr<MicroOcpp::FilesystemAdapter> filesystem)
     g_isOcpp201 = false;
 }
 
+// PLA-894: the firmware version in the BootNotification. Interoperability
+// profiles match it exactly (ADR 0022), so change the default only when the
+// simulator's charging behaviour changes.
+const char* const DEFAULT_FIRMWARE_VERSION = "fenexity-sim-1.0.0";
+
 void app_setup(MicroOcpp::Connection& connection, std::shared_ptr<MicroOcpp::FilesystemAdapter> filesystem) {
+    const char* firmwareVersion = getEnvOrDefault("FIRMWARE_VERSION", DEFAULT_FIRMWARE_VERSION);
     mocpp_initialize(connection,
             g_isOcpp201 ?
-                ChargerCredentials::v201("MicroOcpp Simulator", "MicroOcpp") :
-                ChargerCredentials("MicroOcpp Simulator", "MicroOcpp"),
+                ChargerCredentials::v201("MicroOcpp Simulator", "MicroOcpp", firmwareVersion) :
+                ChargerCredentials("MicroOcpp Simulator", "MicroOcpp", firmwareVersion),
             filesystem,
             false,
             g_isOcpp201 ?
