@@ -3,6 +3,7 @@
 // GPL-3.0 License
 
 #include "evse.h"
+#include "sim_clock_core.h"
 #include <MicroOcpp.h>
 #include <MicroOcpp/Core/Context.h>
 #include <MicroOcpp/Model/Model.h>
@@ -137,14 +138,24 @@ void Evse::loop() {
     simulate_isCharging &= limit_power >= 720.f; //minimum charging current is 6A (720W for 120V grids) according to J1772
 
     if (simulate_isCharging) {
+        // Fenexity PLA-746: with simulation time, energy accrues over elapsed business time
+        // (nothing while paused); otherwise over the real tick as before.
+        int64_t businessNowMs = SimClock::active() ? SimClock::activeNowMs() : 0;
         if (simulate_power >= 1.f) {
-            simulate_energy += (float) (mocpp_tick_ms() - simulate_energy_track_time) * simulate_power * (0.001f / 3600.f);
+            if (SimClock::active()) {
+                if (simulate_energy_track_business_ms > 0) {
+                    simulate_energy += (float) SimClock::energyWh(simulate_power, businessNowMs - simulate_energy_track_business_ms);
+                }
+            } else {
+                simulate_energy += (float) (mocpp_tick_ms() - simulate_energy_track_time) * simulate_power * (0.001f / 3600.f);
+            }
         }
 
         simulate_power = SIMULATE_POWER_CONST;
         simulate_power = std::min(simulate_power, limit_power);
         simulate_power += (((mocpp_tick_ms() / 5000) * 3483947) % 20000) * 0.001f - 10.f;
         simulate_energy_track_time = mocpp_tick_ms();
+        simulate_energy_track_business_ms = businessNowMs;
     } else {
         simulate_power = 0.f;
     }

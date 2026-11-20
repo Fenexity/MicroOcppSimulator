@@ -19,7 +19,9 @@ This repository contains a MicroOCPP simulator setup with:
 2. Keep the shared Docker network name aligned across scripts, configs, and
    checked-in compose examples. The current network is `fnx-platform-net`.
 3. Do not edit vendored code under `lib/` unless the task explicitly requires
-   it.
+   it. Known local changes, to be re-applied on a library update:
+   `lib/MicroOcpp/src/MicroOcpp/Core/Time.h` and `Time.cpp` (time source of the
+   simulation clock, PLA-746).
 4. Keep shell output concise and readable. Avoid decorative emoji in scripts.
 5. Update docs when changing workflow, file names, or runtime assumptions.
 
@@ -36,6 +38,8 @@ This repository contains a MicroOCPP simulator setup with:
 ## Validation
 
 - Use `bash -n` for edited shell scripts.
+- For C++ changes, build and run the unit tests (`-DMO_SIM_BUILD_TESTS=ON`,
+  target `mo_sim_tests`) in a Linux container; see the README.
 - Check for stale network references with targeted `rg` searches before and
   after network-related changes.
 - If you change generated templates or generator output, review the checked-in

@@ -47,6 +47,8 @@ unsigned int g_bootNotificationTime = 0;
 #if MO_NETLIB == MO_NETLIB_MONGOOSE
 #include "mongoose.h"
 #include <MicroOcppMongooseClient.h>
+#include "sim_clock_core.h"
+#include "sim_clock_redis.h"
 
 #include "net_mongoose.h"
 
@@ -205,8 +207,19 @@ int main() {
             MicroOcpp::ProtocolVersion{1,6}
         );
 
+    // Fenexity PLA-746: shared simulation time only with FNX_CLOCK=sim (development stack).
+    int simClock = SimClock::start();
+    if (simClock < 0) {
+        return 1;
+    }
+
     server_initialize(osock, api_cert.buf ? api_cert.buf : "", api_key.buf ? api_key.buf : "", api_settings["user"] | "", api_settings["pass"] | "");
     app_setup(*osock, filesystem);
+
+    if (simClock > 0) {
+        getOcppContext()->getModel().getClock().setTimeSource(&SimClock::activeTimestamp);
+    }
+    int exitCode = 0;
 
     setOnResetExecute([] (bool isHard) {
         g_runSimulator = false;
@@ -226,9 +239,15 @@ int main() {
             g_isUpAndRunning = true;
             MO_MEM_RESET();
         }
+
+        if (SimClock::epochChanged()) { // a new simulation run: restart on it (ADR 0025 section 3)
+            exitCode = SimClock::EPOCH_CHANGED_EXIT;
+            g_runSimulator = false;
+        }
     }
 
     printf("[Sim] Shutting down Simulator\n");
+    SimClock::stop();
 
     MO_MEM_PRINT_STATS();
 
@@ -238,7 +257,7 @@ int main() {
     mg_mgr_free(&mgr);
     free(api_cert.buf);
     free(api_key.buf);
-    return 0;
+    return exitCode;
 }
 
 #elif MO_NETLIB == MO_NETLIB_WASM

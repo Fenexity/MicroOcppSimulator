@@ -4,6 +4,10 @@
 # Platform wird durch docker buildx --platform gesteuert
 FROM alpine:latest
 
+# Fenexity PLA-746: this image follows the shared simulation time with FNX_CLOCK=sim;
+# the Hub's generator refuses images without this label for the simulation stack.
+LABEL io.fenexity.microocpp.timebase="1"
+
 # Build arguments
 ARG OCPP_VERSION=1.6
 ARG SIMULATOR_PORT=8000

@@ -6,6 +6,9 @@ on:
     branches: [main]
     paths:
       - 'src/**'
+      - 'lib/**'
+      - 'tests/**'
+      - 'CMakeLists.txt'
       - 'Dockerfile*'
       - '.github/workflows/build-docker-image.yml'
   
@@ -14,6 +17,9 @@ on:
     branches: [main]
     paths:
       - 'src/**'
+      - 'lib/**'
+      - 'tests/**'
+      - 'CMakeLists.txt'
       - 'Dockerfile*'
       - '.github/workflows/build-docker-image.yml'
   
@@ -35,7 +41,23 @@ env:
   IMAGE_NAME_V201: fenexity/microocpp-sim-v201
 
 jobs:
+  # PLA-746: unit tests of the simulator (simulation clock) before any image is pushed.
+  unit-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Build and run the unit tests
+        run: |
+          cmake -S . -B build -DMO_SIM_BUILD_TESTS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+          cmake --build build --target mo_sim_tests -j "$(nproc)"
+          ctest --test-dir build --output-on-failure
+
   build-v16:
+    needs: [unit-tests]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -90,6 +112,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   build-v201:
+    needs: [unit-tests]
     runs-on: ubuntu-latest
     # Nur bei manuellem Trigger mit Version 2.0.1
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.ocpp_version == '2.0.1'
