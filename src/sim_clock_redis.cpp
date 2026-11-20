@@ -308,7 +308,6 @@ void follow() {
             backoffMs = backoffMs * 2 > REFRESH_MS ? REFRESH_MS : backoffMs * 2;
             continue;
         }
-        backoffMs = 1000;
         bool refresh = true;
         auto lastRead = std::chrono::steady_clock::now();
         while (!g_stop.load()) {
@@ -317,7 +316,12 @@ void follow() {
                 std::map<std::string, std::string> hash;
                 bool ok = readHash(reader, hash, error);
                 if (!applyRead(ok, hash, error)) return;
-                if (!ok) break;
+                if (!ok) {
+                    // Like fnx_utils: wait one refresh interval after a failed read.
+                    backoffMs = REFRESH_MS;
+                    break;
+                }
+                backoffMs = 1000; // the connection works end to end
                 refresh = false;
                 lastRead = std::chrono::steady_clock::now();
             }
