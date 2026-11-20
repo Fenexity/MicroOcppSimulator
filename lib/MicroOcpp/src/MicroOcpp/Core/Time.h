@@ -107,6 +107,15 @@ private:
     Timestamp currentTime = Timestamp();
 
 public:
+    // Fenexity PLA-746 (local change to the vendored library): optional business-time
+    // source of the simulation clock. Once the clock was set by the CSMS, now() returns the
+    // source's time while it answers; mocpp_tick_ms() and every tick-based timer stay real.
+    typedef bool (*TimeSource)(Timestamp& out);
+
+private:
+    TimeSource timeSource = nullptr;
+
+public:
 
     Clock();
     Clock(const Clock&) = delete;
@@ -136,6 +145,9 @@ public:
      * run of this library. The caller must check this
      */
     Timestamp adjustPrebootTimestamp(const Timestamp& t);
+
+    // Fenexity PLA-746: nullptr restores the tick-based clock.
+    void setTimeSource(TimeSource source);
 };
 
 }

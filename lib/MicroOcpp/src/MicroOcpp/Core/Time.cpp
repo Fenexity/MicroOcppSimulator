@@ -349,6 +349,16 @@ bool Clock::setTime(const char* jsonDateString) {
 }
 
 const Timestamp &Clock::now() {
+    // Fenexity PLA-746: business time from the simulation clock once the CSMS set the time.
+    if (timeSource && mocpp_basetime >= MIN_TIME) {
+        Timestamp source;
+        if (timeSource(source)) {
+            currentTime = source;
+            lastUpdate = mocpp_tick_ms();
+            return currentTime;
+        }
+    }
+
     auto tReading = mocpp_tick_ms();
     auto delta = tReading - lastUpdate;
 
@@ -362,6 +372,10 @@ const Timestamp &Clock::now() {
 #endif //MO_ENABLE_TIMESTAMP_MILLISECONDS
 
     return currentTime;
+}
+
+void Clock::setTimeSource(TimeSource source) {
+    timeSource = source;
 }
 
 Timestamp Clock::adjustPrebootTimestamp(const Timestamp& t) {

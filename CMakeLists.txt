@@ -10,10 +10,13 @@ set(MO_SIM_SRC
     src/evse.cpp
     src/main.cpp
     src/api.cpp
+    src/sim_clock_core.cpp
 )
 
+# Fenexity PLA-746: the Redis follower of the simulation clock (POSIX sockets, one thread)
 set(MO_SIM_MG_SRC
     src/net_mongoose.cpp
+    src/sim_clock_redis.cpp
     lib/mongoose/mongoose.c
 )
 
@@ -105,6 +108,27 @@ endif()
 
 add_subdirectory(lib/MicroOcppMongoose)
 target_link_libraries(mo_simulator PUBLIC MicroOcppMongoose)
+
+find_package(Threads REQUIRED)
+target_link_libraries(mo_simulator PUBLIC Threads::Threads)
+
+# Fenexity PLA-746: unit tests of the simulation clock (cmake -DMO_SIM_BUILD_TESTS=ON)
+option(MO_SIM_BUILD_TESTS "Build the simulator unit tests" OFF)
+if (MO_SIM_BUILD_TESTS)
+    enable_testing()
+    add_executable(mo_sim_tests
+        tests/sim_clock_test.cpp
+        src/sim_clock_core.cpp
+        lib/MicroOcpp/tests/catch2/catchMain.cpp
+    )
+    target_include_directories(mo_sim_tests PUBLIC
+        "${CMAKE_CURRENT_SOURCE_DIR}/src"
+        "${CMAKE_CURRENT_SOURCE_DIR}/lib/MicroOcpp/tests/catch2"
+        "${CMAKE_CURRENT_SOURCE_DIR}/lib/ArduinoJson/src"
+    )
+    target_link_libraries(mo_sim_tests PUBLIC MicroOcpp)
+    add_test(NAME mo_sim_tests COMMAND mo_sim_tests)
+endif()
 
 # experimental WebAssembly port
 add_executable(mo_simulator_wasm ${MO_SIM_SRC} ${MO_SIM_WASM_SRC})

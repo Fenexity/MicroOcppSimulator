@@ -6,6 +6,7 @@
 #define EVSE_H
 
 #include <array>
+#include <cstdint>
 #include <string>
 #include <MicroOcpp/Core/Configuration.h>
 #include <MicroOcpp/Version.h>
@@ -30,6 +31,7 @@ private:
     float limit_power;
     const float SIMULATE_ENERGY_DELTA_MS = SIMULATE_POWER_CONST / (3600.f * 1000.f);
     unsigned long simulate_energy_track_time = 0;
+    int64_t simulate_energy_track_business_ms = 0; // Fenexity PLA-746: business time of the last step
     float simulate_energy = 0;
 
     std::string status;

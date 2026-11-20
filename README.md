@@ -118,6 +118,63 @@ version exactly. Change the default only when the simulator's charging
 behaviour changes, and create a new profile revision from an FNX Testing run
 for the new version.
 
+### Simulation time (development only)
+
+On a Fenexity development stack started with `./setup.sh --sim-clock`, a simulator
+can follow the shared simulation time of the platform (ADR 0025 in the Hub's
+architecture documentation, PLA-746). It is off unless `FNX_CLOCK=sim` is set;
+without it the simulator keeps its own clock, synchronized by BootNotification
+and Heartbeat as before.
+
+| Variable | Meaning |
+|---|---|
+| `FNX_CLOCK` | Unset, empty or `system`: real time. `sim`: shared simulation time. Any other value refuses to start. |
+| `FNX_CLOCK_REDIS_URL` | `redis://:<password>@<host>:<port>/15`, the database with the timebase. Never logged. |
+| `FENEXITY_DEPLOYMENT_CLASS` | Must be `development`; `ENVIRONMENT=production` or `FENEXITY_ENVIRONMENT=prod` refuse simulation time. |
+| `FNX_SIM_CLOCK_READY_FILE` | Readiness marker, default `/tmp/fnx-sim-clock-ready`; present while the timebase is valid. |
+
+With `FNX_CLOCK=sim`:
+
+- **Business time:** once the CSMS has set the time (BootNotification), every
+  OCPP timestamp (StatusNotification, StartTransaction, MeterValues,
+  StopTransaction) is the simulation time at that moment, also at rate > 1 and
+  frozen while the run is paused. Smart-charging schedules, reservations and
+  the plug-in timeout (`ConnectionTimeOut`) follow it too.
+- **Energy:** accrues over elapsed simulation time: one simulated hour at
+  11 kW reports about 11 kWh at any rate; nothing accrues while paused.
+- **Real time stays real:** websocket ping, stale detection and reconnect,
+  Heartbeat interval, request timeouts, boot retries and
+  `MeterValueSampleInterval` keep real seconds, so the connection is not
+  stressed by a high rate. Periodic MeterValues therefore cover
+  `MeterValueSampleInterval` × rate of simulated time each; while paused they
+  repeat the frozen timestamp and energy.
+- **Retry backoff:** `TransactionMessageRetryInterval` for StartTransaction and
+  StopTransaction is measured on the library clock, so it shrinks with the rate
+  and waits while paused.
+- **Timebase rules:** the simulator refuses to start without a valid timebase,
+  keeps the last one (and removes the readiness marker) while it is missing or
+  invalid, follows changes within milliseconds (subscription) and re-reads it
+  every 5 s, and exits with status 75 when a new run starts, so Docker restarts
+  it on the new run.
+
+Images with this support carry the label `io.fenexity.microocpp.timebase="1"`.
+
+The simulator patches one file of the vendored MicroOcpp library for this:
+`lib/MicroOcpp/src/MicroOcpp/Core/Time.h` and `Time.cpp` (an optional time
+source for `Clock::now()`, marked `Fenexity PLA-746`). Re-apply it when the
+library is updated.
+
+### Unit tests
+
+```bash
+cmake -S . -B build -DMO_SIM_BUILD_TESTS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+cmake --build build --target mo_sim_tests
+ctest --test-dir build --output-on-failure
+```
+
+macOS clang treats warnings in the vendored mbedtls as errors; build the tests
+in a Linux container (as CI does) instead.
+
 ### `simulator-config.yml`
 
 Example:
